@@ -28,5 +28,12 @@ jobs:
         with:
           version: latest
 
+      - name: Verify Supabase project access
+        run: supabase projects list
+
+      - name: Diagnose Edge Functions management API
+        continue-on-error: true
+        run: supabase functions list --project-ref "$PROJECT_REF" --debug
+
       - name: Deploy ZEE AI function
-        run: supabase functions deploy zhi-agnes-chat --project-ref "$PROJECT_REF"
+        run: supabase functions deploy zhi-agnes-chat --project-ref "$PROJECT_REF" --debug
