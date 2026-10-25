@@ -5,9 +5,7 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const AGNES_API_KEY = Deno.env.get("AGNES_API_KEY") ?? "";
 const AGNES_MODEL = Deno.env.get("AGNES_MODEL") || "agnes-3.0-flash";
 const AGNES_BASE_URL = (Deno.env.get("AGNES_BASE_URL") || "https://apihub.agnes-ai.com/v1").replace(/\/+$/, "");
-const FINANCE_URL = "https://bkttvffunyvbswkxpygp.supabase.co";
-const FINANCE_KEY = "sb_publishable_NYVMp3Nhk9QDtIxz1MGOEA_Z7RtbMyP";
-const ADMIN_ID = "8ea33807-8b68-4f8f-b145-398937c7bba1";
+const ADMIN_ID = "27cab698-4dc7-4b4e-a6e2-a837119a206f";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -62,7 +60,7 @@ async function isChatAdmin(req: Request): Promise<boolean> {
   const token = authorization.slice(7);
   if (await isSignedChatAdminToken(token)) return true;
 
-  const authClient = createClient(FINANCE_URL, FINANCE_KEY, {
+  const authClient = createClient(SUPABASE_URL, SERVICE_KEY, {
     global: { headers: { Authorization: `Bearer ${token}` } },
     auth: { persistSession: false, autoRefreshToken: false },
   });
