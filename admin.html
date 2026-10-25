@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>ZEE · 智能人对话控制台</title>
+<style>
+:root{color-scheme:dark;--bg:#080d19;--panel:#111a2b;--line:#293951;--muted:#9aa9bf;--teal:#5eead4;--blue:#a5b4fc;--red:#fca5a5}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#172842 0,#080d19 58%);color:#eef4ff;font:16px/1.6 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}.wrap{width:min(900px,100% - 28px);margin:auto;padding:32px 0 48px}.hero{text-align:center;margin-bottom:24px}.eyebrow{color:var(--teal);letter-spacing:.18em;font-size:.75rem}.hero h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.2;margin:10px 0;background:linear-gradient(100deg,#5eead4,#a5b4fc);color:transparent;background-clip:text}.hero p{color:var(--muted);margin:0 auto;max-width:650px}.panel{background:#111a2be8;border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vw,24px);margin:16px 0}.panel h2{font-size:1rem;color:var(--teal);margin:0 0 14px}label{display:block;color:#cbd5e1;font-size:.88rem;margin:12px 0 6px}input,button,textarea{font:inherit}input,textarea{width:100%;border:1px solid #34445d;background:#09111f;color:#eef4ff;border-radius:10px;padding:11px 12px;outline:none}input:focus,textarea:focus{border-color:var(--teal)}button{border:1px solid #3c506b;background:#1a2940;color:#eef4ff;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:650}button.primary{background:linear-gradient(110deg,#0f766e,#4338ca);border:0}button:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.hint,.note{color:#8293aa;font-size:.82rem}.status{min-height:1.5em;color:var(--teal);font-size:.88rem;white-space:pre-wrap}.status.error{color:var(--red)}.hidden{display:none!important}.chatlog{display:flex;flex-direction:column;gap:12px;min-height:100px;max-height:45vh;overflow:auto;margin:14px 0}.bubble{padding:12px 14px;border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.admin{align-self:flex-end;max-width:90%;background:#173b48;border:1px solid #28616a}.bubble.agent{align-self:flex-start;max-width:95%;background:#0a1322;border:1px solid #293951}.bubble small{display:block;color:#91a5bd;font-size:.72rem;margin-bottom:4px}.message-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.message-row textarea{min-height:78px;resize:vertical}.pill{display:inline-block;border:1px solid #36536a;border-radius:999px;padding:3px 9px;color:#9fe9df;font-size:.75rem}.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}@media(max-width:560px){.wrap{padding-top:22px}.row>*{flex-basis:100%}.message-row{grid-template-columns:1fr}.message-row button{width:100%}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="hero"><div class="eyebrow">ZEE · ADMIN CONSOLE</div><h1>智能人对话控制台</h1><p>通过 Supabase 登录验证管理员身份，再调用 ZHI AI 大脑。此页面不会保存或展示你的密码、访问令牌或服务端密钥。</p></header>
+<section class="panel" id="login-panel">
+<h2>① 管理员登录</h2>
+<label for="email">Supabase Auth 管理员邮箱</label><input id="email" type="email" autocomplete="username" placeholder="输入已注册并获授权的管理员邮箱">
+<label for="password">密码</label><input id="password" type="password" autocomplete="current-password" placeholder="输入 Supabase Auth 密码">
+<div class="row" style="margin-top:14px"><button class="primary" id="login-btn">登录并验证身份</button></div>
+<p class="hint">请使用 UID 已获授权的管理员账号。登录成功不代表 AI 服务已通过测试；后续发送消息才能验证完整链路。</p>
+</section>
+<section class="panel hidden" id="chat-panel">
+<div class="topline"><h2 style="margin:0">② 与智能人对话</h2><span class="pill" id="signed-in">已登录</span><button id="logout-btn">退出登录</button></div>
+<label for="agent-id">智能人 ID（UUID）</label><input id="agent-id" autocomplete="off" placeholder="粘贴 zhi_agents 表中该智能人的 id">
+<p class="hint">可使用之前创建的测试智能人记录。不要填写 Supabase 密钥。</p>
+<div class="chatlog" id="chatlog" aria-live="polite"><div class="hint">登录并发送第一条消息后，对话会显示在这里。</div></div>
+<label for="message">发送给智能人的话</label>
+<div class="message-row"><textarea id="message" maxlength="2000" placeholder="例如：你今天在想什么？"></textarea><button class="primary" id="send-btn">发送消息</button></div>
+<div class="status" id="chat-status" role="status"></div>
+</section>
+<section class="panel"><h2>连接状态</h2><div class="status" id="global-status" role="status">正在初始化前端连接…</div><p class="note">本页面位于 GitHub Pages；AI 推理和数据库读写由 Supabase Edge Function 完成。浏览器只使用项目公开的 publishable key，服务端密钥保留在 Supabase Secrets 中。</p></section>
+</main>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const SUPABASE_URL = "https://xeykndpirxfuozeunkku.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Z5EhfK6vBnD5BfATUrS1Jg_h0bGshqA";
+const FUNCTION_NAME = "zhi-agnes-chat";
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const $ = id => document.getElementById(id);
+function status(message, error=false){$("global-status").textContent=message;$("global-status").classList.toggle("error",error)}
+function chatStatus(message,error=false){$("chat-status").textContent=message;$("chat-status").classList.toggle("error",error)}
+function addBubble(who,content){const log=$("chatlog");const empty=log.querySelector(".hint");if(empty)empty.remove();const bubble=document.createElement("div");bubble.className="bubble "+who;const label=document.createElement("small");label.textContent=who==="admin"?"管理员":"智能人";const body=document.createElement("div");body.textContent=content;bubble.append(label,body);log.appendChild(bubble);log.scrollTop=log.scrollHeight}
+async function syncSession(){const {data:{session}}=await supabase.auth.getSession();$("login-panel").classList.toggle("hidden",!!session);$("chat-panel").classList.toggle("hidden",!session);$("signed-in").textContent=session?.user?.email||"已登录";if(session)status("Supabase Auth 会话已建立。请填写智能人 UUID，发送消息以测试完整链路。");else status("前端已连接 Supabase 项目；请用获授权的管理员账号登录。")}
+$("login-btn").addEventListener("click",async()=>{const email=$("email").value.trim(),password=$("password").value;if(!email||!password){status("请填写邮箱和密码。",true);return}const btn=$("login-btn");btn.disabled=true;status("正在验证 Supabase Auth…");try{const {error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;$("password").value="";await syncSession()}catch(e){status("登录失败："+(e?.message||"未知错误")+"。请确认账号可登录且邮箱已验证。",true)}finally{btn.disabled=false}});
+$("logout-btn").addEventListener("click",async()=>{await supabase.auth.signOut();$("chatlog").replaceChildren();$("chatlog").innerHTML='<div class="hint">登录并发送第一条消息后，对话会显示在这里。</div>';chatStatus("");await syncSession()});
+$("send-btn").addEventListener("click",async()=>{const agent_id=$("agent-id").value.trim(),message=$("message").value.trim();if(!agent_id){chatStatus("请先填写智能人 UUID。",true);return}if(!message){chatStatus("请先输入消息。",true);return}const btn=$("send-btn");btn.disabled=true;chatStatus("正在请求 ZHI AI 大脑…");try{const {data:{session},error:sessionError}=await supabase.auth.getSession();if(sessionError||!session)throw new Error("登录会话已失效，请重新登录。");addBubble("admin",message);$("message").value="";const {data,error}=await supabase.functions.invoke(FUNCTION_NAME,{body:{agent_id,message}});if(error){let detail=error.message||"Edge Function 请求失败";try{const ctx=error.context;if(ctx?.json){const payload=await ctx.json();detail=payload.error||detail}}catch{}throw new Error(detail)}if(!data?.ok||!data?.reply)throw new Error(data?.error||"AI 返回内容不完整");addBubble("agent",data.reply);chatStatus(data.saved?"回复成功，对话与记忆已保存。":"回复已生成，但有部分记录保存失败，请检查函数日志。",!data.saved)}catch(e){chatStatus("请求失败："+(e?.message||"未知错误"),true)}finally{btn.disabled=false}});
+$("message").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();$("send-btn").click()}});
+supabase.auth.onAuthStateChange(()=>{syncSession()});
+syncSession().catch(e=>status("初始化失败："+(e?.message||"未知错误"),true));
+</script>
+</body>
+</html>
