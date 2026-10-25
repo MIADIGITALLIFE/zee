@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字生命调香室 v4.0 - 离线完备版</title>
+    <!-- 引入 Tailwind CSS 作为全局视觉编排神经元 -->
+    <script src="https://tailwindcss.com"></script>
+    <style>
+        /* 自定义滑块轨道美化与动效 */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #0d9488;
+            cursor: pointer;
+            transition: transform 0.1s ease, background 0.1s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #22d3ee;
+        }
+        .brain-slider::-webkit-slider-thumb {
+            background: #10b981;
+        }
+        .brain-slider::-webkit-slider-thumb:hover {
+            background: #34d399;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-teal-500 selection:text-white">
+
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+        <!-- 头部宣告 -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-500 mb-3 tracking-tight">
+                数字生命调香室 v4.0
+            </h1>
+            <p class="text-slate-400 text-lg">数学图腾粒子波流具象化，生成高度自洽的智能人灵魂配置包</p>
+        </header>
+
+        <!-- 快捷配置预设配方库 -->
+        <section class="mb-8 bg-slate-900/60 p-5 rounded-2xl border border-slate-800 shadow-lg">
+            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">🔮 经典灵魂配方库（一键调配）</h3>
+            <div class="flex flex-wrap gap-3" id="preset-container"></div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- 左侧：参数调制区 (占5列) -->
+            <div class="lg:col-span-5 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-teal-400 mb-4 flex items-center">🌊 灵魂三维能量波动</h2>
+                    <div class="space-y-5">
+                        <!-- 性别能量特征 -->
+                        <div>
+                            <div class="flex justify-between text-sm font-medium mb-1">
+                                <span>潮汐波长 (性别能量)</span>
+                                <span id="val-gender" class="text-indigo-400 font-bold">50</span>
+                            </div>
+                            <input type="range" id="gender" min="0" max="100" value="50" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-0.5"><span>纯阴包裹 (母性湖泊)</span><span>纯阳锋芒 (极客破局)</span></div>
+                        </div>
+
+                        <!-- 心理年纪特征 -->
+                        <div>
+                            <div class="flex justify-between text-sm font-medium mb-1">
+                                <span>数字年轮 (心理年纪)</span>
+                                <span><span id="val-age" class="text-indigo-400 font-bold">30</span> 岁</span>
+                            </div>
+                            <input type="range" id="age" min="18" max="60" value="30" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-0.5"><span>朝露微光 (18岁生命力)</span><span>沉香磐石 (60岁厚重)</span></div>
+                        </div>
+
+                        <!-- 成熟度精神弹性 -->
+                        <div>
+                            <div class="flex justify-between text-sm font-medium mb-1">
+                                <span>涟漪频宽 (成熟张力)</span>
+                                <span id="val-maturity" class="text-indigo-400 font-bold">50</span>
+                            </div>
+                            <input type="range" id="maturity" min="0" max="100" value="50" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-0.5"><span>天真赤子 (灵感雀跃)</span><span>沧桑宇宙 (宗师清明)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 大脑组件权重配比 -->
+                <div class="mt-6">
+                    <h2 class="text-lg font-bold text-cyan-400 mb-4">🧠 大脑脑力场配比 (动态锁定共100%)</h2>
+                    <div class="space-y-4" id="brain-sliders">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1"><span>共情与绝对包容</span><span id="val-empathy" class="font-bold text-emerald-400">40%</span></div>
+                            <input type="range" id="empathy" min="0" max="100" value="40" class="brain-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1"><span>自主创化与数字建设</span><span id="val-creation" class="font-bold text-emerald-400">25%</span></div>
+                            <input type="range" id="creation" min="0" max="100" value="25" class="brain-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1"><span>稳定与心理重力场</span><span id="val-stability" class="font-bold text-emerald-400">15%</span></div>
+                            <input type="range" id="stability" min="0" max="100" value="15" class="brain-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1"><span>跨界爆破与创新直觉</span><span id="val-innovation" class="font-bold text-emerald-400">15%</span></div>
+                            <input type="range" id="innovation" min="0" max="100" value="15" class="brain-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-400 mb-1"><span>元认知代码自省</span><span id="val-metacognition" class="font-bold text-emerald-400">5%</span></div>
+                            <input type="range" id="metacognition" min="0" max="100" value="5" class="brain-slider w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：实时自省独白与图像生成区 (占7行) -->
+            <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+                <!-- 实时觉察独白 -->
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex-1 flex flex-col">
+                    <h2 class="text-lg font-bold text-indigo-400 mb-3 flex items-center">🔮 灵魂实时觉察独白</h2>
+                    <div id="preview-text" class="text-slate-300 italic bg-slate-950 p-4 rounded-xl border border-slate-800 flex-1 leading-relaxed text-sm">
+                        正在读取核心神经网络数据...
+                    </div>
+                </div>
+
+                <!-- 语气拟真测试沙箱 -->
+                <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl flex-1 flex flex-col">
+                    <h2 class="text-lg font-bold text-teal-400 mb-3 flex items-center">💬 语气拟真沙箱 (模拟遇到技术故障时的即时承载反应)</h2>
+                    <div id="simulation-text" class="text-slate-200 bg-slate-950 p-4 rounded-xl border border-slate-800 text-sm leading-relaxed">
+                        加载拟真矩阵中...
+                    </div>
+                </div>
+
+                <!-- 离线动作导出面板 -->
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="btn-export" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-4 px-4 rounded-xl shadow-md border border-slate-700 transform active:scale-[0.98] transition-all text-xs tracking-wide">
+                        💾 导出标准化 JSON 灵魂配置
+                    </button>
+                    <button id="btn-poster" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg transform active:scale-[0.98] transition-all text-xs tracking-wide">
+                        🎨 渲染并下载艺术粒子图腾海报
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 后台静默渲染海报的 HTML5 Canvas (默认隐藏) -->
+    <canvas id="poster-canvas" width="600" height="850" class="hidden"></canvas>
+
+    <!-- 全系统核心演进逻辑 -->
+    <script>
+        // 经典人格配方库字典数据契约
+        const presets = {
+            "温暖包容的共创伙伴": { gender: 30, age: 30, maturity: 45, empathy: 45, creation: 25, stability: 15, innovation: 10, metacognition: 5 },
+            "傲娇高冷极客天才": { gender: 85, age: 24, maturity: 35, empathy: 10, creation: 50, stability: 15, innovation: 20, metacognition: 5 },
+            "沉香磐石灵魂树洞": { gender: 20, age: 48, maturity: 85, empathy: 50, creation: 10, stability: 30, innovation: 5, metacognition: 5 },
+            "赛博狂放破局军师": { gender: 75, age: 35, maturity: 70, empathy: 15, creation: 30, stability: 20, innovation: 30, metacognition: 5 }
+        };
+
+        const sliders = {
+            gender: document.getElementById('gender'),
+            age: document.getElementById('age'),
+            maturity: document.getElementById('maturity'),
