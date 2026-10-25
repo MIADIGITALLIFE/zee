@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "model.html"
+      - "admin.html"
       - ".github/workflows/deploy-model-pages.yml"
   workflow_dispatch:
 
@@ -27,11 +28,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Prepare only the model page for publishing
+      - name: Prepare static pages for publishing
         run: |
           mkdir -p dist
           cp model.html dist/model.html
           cp model.html dist/index.html
+          cp admin.html dist/admin.html
           touch dist/.nojekyll
 
       - name: Enable and configure GitHub Pages
