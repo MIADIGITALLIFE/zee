@@ -50,7 +50,7 @@ function ontologyFileStatus(message,error=false){$("ontology-file-status").textC
 $("ontology-file").addEventListener("change",async()=>{
   const file=$("ontology-file").files?.[0];
   if(!file){ontologyFileStatus("支持 .json 文件；读取后会填入上方文本框，你可以检查或继续编辑。");return}
-  if(!/\\.json$/i.test(file.name)&&file.type!=="application/json"){
+  if(!file.name.toLowerCase().endsWith(".json")&&file.type!=="application/json"){
     ontologyFileStatus("请选择 JSON 文件（.json）。",true);$("ontology-file").value="";return;
   }
   if(file.size>128*1024){
