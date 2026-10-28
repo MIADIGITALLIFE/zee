@@ -9,6 +9,7 @@ import sys
 import tempfile
 
 PAGE = Path("model.html")
+SCHEMA = Path("schemas/zhi-ontology-draft-v1.schema.json")
 REQUIRED_IDS = [
     "ontology-suite", "onto-id", "onto-type", "onto-label", "onto-epistemic",
     "onto-generate", "onto-download", "onto-copy", "onto-reset",
