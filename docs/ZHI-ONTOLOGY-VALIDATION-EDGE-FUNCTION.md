@@ -33,3 +33,19 @@ Invalid input returns a stage and structured issues. Missing/invalid authenticat
 ## Deployment gate
 
 Do not deploy until the Deno workflow passes and the Supabase project reference, auth settings, allowed origins, and test environment are explicitly confirmed. Do not change `zhi-agnes-chat` or production data as part of this step.
+
+
+## Non-production smoke test
+
+A repeatable smoke-test script is available at `scripts/smoke-test-zhi-ontology-validate.mjs`. It sends requests only to the URL supplied through environment variables and never prints the access token.
+
+Run it locally only after deploying the function to an isolated non-production Supabase project and signing in as a test user:
+
+```sh
+SUPABASE_URL="https://YOUR-TEST-PROJECT.supabase.co" \
+SUPABASE_ANON_KEY="YOUR_TEST_ANON_KEY" \
+SUPABASE_ACCESS_TOKEN="TEST_USER_ACCESS_TOKEN" \
+node scripts/smoke-test-zhi-ontology-validate.mjs
+```
+
+Expected checks: missing token returns 401, invalid token returns 401, invalid record returns 400, valid draft returns 200 with `persistence: "not-performed"`, and a request above 64 KiB returns 413. A passing script is evidence only for that test project and deployment. Do not use production credentials or paste tokens into chat, GitHub issues, commits, or logs. The script has not been run against a live endpoint because no test deployment/access token has been confirmed.
