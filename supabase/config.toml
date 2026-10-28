@@ -1,1 +1,6 @@
 project_id = "zee"
+
+# Require a valid Supabase user JWT at the Edge Functions gateway.
+# The handler also calls auth.getUser(token) to resolve the authenticated user.
+[functions.zhi-ontology-validate]
+verify_jwt = true
