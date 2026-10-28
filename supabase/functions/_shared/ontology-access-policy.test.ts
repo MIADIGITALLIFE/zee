@@ -59,7 +59,9 @@ Deno.test("owner can read, update, delete and manage sharing", () => {
 });
 
 Deno.test("unrelated user is denied without an active grant", () => {
-  for (const operation of ["read", "update", "delete", "manage_sharing"] as const) {
+  for (
+    const operation of ["read", "update", "delete", "manage_sharing"] as const
+  ) {
     assertEquals(
       authorizeOntologyOperation(
         {
