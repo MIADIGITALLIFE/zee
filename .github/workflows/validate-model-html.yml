@@ -6,13 +6,13 @@ on:
       - "model.html"
       - "schemas/**"
       - "scripts/validate_model_html.py"
-      - "schemas/**"
       - ".github/workflows/validate-model-html.yml"
   push:
     branches:
       - "feat/ontology-dictionary-studio"
     paths:
       - "model.html"
+      - "schemas/**"
       - "scripts/validate_model_html.py"
       - ".github/workflows/validate-model-html.yml"
 
