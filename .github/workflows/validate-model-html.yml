@@ -6,6 +6,7 @@ on:
       - "model.html"
       - "schemas/**"
       - "scripts/validate_model_html.py"
+      - "docs/**"
       - ".github/workflows/validate-model-html.yml"
   push:
     branches:
@@ -14,6 +15,7 @@ on:
       - "model.html"
       - "schemas/**"
       - "scripts/validate_model_html.py"
+      - "docs/**"
       - ".github/workflows/validate-model-html.yml"
 
 permissions:
