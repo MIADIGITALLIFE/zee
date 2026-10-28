@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://miadigitallife.github.io/zee/schemas/zhi-ontology-draft-v1.schema.json",
+  "title": "ZHI Ontology Dictionary V1.0 Draft Record",
+  "description": "Contract for the current offline browser draft emitted by model.html. This schema validates shape, not truth or provenance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "ontology_type", "label", "description", "state", "epistemic_status",
+    "evidence", "source_refs", "event_time", "observed_at", "recorded_at",
+    "validity", "revision", "access_policy", "retention_policy", "relations",
+    "lifecycle", "verification_status", "schema_version"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{1,99}$" },
+    "ontology_type": {
+      "type": "string",
+      "enum": ["Self", "Other", "WorldObject", "Event", "Relation", "State", "Change", "Memory", "EpistemicClaim", "Goal", "ValueAffectState", "Action", "Feedback", "Capability", "OntologyVersion"]
+    },
+    "label": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "state": { "type": "string", "minLength": 1 },
+    "epistemic_status": {
+      "type": "string",
+      "enum": ["observed", "reported", "verified", "inferred", "hypothesis", "unknown", "conflicted"]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_ref"],
+        "properties": { "source_ref": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "source_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "event_time": { "type": ["string", "null"], "format": "date-time" },
+    "observed_at": { "type": ["string", "null"], "format": "date-time" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "type": ["string", "null"], "format": "date-time" },
+        "to": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "revision": { "type": "integer", "minimum": 1 },
+    "access_policy": { "const": "draft-local-only" },
+    "retention_policy": { "const": "not-persisted" },
+    "relations": {
+      "type": "array",
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation_id", "relation_type", "source_entity", "target_entity", "directionality", "epistemic_status", "evidence_refs", "validity", "revision"],
+        "properties": {
+          "relation_id": { "type": "string", "minLength": 1 },
+          "relation_type": {
+            "type": "string",
+            "enum": ["is_a", "part_of", "has_state", "related_to", "causes", "before", "after", "depends_on", "interacts_with", "supports", "contradicts", "derived_from", "updates", "supersedes", "has_goal"]
+          },
+          "source_entity": { "type": "string", "minLength": 1 },
+          "target_entity": { "type": "string", "minLength": 1 },
+          "directionality": { "const": "directed" },
+          "epistemic_status": {
+            "type": "string",
+            "enum": ["observed", "reported", "verified", "inferred", "hypothesis", "unknown", "conflicted"]
+          },
+          "evidence_refs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "validity": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "type": ["string", "null"], "format": "date-time" },
+              "to": { "type": ["string", "null"], "format": "date-time" }
+            }
+          },
+          "revision": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transition", "status", "requires_validation"],
+      "properties": {
+        "transition": { "const": "CREATE" },
+        "status": { "const": "candidate" },
+        "requires_validation": { "const": true }
+      }
+    },
+    "verification_status": { "const": "not-validated" },
+    "schema_version": { "const": "ZHI-Ontology-Dictionary-V1.0" }
+  }
+}
