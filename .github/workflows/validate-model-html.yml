@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - "model.html"
+      - "schemas/**"
       - "scripts/validate_model_html.py"
+      - "schemas/**"
       - ".github/workflows/validate-model-html.yml"
   push:
     branches:
