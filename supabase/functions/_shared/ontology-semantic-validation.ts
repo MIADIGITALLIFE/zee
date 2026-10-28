@@ -40,7 +40,9 @@ export function validateOntologyDraftSemantics(
     }];
   }
 
-  const validity = draft.validity as { from?: unknown; to?: unknown } | undefined;
+  const validity = draft.validity as
+    | { from?: unknown; to?: unknown }
+    | undefined;
   if (validity && validity.from != null && validity.to != null) {
     const from = parseDate(validity.from);
     const to = parseDate(validity.to);
@@ -56,7 +58,10 @@ export function validateOntologyDraftSemantics(
   const relations = Array.isArray(draft.relations) ? draft.relations : [];
   relations.forEach((value, index) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) return;
-    const relation = value as { source_entity?: unknown; target_entity?: unknown };
+    const relation = value as {
+      source_entity?: unknown;
+      target_entity?: unknown;
+    };
     if (
       typeof relation.source_entity === "string" &&
       typeof relation.target_entity === "string" &&
@@ -75,13 +80,16 @@ export function validateOntologyDraftSemantics(
       issues.push({
         code: "RELATION_RECORD_REQUIRES_EDGE",
         path: "$.relations",
-        message: "A Relation ontology record must contain exactly one relation edge in V1.0.",
+        message:
+          "A Relation ontology record must contain exactly one relation edge in V1.0.",
       });
     }
   }
 
   if (draft.epistemic_status === "verified") {
-    const sourceRefs = Array.isArray(draft.source_refs) ? draft.source_refs : [];
+    const sourceRefs = Array.isArray(draft.source_refs)
+      ? draft.source_refs
+      : [];
     const evidence = Array.isArray(draft.evidence) ? draft.evidence : [];
     const hasSourceRef = sourceRefs.some(
       (item) => typeof item === "string" && item.trim().length > 0,
@@ -90,14 +98,15 @@ export function validateOntologyDraftSemantics(
       !!item &&
       typeof item === "object" &&
       typeof (item as { source_ref?: unknown }).source_ref === "string" &&
-      ((item as { source_ref: string }).source_ref).trim().length > 0
+      (item as { source_ref: string }).source_ref.trim().length > 0
     );
 
     if (!hasSourceRef && !hasEvidenceRef) {
       issues.push({
         code: "VERIFIED_REQUIRES_SOURCE_REFERENCE",
         path: "$.epistemic_status",
-        message: "Verified status requires a source reference; this does not independently verify the claim.",
+        message:
+          "Verified status requires a source reference; this does not independently verify the claim.",
       });
     }
   }
