@@ -115,7 +115,7 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  // Validation-only endpoint: no candidate is returned and no database write occurs.
+  // Validation-only endpoint: return status only; never return or persist a candidate.
   return json({
     ok: true,
     validation_status: "valid-for-review",
