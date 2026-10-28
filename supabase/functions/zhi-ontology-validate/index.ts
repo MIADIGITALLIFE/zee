@@ -106,9 +106,7 @@ Deno.serve(async (req: Request) => {
 
   if (!result.ok) {
     const status = result.stage === "request" &&
-      result.issues.some((issue) =>
-        issue.code === "AUTHENTICATION_REQUIRED"
-      )
+      result.issues.some((issue) => issue.code === "AUTHENTICATION_REQUIRED")
       ? 401
       : 400;
     return json(
