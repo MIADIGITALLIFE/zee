@@ -2,7 +2,9 @@ import { validateOntologyDraftSemantics } from "./ontology-semantic-validation.t
 
 function assertEquals(actual: unknown, expected: unknown): void {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    throw new Error(`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
+    throw new Error(
+      `Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`,
+    );
   }
 }
 
@@ -39,7 +41,9 @@ Deno.test("rejects self-relation", () => {
       target_entity: "entity_a",
     }],
   });
-  assertEquals(issues.map((issue) => issue.code), ["SELF_RELATION_NOT_ALLOWED"]);
+  assertEquals(issues.map((issue) => issue.code), [
+    "SELF_RELATION_NOT_ALLOWED",
+  ]);
 });
 
 Deno.test("Relation ontology record requires exactly one edge", () => {
@@ -48,7 +52,9 @@ Deno.test("Relation ontology record requires exactly one edge", () => {
     ontology_type: "Relation",
     relations: [],
   });
-  assertEquals(issues.map((issue) => issue.code), ["RELATION_RECORD_REQUIRES_EDGE"]);
+  assertEquals(issues.map((issue) => issue.code), [
+    "RELATION_RECORD_REQUIRES_EDGE",
+  ]);
 });
 
 Deno.test("verified status requires a source reference but does not certify truth", () => {
@@ -56,7 +62,9 @@ Deno.test("verified status requires a source reference but does not certify trut
     ...base,
     epistemic_status: "verified",
   });
-  assertEquals(missing.map((issue) => issue.code), ["VERIFIED_REQUIRES_SOURCE_REFERENCE"]);
+  assertEquals(missing.map((issue) => issue.code), [
+    "VERIFIED_REQUIRES_SOURCE_REFERENCE",
+  ]);
 
   const withSource = validateOntologyDraftSemantics({
     ...base,
