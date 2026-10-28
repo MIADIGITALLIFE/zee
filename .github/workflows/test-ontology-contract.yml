@@ -12,6 +12,7 @@ on:
       - "supabase/functions/_shared/ontology-create-pipeline.ts"
       - "supabase/functions/_shared/ontology-create-pipeline.test.ts"
       - "supabase/functions/zhi-ontology-validate/index.ts"
+      - "scripts/smoke-test-zhi-ontology-validate.mjs"
       - "schemas/zhi-ontology-draft-v1.schema.json"
       - ".github/workflows/test-ontology-contract.yml"
   push:
@@ -19,6 +20,7 @@ on:
       - "feat/ontology-dictionary-studio"
     paths:
       - "docs/ZHI-ONTOLOGY-VALIDATION-EDGE-FUNCTION.md"
+      - "scripts/smoke-test-zhi-ontology-validate.mjs"
       - "supabase/functions/zhi-ontology-validate/index.ts"
       - "supabase/functions/_shared/ontology-semantic-validation.ts"
       - "supabase/functions/_shared/ontology-semantic-validation.test.ts"
@@ -45,6 +47,8 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Check smoke-test script syntax
+        run: node --check scripts/smoke-test-zhi-ontology-validate.mjs
       - name: Format check
         run: deno fmt --check supabase/functions/zhi-ontology-validate/index.ts supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.ts supabase/functions/_shared/ontology-request-validation.test.ts supabase/functions/_shared/ontology-create-pipeline.ts supabase/functions/_shared/ontology-create-pipeline.test.ts
       - name: Type check
