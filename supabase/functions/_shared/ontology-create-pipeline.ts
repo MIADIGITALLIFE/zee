@@ -22,7 +22,10 @@ export function prepareOntologyCreate(
   authenticatedSubjectId: string | null,
   validateSchema: (payload: unknown) => SchemaIssue[],
 ): OntologyCreatePreparation {
-  const requestIssues = validateOntologyCreateRequest(payload, authenticatedSubjectId);
+  const requestIssues = validateOntologyCreateRequest(
+    payload,
+    authenticatedSubjectId,
+  );
   if (requestIssues.length) {
     return { ok: false, stage: "request", issues: requestIssues };
   }
@@ -50,7 +53,8 @@ export function prepareOntologyCreate(
       issues: [{
         code: access.reason,
         path: "$",
-        message: "The authenticated caller is not allowed to create this record.",
+        message:
+          "The authenticated caller is not allowed to create this record.",
       }],
     };
   }
