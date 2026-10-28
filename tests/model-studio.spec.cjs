@@ -175,3 +175,22 @@ test('generated ontology draft conforms to the canonical JSON Schema', async ({ 
   const invalidRecord = { ...record, epistemic_status: 'maybe-true' };
   expect(validate(invalidRecord)).toBe(false);
 });
+
+test('UI ontology options stay aligned with the canonical JSON Schema enums', async () => {
+  const fs = require('node:fs/promises');
+  const html = await fs.readFile(path.resolve(__dirname, '../model.html'), 'utf8');
+  const schema = JSON.parse(await fs.readFile(path.resolve(__dirname, '../schemas/zhi-ontology-draft-v1.schema.json'), 'utf8'));
+
+  const optionValues = (selectId) => {
+    const select = html.match(new RegExp('<select[^>]*id="' + selectId + '"[^>]*>([\\s\\S]*?)</select>'));
+    if (!select) throw new Error('Missing select control: ' + selectId);
+    return [...select[1].matchAll(/<option\\s+value="([^"]*)"/g)]
+      .map((match) => match[1])
+      .filter(Boolean)
+      .sort();
+  };
+
+  expect(optionValues('onto-type')).toEqual([...schema.properties.ontology_type.enum].sort());
+  expect(optionValues('onto-epistemic')).toEqual([...schema.properties.epistemic_status.enum].sort());
+  expect(optionValues('onto-relation')).toEqual([...schema.properties.relations.items.properties.relation_type.enum].sort());
+});
