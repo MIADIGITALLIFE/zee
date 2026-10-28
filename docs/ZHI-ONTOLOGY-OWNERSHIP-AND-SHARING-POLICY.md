@@ -17,6 +17,8 @@
 
 This is a recommendation for the next implementation stage, not a statement about current production behavior.
 
+A pure fail-closed policy helper and unit tests now exist at `../supabase/functions/_shared/ontology-access-policy.ts` and `../supabase/functions/_shared/ontology-access-policy.test.ts`. They exercise the proposed decision rules only. They are not connected to authentication, stored sharing grants, a database, an API endpoint, or production enforcement.
+
 ## 2. Proposed access levels
 
 | Level | Meaning | Default |
