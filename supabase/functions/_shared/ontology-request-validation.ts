@@ -76,7 +76,8 @@ export function validateOntologyCreateRequest(
       issues.push({
         code: "SERVER_MANAGED_FIELD_FORBIDDEN",
         path: `$.${field}`,
-        message: `Field "${field}" must be assigned by the server, not the client.`,
+        message:
+          `Field "${field}" must be assigned by the server, not the client.`,
       });
     }
   }
