@@ -72,3 +72,29 @@ test('prevents empty cognition feedback and remains usable on a narrow viewport'
   }));
   expect(dimensions.page).toBeLessThanOrEqual(dimensions.viewport + 1);
 });
+
+test('serializes relation endpoints and relation type into the draft', async ({ page }) => {
+  await page.locator('#onto-id').fill('relation_bridge_road');
+  await page.locator('#onto-label').fill('桥梁与道路的关联');
+  await page.locator('#onto-relation').selectOption('related_to');
+  await page.locator('#onto-source-entity').fill('bridge_001');
+  await page.locator('#onto-target-entity').fill('road_002');
+  await page.locator('#onto-generate').click();
+
+  const record = JSON.parse(await page.locator('#onto-output').textContent());
+  expect(record.relations).toHaveLength(1);
+  expect(record.relations[0].relation_type).toBe('related_to');
+  expect(record.relations[0].source_entity).toBe('bridge_001');
+  expect(record.relations[0].target_entity).toBe('road_002');
+});
+
+test('marks a generated preview stale after any form edit', async ({ page }) => {
+  await page.locator('#onto-id').fill('claim_preview_test');
+  await page.locator('#onto-label').fill('初始名称');
+  await page.locator('#onto-generate').click();
+  await expect(page.locator('#onto-output')).toContainText('初始名称');
+
+  await page.locator('#onto-label').fill('修改后的名称');
+  await expect(page.locator('#onto-output')).toContainText('请重新生成 JSON 草案');
+  await expect(page.locator('#onto-status')).toContainText('草案已失效');
+});
