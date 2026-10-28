@@ -1,0 +1,61 @@
+name: Test ZHI ontology semantic contract
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/_shared/ontology-runtime-context.ts"
+      - "supabase/functions/_shared/ontology-runtime-context.test.ts"
+      - "supabase/functions/zhi-agnes-chat/index.ts"
+      - "supabase/functions/_shared/ontology-semantic-validation.ts"
+      - "supabase/functions/_shared/ontology-semantic-validation.test.ts"
+      - "supabase/functions/_shared/ontology-access-policy.ts"
+      - "supabase/functions/_shared/ontology-access-policy.test.ts"
+      - "supabase/functions/_shared/ontology-request-validation.ts"
+      - "supabase/functions/_shared/ontology-request-validation.test.ts"
+      - "supabase/functions/_shared/ontology-create-pipeline.ts"
+      - "supabase/functions/_shared/ontology-create-pipeline.test.ts"
+      - "supabase/functions/zhi-ontology-validate/index.ts"
+      - "supabase/config.toml"
+      - "scripts/smoke-test-zhi-ontology-validate.mjs"
+      - "schemas/zhi-ontology-draft-v1.schema.json"
+      - ".github/workflows/test-ontology-contract.yml"
+  push:
+    branches:
+      - "feat/ontology-dictionary-studio"
+    paths:
+      - "docs/ZHI-ONTOLOGY-VALIDATION-EDGE-FUNCTION.md"
+      - "scripts/smoke-test-zhi-ontology-validate.mjs"
+      - "supabase/functions/zhi-ontology-validate/index.ts"
+      - "supabase/functions/_shared/ontology-semantic-validation.ts"
+      - "supabase/functions/_shared/ontology-semantic-validation.test.ts"
+      - "supabase/functions/_shared/ontology-access-policy.ts"
+      - "supabase/functions/_shared/ontology-access-policy.test.ts"
+      - "supabase/functions/_shared/ontology-request-validation.ts"
+      - "supabase/functions/_shared/ontology-request-validation.test.ts"
+      - "supabase/functions/_shared/ontology-create-pipeline.ts"
+      - "supabase/functions/_shared/ontology-create-pipeline.test.ts"
+      - "schemas/zhi-ontology-draft-v1.schema.json"
+      - ".github/workflows/test-ontology-contract.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check smoke-test script syntax
+        run: node --check scripts/smoke-test-zhi-ontology-validate.mjs
+      - name: Format check
+        run: deno fmt --check supabase/functions/_shared/ontology-runtime-context.ts supabase/functions/_shared/ontology-runtime-context.test.ts supabase/functions/zhi-ontology-validate/index.ts supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.ts supabase/functions/_shared/ontology-request-validation.test.ts supabase/functions/_shared/ontology-create-pipeline.ts supabase/functions/_shared/ontology-create-pipeline.test.ts
+      - name: Type check
+        run: deno check supabase/functions/zhi-agnes-chat/index.ts supabase/functions/_shared/ontology-runtime-context.ts supabase/functions/_shared/ontology-runtime-context.test.ts supabase/functions/zhi-ontology-validate/index.ts supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.ts supabase/functions/_shared/ontology-request-validation.test.ts supabase/functions/_shared/ontology-create-pipeline.ts supabase/functions/_shared/ontology-create-pipeline.test.ts
+      - name: Run semantic contract tests
+        run: deno test supabase/functions/_shared/ontology-runtime-context.test.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.test.ts supabase/functions/_shared/ontology-create-pipeline.test.ts

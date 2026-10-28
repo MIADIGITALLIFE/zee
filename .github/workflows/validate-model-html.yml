@@ -1,0 +1,45 @@
+name: Validate ZEE model studio
+
+on:
+  pull_request:
+    paths:
+      - "admin.html"
+      - "scripts/validate_admin_html.py"
+      - "admin.html"
+      - "scripts/validate_admin_html.py"
+      - "model.html"
+      - "schemas/**"
+      - "scripts/validate_model_html.py"
+      - "docs/**"
+      - ".github/workflows/validate-model-html.yml"
+  push:
+    branches:
+      - "feat/ontology-dictionary-studio"
+    paths:
+      - "model.html"
+      - "schemas/**"
+      - "scripts/validate_model_html.py"
+      - "docs/**"
+      - ".github/workflows/validate-model-html.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Validate admin console HTML and embedded JavaScript
+        run: python scripts/validate_admin_html.py
+      - name: Validate model studio HTML and embedded JavaScript
+        run: python scripts/validate_model_html.py
