@@ -1,6 +1,6 @@
 # ZHI Ontology Backend Integration Plan
 
-**Status:** proposed contract; not implemented or deployed  
+**Status:** proposed contract; pure semantic validation helper and unit tests exist; no persistence endpoint or deployment  
 **Applies to:** ZHI Ontology Dictionary V1.0 and the offline draft emitted by `model.html`  
 **Goal:** define the smallest safe server-side persistence boundary before any database migration or production write.
 
@@ -8,7 +8,9 @@
 
 The current Studio is a browser-only prototype. It creates downloadable JSON drafts and an in-memory cognition experiment. The canonical draft shape is documented in `../schemas/zhi-ontology-draft-v1.schema.json`.
 
-This document is a design proposal only. It does not assert that any table, API endpoint, migration, permission policy, or integration test described below currently exists. Do not deploy or run write operations based only on this plan.
+A dependency-free semantic validation helper exists at `../supabase/functions/_shared/ontology-semantic-validation.ts`, with Deno tests beside it. It checks selected cross-field rules such as validity ordering, self-relations, the V1.0 Relation-record edge rule, and the source-reference requirement for a `verified` label. It does **not** perform JSON Schema validation, authenticate callers, verify source truth, authorize access, or persist data. It is not yet wired into a deployed endpoint.
+
+This document remains a design proposal. It does not assert that any table, API endpoint, migration, permission policy, or production write path exists. Do not deploy or run write operations based only on this plan.
 
 The ontology draft is distinct from the existing AI chat flow documented in `../AI_BRAIN_INTEGRATION.md`. Ontology persistence should not silently invoke a model or alter agent state, balances, or world-state fields.
 
@@ -170,4 +172,4 @@ Do not begin persistent writes until all are true:
 6. Add UI persistence only after endpoint tests pass.
 7. Review and approve before any production deployment.
 
-**Current verified state:** the offline Studio's static and Chromium tests pass. No ontology persistence endpoint or database migration is claimed by this plan.
+**Current verified state:** the offline Studio's static and Chromium tests pass. The semantic helper is being tested independently. No ontology persistence endpoint or database migration is claimed by this plan.
