@@ -5,6 +5,7 @@ on:
     paths:
       - "model.html"
       - "tests/model-studio.spec.cjs"
+      - "schemas/**"
       - ".github/workflows/test-model-studio.yml"
   push:
     branches:
@@ -29,7 +30,7 @@ jobs:
         with:
           node-version: "24"
       - name: Install Playwright
-        run: npm install --no-save @playwright/test
+        run: npm install --no-save @playwright/test ajv ajv-formats
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run browser interaction tests
