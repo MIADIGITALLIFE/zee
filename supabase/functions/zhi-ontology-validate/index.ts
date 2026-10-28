@@ -1,6 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import Ajv2020 from "npm:ajv@8/dist/2020.js";
-import addFormats from "npm:ajv-formats@3";
+import * as Ajv2020Module from "npm:ajv@8/dist/2020.js";
+import * as addFormatsModule from "npm:ajv-formats@3";
 import schema from "../../../schemas/zhi-ontology-draft-v1.schema.json" with {
   type: "json",
 };
@@ -28,6 +28,8 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+const Ajv2020 = Ajv2020Module.default;
+const addFormats = addFormatsModule.default;
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 const validateSchema = ajv.compile(schema);
