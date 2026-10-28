@@ -57,7 +57,9 @@ export function validateRuntimeOntologyRecords(
     if (semanticIssues.length) {
       return {
         records: [],
-        error: `ontology_records[${i}] failed semantic validation: ${semanticIssues[0].code}`,
+        error: `ontology_records[${i}] failed semantic validation: ${
+          semanticIssues[0].code
+        }`,
       };
     }
     records.push(record as OntologyRuntimeRecord);
