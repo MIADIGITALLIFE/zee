@@ -98,3 +98,39 @@ test('marks a generated preview stale after any form edit', async ({ page }) => 
   await expect(page.locator('#onto-output')).toContainText('请重新生成 JSON 草案');
   await expect(page.locator('#onto-status')).toContainText('草案已失效');
 });
+
+test('rejects a self-referential relation by default', async ({ page }) => {
+  await page.locator('#onto-id').fill('relation_self_test');
+  await page.locator('#onto-label').fill('自指关系测试');
+  await page.locator('#onto-relation').selectOption('related_to');
+  await page.locator('#onto-source-entity').fill('entity_same');
+  await page.locator('#onto-target-entity').fill('entity_same');
+  await page.locator('#onto-generate').click();
+  await expect(page.locator('#onto-status')).toContainText('不能是同一个 ID');
+});
+
+test('rejects a validity end date earlier than its start date', async ({ page }) => {
+  await page.locator('#onto-id').fill('validity_range_test');
+  await page.locator('#onto-label').fill('有效期校验');
+  await page.locator('#onto-valid-from').fill('2026-10-20T10:00');
+  await page.locator('#onto-valid-to').fill('2026-10-19T10:00');
+  await page.locator('#onto-generate').click();
+  await expect(page.locator('#onto-status')).toContainText('有效期结束时间不能早于开始时间');
+});
+
+test('reset clears ontology draft and cognition experiment', async ({ page }) => {
+  await page.locator('#onto-id').fill('reset_test_record');
+  await page.locator('#onto-label').fill('待清除记录');
+  await page.locator('#onto-generate').click();
+  await page.locator('#onto-reset').click();
+  await expect(page.locator('#onto-output')).toContainText('表单已清空');
+  await expect(page.locator('#onto-id')).toHaveValue('');
+
+  await page.locator('#loop-hypothesis').fill('重置测试假设');
+  await page.locator('#loop-observation').fill('重置测试观察');
+  await page.locator('#loop-evaluate').click();
+  await page.locator('#loop-reset').click();
+  await expect(page.locator('#loop-output')).toContainText('实验结果将在这里显示');
+  await expect(page.locator('#loop-hypothesis')).toHaveValue('');
+  await expect(page.locator('#loop-status')).toContainText('实验已清空');
+});
