@@ -1,7 +1,10 @@
-import {
-  assertEquals,
-} from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { validateOntologyDraftSemantics } from "./ontology-semantic-validation.ts";
+
+function assertEquals(actual: unknown, expected: unknown): void {
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    throw new Error(`Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
+  }
+}
 
 const base = {
   id: "claim_001",
