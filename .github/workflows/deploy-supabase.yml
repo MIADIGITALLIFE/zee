@@ -1,4 +1,4 @@
-name: Deploy ZEE Edge Function to Supabase
+name: Deploy ZEE Edge Functions to Supabase
 
 on:
   push:
@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - "supabase/functions/zhi-agnes-chat/**"
+      - "supabase/functions/zhi-ontology-validate/**"
+      - "supabase/functions/_shared/ontology-*.ts"
+      - "schemas/zhi-ontology-draft-v1.schema.json"
       - "supabase/config.toml"
       - ".github/workflows/deploy-supabase.yml"
   workflow_dispatch:
@@ -35,5 +38,8 @@ jobs:
         continue-on-error: true
         run: supabase functions list --project-ref "$PROJECT_REF" --debug
 
-      - name: Deploy ZEE AI function
+      - name: Deploy ZEE AI chat function
         run: supabase functions deploy zhi-agnes-chat --project-ref "$PROJECT_REF" --debug
+
+      - name: Deploy ZHI ontology validation function
+        run: supabase functions deploy zhi-ontology-validate --project-ref "$PROJECT_REF" --debug
