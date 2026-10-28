@@ -7,6 +7,8 @@ on:
       - "supabase/functions/_shared/ontology-semantic-validation.test.ts"
       - "supabase/functions/_shared/ontology-access-policy.ts"
       - "supabase/functions/_shared/ontology-access-policy.test.ts"
+      - "supabase/functions/_shared/ontology-request-validation.ts"
+      - "supabase/functions/_shared/ontology-request-validation.test.ts"
       - "schemas/zhi-ontology-draft-v1.schema.json"
       - ".github/workflows/test-ontology-contract.yml"
   push:
@@ -15,6 +17,10 @@ on:
     paths:
       - "supabase/functions/_shared/ontology-semantic-validation.ts"
       - "supabase/functions/_shared/ontology-semantic-validation.test.ts"
+      - "supabase/functions/_shared/ontology-access-policy.ts"
+      - "supabase/functions/_shared/ontology-access-policy.test.ts"
+      - "supabase/functions/_shared/ontology-request-validation.ts"
+      - "supabase/functions/_shared/ontology-request-validation.test.ts"
       - "schemas/zhi-ontology-draft-v1.schema.json"
       - ".github/workflows/test-ontology-contract.yml"
 
@@ -33,8 +39,8 @@ jobs:
         with:
           deno-version: v2.x
       - name: Format check
-        run: deno fmt --check supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts
+        run: deno fmt --check supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.ts supabase/functions/_shared/ontology-request-validation.test.ts
       - name: Type check
         run: deno check supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts
       - name: Run semantic contract tests
-        run: deno test supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.test.ts
+        run: deno test supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.test.ts
