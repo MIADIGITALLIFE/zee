@@ -161,18 +161,23 @@ render();
  const iso=(id)=>{const value=$(id).value;if(!value)return null;const d=new Date(value);return Number.isNaN(d.getTime())?null:d.toISOString()};
  function build(){
    const id=$('onto-id').value.trim(),label=$('onto-label').value.trim(),relationType=$('onto-relation').value,sourceEntity=$('onto-source-entity').value.trim(),targetEntity=$('onto-target-entity').value.trim();
+   const ontologyType=$('onto-type').value,epistemicStatus=$('onto-epistemic').value,sourceRef=$('onto-source').value.trim();
    if(!id||!label){status('请填写稳定对象 ID 和名称。',true);return null}
+   if(!/^[A-Za-z][A-Za-z0-9_-]{1,99}$/.test(id)){status('对象 ID 必须以英文字母开头，只能包含英文字母、数字、下划线或连字符（2–100 位）。',true);return null}
    const revision=Number($('onto-revision').value);
    if(!Number.isInteger(revision)||revision<1){status('修订序号必须是大于 0 的整数。',true);return null}
    if(relationType&&(!sourceEntity||!targetEntity)){status('填写关系类型时，必须同时填写关系起点和终点 ID。',true);return null}
+   if(relationType&&sourceEntity===targetEntity){status('关系起点和终点不能是同一个 ID；若需自指关系，请在规范中明确定义后再录入。',true);return null}
+   if(ontologyType==='Relation'&&!relationType){status('Relation 类型必须填写关系类型与起点、终点 ID。',true);return null}
+   if(epistemicStatus==='verified'&&!sourceRef){status('认知状态选择 verified 时，请提供可追溯的来源引用；这仍不代表系统已完成独立验证。',true);return null}
    const recordedAt=new Date().toISOString();
    const record={
-     id,ontology_type:$('onto-type').value,label,
+     id,ontology_type:ontologyType,label,
      description:$('onto-description').value.trim(),
      state:$('onto-state').value.trim()||'unknown',
-     epistemic_status:$('onto-epistemic').value,
-     evidence:$('onto-source').value.trim()? [{source_ref:$('onto-source').value.trim()}]:[],
-     source_refs:$('onto-source').value.trim()?[$('onto-source').value.trim()]:[],
+     epistemic_status:epistemicStatus,
+     evidence:sourceRef? [{source_ref:sourceRef}]:[],
+     source_refs:sourceRef?[sourceRef]:[],
      event_time:iso('onto-event-time'),
      observed_at:iso('onto-observed-at'),
      recorded_at:recordedAt,
@@ -180,7 +185,7 @@ render();
      revision,
      access_policy:'draft-local-only',
      retention_policy:'not-persisted',
-     relations:relationType?[{relation_id:'rel_'+id,relation_type:relationType,source_entity:sourceEntity,target_entity:targetEntity,directionality:'directed',epistemic_status:$('onto-epistemic').value,evidence_refs:$('onto-source').value.trim()?[$('onto-source').value.trim()]:[],validity:{from:iso('onto-valid-from'),to:iso('onto-valid-to')},revision}]:[],
+     relations:relationType?[{relation_id:'rel_'+id,relation_type:relationType,source_entity:sourceEntity,target_entity:targetEntity,directionality:'directed',epistemic_status:epistemicStatus,evidence_refs:sourceRef?[sourceRef]:[],validity:{from:iso('onto-valid-from'),to:iso('onto-valid-to')},revision}]:[],
      lifecycle:{transition:'CREATE',status:'candidate',requires_validation:true},
      verification_status:'not-validated',
      schema_version:'ZHI-Ontology-Dictionary-V1.0'
