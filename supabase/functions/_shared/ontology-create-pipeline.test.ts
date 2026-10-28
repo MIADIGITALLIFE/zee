@@ -54,20 +54,28 @@ Deno.test("stops when canonical schema validation fails", () => {
 });
 
 Deno.test("stops on semantic failure before preparing candidate", () => {
-  const result = prepareOntologyCreate({
-    ...payload,
-    validity: { from: "2026-12-31T00:00:00Z", to: "2026-01-01T00:00:00Z" },
-  }, "user-a", () => []);
+  const result = prepareOntologyCreate(
+    {
+      ...payload,
+      validity: { from: "2026-12-31T00:00:00Z", to: "2026-01-01T00:00:00Z" },
+    },
+    "user-a",
+    () => [],
+  );
   if (result.ok) throw new Error("Expected semantic failure.");
   assertEquals(result.stage, "semantics");
   assertEquals(result.issues[0].code, "INVALID_VALIDITY_RANGE");
 });
 
 Deno.test("rejects client-provided owner instead of trusting it", () => {
-  const result = prepareOntologyCreate({
-    ...payload,
-    owner_id: "user-b",
-  }, "user-a", () => []);
+  const result = prepareOntologyCreate(
+    {
+      ...payload,
+      owner_id: "user-b",
+    },
+    "user-a",
+    () => [],
+  );
   if (result.ok) throw new Error("Expected request rejection.");
   assertEquals(result.stage, "request");
   assertEquals(result.issues[0].code, "SERVER_MANAGED_FIELD_FORBIDDEN");
