@@ -3,6 +3,7 @@
 from html.parser import HTMLParser
 from pathlib import Path
 import re
+import json
 import subprocess
 import sys
 import tempfile
@@ -58,6 +59,17 @@ def fail(message):
 if not PAGE.exists():
     fail("model.html not found at repository root")
 
+if not SCHEMA.exists():
+    fail("Canonical ontology JSON Schema not found")
+try:
+    schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+except json.JSONDecodeError as exc:
+    fail(f"Canonical ontology JSON Schema is invalid JSON: {exc}")
+if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
+    fail("Ontology JSON Schema must declare JSON Schema draft 2020-12")
+if "id" not in schema.get("properties", {}) or "ontology_type" not in schema.get("properties", {}):
+    fail("Ontology JSON Schema is missing core record fields")
+
 html = PAGE.read_text(encoding="utf-8")
 parser = StructureParser()
 parser.feed(html)
@@ -94,4 +106,5 @@ for index, source in enumerate(scripts, start=1):
 print(f"PASS: HTML structure; {len(parser.ids)} unique IDs; {len(scripts)} JavaScript blocks parsed.")
 print(f"PASS: {len(REQUIRED_IDS)} required UI IDs are present.")
 print("PASS: all embedded JavaScript blocks pass node --check.")
+print("PASS: canonical ontology JSON Schema is valid JSON and declares required core fields.")
 print("NOTE: these are static checks, not real browser interaction or visual regression tests.")
