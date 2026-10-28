@@ -18,7 +18,7 @@ The existing admin-only chat request remains compatible:
 }
 ```
 
-For convenience, one record may instead be passed as `ontology_record`. If neither field is present, the previous chat flow continues without ontology context. If both fields are supplied, `ontology_records` takes precedence.
+For convenience, one record may instead be passed as `ontology_record`. The admin console (`admin.html`) now has an optional JSON input: paste a single exported record or a JSON array, and the console sends it alongside the message. If neither field is present, the previous chat flow continues without ontology context. If both fields are supplied, `ontology_records` takes precedence.
 
 Limits:
 - Whole request body: 128 KiB maximum.
@@ -40,7 +40,7 @@ The normal chat reply and existing chat/mind/memory writes continue under the pr
 
 ## How to test
 
-Send the existing authorized request to `zhi-agnes-chat` with one full draft record in `ontology_records`. Check that:
+In `admin.html`, sign in with an authorized admin account, enter an agent UUID, paste one full draft JSON into the optional ontology field, and send a message. Alternatively, send the existing authorized request to `zhi-agnes-chat` with one full draft record in `ontology_records`. Check that:
 1. A valid record is accepted and the response reports `ontology_context_count: 1`.
 2. A malformed schema or semantic conflict returns HTTP 400 before the model request.
 3. A request without ontology fields still follows the legacy path.
