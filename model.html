@@ -198,6 +198,7 @@ render();
    try{await navigator.clipboard.writeText(JSON.stringify(record,null,2));status('JSON 已复制到剪贴板。')}
    catch(_){status('浏览器未授予剪贴板权限；请从下方预览手动复制。',true)}
  }
+ formIds.forEach(id=>{const el=$(id);el.addEventListener('input',()=>{current=null});el.addEventListener('change',()=>{current=null})});
  $('onto-generate').addEventListener('click',build);$('onto-download').addEventListener('click',download);$('onto-copy').addEventListener('click',copy);
  $('onto-reset').addEventListener('click',()=>{formIds.forEach(id=>{const el=$(id);if(el.tagName==='SELECT')el.selectedIndex=0;else if(id==='onto-revision')el.value='1';else el.value=''});current=null;$('onto-output').textContent='表单已清空。尚未创建或保存任何本体数据。';status('已清空本地表单。')});
 })();
