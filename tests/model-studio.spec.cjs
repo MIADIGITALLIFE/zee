@@ -152,3 +152,26 @@ test('downloads the generated JSON draft with a stable filename', async ({ page 
   expect(saved.verification_status).toBe('not-validated');
   expect(saved.retention_policy).toBe('not-persisted');
 });
+
+test('generated ontology draft conforms to the canonical JSON Schema', async ({ page }) => {
+  const fs = require('node:fs/promises');
+  const Ajv2020 = require('ajv/dist/2020');
+  const addFormats = require('ajv-formats');
+  await page.locator('#onto-id').fill('schema_contract_test');
+  await page.locator('#onto-label').fill('契约验证记录');
+  await page.locator('#onto-source').fill('test_source_01');
+  await page.locator('#onto-relation').selectOption('related_to');
+  await page.locator('#onto-source-entity').fill('entity_alpha');
+  await page.locator('#onto-target-entity').fill('entity_beta');
+  await page.locator('#onto-generate').click();
+
+  const record = JSON.parse(await page.locator('#onto-output').textContent());
+  const schema = JSON.parse(await fs.readFile(path.resolve(__dirname, '../schemas/zhi-ontology-draft-v1.schema.json'), 'utf8'));
+  const ajv = new Ajv2020({ allErrors: true });
+  addFormats(ajv);
+  const validate = ajv.compile(schema);
+
+  expect(validate(record), JSON.stringify(validate.errors)).toBe(true);
+  const invalidRecord = { ...record, epistemic_status: 'maybe-true' };
+  expect(validate(invalidRecord)).toBe(false);
+});
