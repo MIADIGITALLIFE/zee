@@ -184,8 +184,8 @@ test('UI ontology options stay aligned with the canonical JSON Schema enums', as
   const optionValues = (selectId) => {
     const select = html.match(new RegExp('<select[^>]*id="' + selectId + '"[^>]*>([\\s\\S]*?)</select>'));
     if (!select) throw new Error('Missing select control: ' + selectId);
-    return [...select[1].matchAll(/<option\\s+value="([^"]*)"/g)]
-      .map((match) => match[1])
+    return select[1].split('<option value="').slice(1)
+      .map((option) => option.split('"')[0])
       .filter(Boolean)
       .sort();
   };
