@@ -6,6 +6,7 @@ on:
       - "model.html"
       - "tests/model-studio.spec.cjs"
       - "schemas/**"
+      - "docs/**"
       - ".github/workflows/test-model-studio.yml"
   push:
     branches:
@@ -13,6 +14,8 @@ on:
     paths:
       - "model.html"
       - "tests/model-studio.spec.cjs"
+      - "schemas/**"
+      - "docs/**"
       - ".github/workflows/test-model-studio.yml"
 
 permissions:
