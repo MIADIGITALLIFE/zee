@@ -2,7 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import Ajv2020 from "npm:ajv@8/dist/2020.js";
 import addFormats from "npm:ajv-formats@3";
 import ontologySchema from "../../../schemas/zhi-ontology-draft-v1.schema.json" with { type: "json" };
-import { validateOntologyDraftSemantics } from "../_shared/ontology-semantic-validation.ts";
+import { validateRuntimeOntologyRecords } from "../_shared/ontology-runtime-context.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -11,59 +11,9 @@ const AGNES_MODEL = Deno.env.get("AGNES_MODEL") || "agnes-3.0-flash";
 const AGNES_BASE_URL = (Deno.env.get("AGNES_BASE_URL") || "https://apihub.agnes-ai.com/v1").replace(/\/+$/, "");
 const ADMIN_ID = "27cab698-4dc7-4b4e-a6e2-a837119a206f";
 const MAX_REQUEST_BYTES = 128 * 1024;
-const MAX_ONTOLOGY_RECORDS = 8;
-const MAX_ONTOLOGY_CONTEXT_BYTES = 48 * 1024;
 const ontologyAjv = new Ajv2020.default({ allErrors: true, strict: true });
 addFormats.default(ontologyAjv);
 const validateOntologySchema = ontologyAjv.compile(ontologySchema);
-
-type OntologyRecord = Record<string, unknown>;
-
-function validateRuntimeOntologyRecords(body: Record<string, unknown>):
-  { records: OntologyRecord[]; error?: string } {
-  const supplied = body.ontology_records ??
-    (body.ontology_record === undefined ? [] : [body.ontology_record]);
-  if (!Array.isArray(supplied)) {
-    return { records: [], error: "ontology_records must be an array" };
-  }
-  if (supplied.length > MAX_ONTOLOGY_RECORDS) {
-    return { records: [], error: `ontology_records exceeds the limit of ${MAX_ONTOLOGY_RECORDS}` };
-  }
-  let serialized = "";
-  try {
-    serialized = JSON.stringify(supplied);
-  } catch {
-    return { records: [], error: "ontology_records is not serializable JSON" };
-  }
-  if (new TextEncoder().encode(serialized).byteLength > MAX_ONTOLOGY_CONTEXT_BYTES) {
-    return { records: [], error: "ontology_records exceeds the context size limit" };
-  }
-
-  const records: OntologyRecord[] = [];
-  for (let i = 0; i < supplied.length; i++) {
-    const record = supplied[i];
-    if (!record || typeof record !== "object" || Array.isArray(record)) {
-      return { records: [], error: `ontology_records[${i}] must be an object` };
-    }
-    if (!validateOntologySchema(record)) {
-      const first = validateOntologySchema.errors?.[0];
-      return {
-        records: [],
-        error: `ontology_records[${i}] failed schema validation at ${first?.instancePath || "$"}`,
-      };
-    }
-    const semanticIssues = validateOntologyDraftSemantics(record as OntologyRecord);
-    if (semanticIssues.length) {
-      return {
-        records: [],
-        error: `ontology_records[${i}] failed semantic validation: ${semanticIssues[0].code}`,
-      };
-    }
-    records.push(record as OntologyRecord);
-  }
-  return { records };
-}
-
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -155,7 +105,10 @@ Deno.serve(async (req: Request) => {
   if (!agentId) return json({ error: "agent_id is required" }, 400);
   if (!message) return json({ error: "message is required" }, 400);
 
-  const ontologyResult = validateRuntimeOntologyRecords(requestBody);
+  const ontologyResult = validateRuntimeOntologyRecords(
+    requestBody,
+    (record) => validateOntologySchema(record) as boolean,
+  );
   if (ontologyResult.error) {
     return json({ error: "Invalid ontology context", details: ontologyResult.error }, 400);
   }
