@@ -3,6 +3,10 @@ name: Validate ZEE model studio
 on:
   pull_request:
     paths:
+      - "admin.html"
+      - "scripts/validate_admin_html.py"
+      - "admin.html"
+      - "scripts/validate_admin_html.py"
       - "model.html"
       - "schemas/**"
       - "scripts/validate_model_html.py"
@@ -35,5 +39,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - name: Validate HTML and embedded JavaScript
+      - name: Validate admin console HTML and embedded JavaScript
+        run: python scripts/validate_admin_html.py
+      - name: Validate model studio HTML and embedded JavaScript
         run: python scripts/validate_model_html.py
