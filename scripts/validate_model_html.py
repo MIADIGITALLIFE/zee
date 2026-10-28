@@ -74,7 +74,7 @@ missing = sorted(set(REQUIRED_IDS) - parser.ids)
 if missing:
     fail("Required controls missing: " + ", ".join(missing))
 
-scripts = re.findall(r"<script\\b[^>]*>(.*?)</script\\s*>", html, flags=re.I | re.S)
+scripts = re.findall(r"<script\b[^>]*>(.*?)</script\s*>", html, flags=re.I | re.S)
 if len(scripts) != parser.script_count:
     fail(f"Could not extract all script blocks: parsed {parser.script_count}, extracted {len(scripts)}")
 
