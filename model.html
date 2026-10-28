@@ -208,5 +208,64 @@ render();
  $('onto-reset').addEventListener('click',()=>{formIds.forEach(id=>{const el=$(id);if(el.tagName==='SELECT')el.selectedIndex=0;else if(id==='onto-revision')el.value='1';else el.value=''});current=null;$('onto-output').textContent='表单已清空。尚未创建或保存任何本体数据。';status('已清空本地表单。')});
 })();
 </script>
+
+<section class="panel ontology-suite" id="cognition-loop" aria-labelledby="loop-heading" style="margin-top:22px">
+  <h2 class="section-title" id="loop-heading">↻ 离线认知闭环实验 <small>HYPOTHESIS → OBSERVATION → FEEDBACK</small></h2>
+  <p class="ontology-intro">用一条假设和一条观察，演示“提出主张—比较结果—产生反馈—修订版本”的最小闭环。实验状态只保存在当前页面内存中；刷新页面即清空，不调用模型、不写数据库。</p>
+  <div class="ontology-form">
+    <div class="control"><label for="loop-hypothesis">待检验假设</label><textarea id="loop-hypothesis" maxlength="1000" placeholder="例如：如果将提示分成两步，任务完成率会提高。"></textarea></div>
+    <div class="control"><label for="loop-observation">观察到的结果</label><textarea id="loop-observation" maxlength="1000" placeholder="填写本次实际观察；没有观察时不要编造结果。"></textarea></div>
+    <div class="control"><label for="loop-verdict">比较结论</label><select id="loop-verdict"><option value="supported">支持假设</option><option value="refuted">不支持 / 反驳假设</option><option value="inconclusive">证据不足，暂不判断</option></select></div>
+  </div>
+  <div class="preset-list" style="margin-top:14px">
+    <button class="preset" id="loop-evaluate" type="button">记录反馈并生成下一版本</button>
+    <button class="preset" id="loop-rollback" type="button">回滚到上一版本</button>
+    <button class="preset" id="loop-reset" type="button">清空实验</button>
+  </div>
+  <p id="loop-status" class="ontology-intro" role="status" aria-live="polite" style="margin-top:14px">等待输入。当前没有实验记录。</p>
+  <pre id="loop-output" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#080d19;border:1px solid var(--line);border-radius:12px;padding:16px;min-height:72px;color:#dce8fb">实验结果将在这里显示。</pre>
+  <p class="ontology-intro"><strong>解释边界：</strong>这里的“支持/反驳”是操作者选择的分类，不是自动推理或科学验证。此模块只演示版本与反馈流程，不代表 ZEE 已具备持久记忆、主动意识或真实认知能力。</p>
+</section>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ const status=$('loop-status'),out=$('loop-output');
+ let history=[],current=null;
+ function render(message){
+   status.textContent=message;
+   out.textContent=current?JSON.stringify(current,null,2):'实验结果将在这里显示。';
+ }
+ $('loop-evaluate').addEventListener('click',()=>{
+   const hypothesis=$('loop-hypothesis').value.trim();
+   const observation=$('loop-observation').value.trim();
+   if(!hypothesis||!observation){render('请同时填写假设和实际观察；不允许用空结果生成结论。');return}
+   if(current)history.push(JSON.parse(JSON.stringify(current)));
+   const verdict=$('loop-verdict').value;
+   const revision=current?current.revision+1:1;
+   current={
+     experiment_id:'offline_loop_'+new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14),
+     schema_version:'ZHI-Cognitive-Loop-Draft-V1.0',
+     revision,
+     hypothesis,
+     observation,
+     feedback:{verdict,operator_selected:true,automated_verification:false},
+     next_step:verdict==='supported'?'记录为暂时支持；在新条件下重复测试。':verdict==='refuted'?'修订或撤回假设，并设计下一轮测试。':'保留为未决问题，收集更多证据后再判断。',
+     recorded_at:new Date().toISOString(),
+     persistence:'memory-only',
+     verification_status:'not-independently-verified'
+   };
+   render('已生成第 '+revision+' 版实验记录；此结果仅在当前页面内存中。');
+ });
+ $('loop-rollback').addEventListener('click',()=>{
+   if(!history.length){render('没有可回滚的上一版本。');return}
+   current=history.pop();render('已回滚到第 '+current.revision+' 版。回滚仅作用于当前页面内存。');
+ });
+ $('loop-reset').addEventListener('click',()=>{
+   history=[];current=null;$('loop-hypothesis').value='';$('loop-observation').value='';$('loop-verdict').selectedIndex=0;
+   render('实验已清空；没有保存任何记录。');
+ });
+})();
+</script>
+
 </body>
 </html>
