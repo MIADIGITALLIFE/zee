@@ -41,6 +41,6 @@ jobs:
       - name: Format check
         run: deno fmt --check supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.ts supabase/functions/_shared/ontology-request-validation.test.ts
       - name: Type check
-        run: deno check supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts
+        run: deno check supabase/functions/_shared/ontology-semantic-validation.ts supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.ts supabase/functions/_shared/ontology-request-validation.test.ts
       - name: Run semantic contract tests
         run: deno test supabase/functions/_shared/ontology-semantic-validation.test.ts supabase/functions/_shared/ontology-access-policy.test.ts supabase/functions/_shared/ontology-request-validation.test.ts
