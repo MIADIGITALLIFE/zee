@@ -53,7 +53,10 @@ Deno.test("rejects schema-invalid ontology records", () => {
     schemaValidator,
   );
   assert(!!result.error, "expected schema validation error");
-  assert(result.records.length === 0, "invalid records must not be passed to runtime");
+  assert(
+    result.records.length === 0,
+    "invalid records must not be passed to runtime",
+  );
 });
 
 Deno.test("rejects semantic conflicts before runtime use", () => {
@@ -68,12 +71,20 @@ Deno.test("rejects semantic conflicts before runtime use", () => {
     },
     schemaValidator,
   );
-  assert(result.error?.includes("VERIFIED_REQUIRES_SOURCE_REFERENCE"), "expected provenance guard");
+  assert(
+    result.error?.includes("VERIFIED_REQUIRES_SOURCE_REFERENCE"),
+    "expected provenance guard",
+  );
 });
 
 Deno.test("rejects too many records", () => {
   const result = validateRuntimeOntologyRecords(
-    { ontology_records: Array.from({ length: MAX_ONTOLOGY_RECORDS + 1 }, () => validRecord) },
+    {
+      ontology_records: Array.from(
+        { length: MAX_ONTOLOGY_RECORDS + 1 },
+        () => validRecord,
+      ),
+    },
     schemaValidator,
   );
   assert(!!result.error, "expected record count limit");
@@ -89,5 +100,8 @@ Deno.test("rejects non-array ontology_records", () => {
 
 Deno.test("no ontology context is a valid empty context", () => {
   const result = validateRuntimeOntologyRecords({}, schemaValidator);
-  assert(!result.error && result.records.length === 0, "expected empty context");
+  assert(
+    !result.error && result.records.length === 0,
+    "expected empty context",
+  );
 });
