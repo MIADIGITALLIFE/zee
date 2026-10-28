@@ -1,7 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import Ajv2020 from "npm:ajv@8/dist/2020.js";
 import addFormats from "npm:ajv-formats@3";
-import schema from "../../../schemas/zhi-ontology-draft-v1.schema.json" with { type: "json" };
+import schema from "../../../schemas/zhi-ontology-draft-v1.schema.json" with {
+  type: "json",
+};
 import { prepareOntologyCreate } from "../_shared/ontology-create-pipeline.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -10,7 +12,8 @@ const MAX_BODY_BYTES = 64 * 1024;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, x-client-info, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, apikey, x-client-info, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
 };
@@ -18,7 +21,10 @@ const corsHeaders = {
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json; charset=utf-8",
+    },
   });
 }
 
@@ -27,7 +33,9 @@ addFormats(ajv);
 const validateSchema = ajv.compile(schema);
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
   if (req.method !== "POST") return json({ error: "POST_REQUIRED" }, 405);
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -44,7 +52,9 @@ Deno.serve(async (req: Request) => {
   const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data: { user }, error: authError } = await authClient.auth.getUser(token);
+  const { data: { user }, error: authError } = await authClient.auth.getUser(
+    token,
+  );
   if (authError || !user) return json({ error: "INVALID_AUTHENTICATION" }, 401);
 
   const declaredLength = Number(req.headers.get("content-length") ?? "0");
@@ -76,7 +86,11 @@ Deno.serve(async (req: Request) => {
     return json({
       ok: false,
       stage: "request",
-      issues: [{ code: "RECORD_REQUIRED", path: "$.record", message: "Provide a JSON object in the record field." }],
+      issues: [{
+        code: "RECORD_REQUIRED",
+        path: "$.record",
+        message: "Provide a JSON object in the record field.",
+      }],
     }, 400);
   }
 
@@ -92,10 +106,15 @@ Deno.serve(async (req: Request) => {
 
   if (!result.ok) {
     const status = result.stage === "request" &&
-      result.issues.some((issue) => issue.code === "AUTHENTICATION_REQUIRED")
+      result.issues.some((issue) =>
+        issue.code === "AUTHENTICATION_REQUIRED"
+      )
       ? 401
       : 400;
-    return json({ ok: false, stage: result.stage, issues: result.issues }, status);
+    return json(
+      { ok: false, stage: result.stage, issues: result.issues },
+      status,
+    );
   }
 
   // Validation-only endpoint: no candidate is returned and no database write occurs.
