@@ -9,6 +9,8 @@ on:
       - "supabase/functions/_shared/ontology-access-policy.test.ts"
       - "supabase/functions/_shared/ontology-request-validation.ts"
       - "supabase/functions/_shared/ontology-request-validation.test.ts"
+      - "supabase/functions/_shared/ontology-create-pipeline.ts"
+      - "supabase/functions/_shared/ontology-create-pipeline.test.ts"
       - "schemas/zhi-ontology-draft-v1.schema.json"
       - ".github/workflows/test-ontology-contract.yml"
   push:
