@@ -72,10 +72,15 @@ export function authorizeOntologyOperation(
   const grant = (context.grants ?? []).find(
     (candidate) => candidate.active && candidate.subjectId === subject,
   );
-  if (grant?.permission === "edit" && (operation === "read" || operation === "update")) {
+  if (
+    grant?.permission === "edit" &&
+    (operation === "read" || operation === "update")
+  ) {
     return {
       allowed: true,
-      reason: operation === "read" ? "READ_GRANT_ALLOWED" : "EDIT_GRANT_ALLOWED",
+      reason: operation === "read"
+        ? "READ_GRANT_ALLOWED"
+        : "EDIT_GRANT_ALLOWED",
     };
   }
   if (grant?.permission === "read" && operation === "read") {
