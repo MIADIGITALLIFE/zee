@@ -18,6 +18,8 @@ on:
     branches:
       - "feat/ontology-dictionary-studio"
     paths:
+      - "docs/ZHI-ONTOLOGY-VALIDATION-EDGE-FUNCTION.md"
+      - "supabase/functions/zhi-ontology-validate/index.ts"
       - "supabase/functions/_shared/ontology-semantic-validation.ts"
       - "supabase/functions/_shared/ontology-semantic-validation.test.ts"
       - "supabase/functions/_shared/ontology-access-policy.ts"
