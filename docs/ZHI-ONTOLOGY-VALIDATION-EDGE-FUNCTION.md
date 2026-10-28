@@ -49,3 +49,8 @@ node scripts/smoke-test-zhi-ontology-validate.mjs
 ```
 
 Expected checks: missing token returns 401, invalid token returns 401, invalid record returns 400, valid draft returns 200 with `persistence: "not-performed"`, and a request above 64 KiB returns 413. A passing script is evidence only for that test project and deployment. Do not use production credentials or paste tokens into chat, GitHub issues, commits, or logs. The script has not been run against a live endpoint because no test deployment/access token has been confirmed.
+
+
+## Gateway JWT configuration
+
+The repository configuration explicitly sets `[functions.zhi-ontology-validate]` to `verify_jwt = true`. This requests JWT verification at the Supabase Edge Functions gateway before the handler runs; the handler additionally calls `auth.getUser(token)` to resolve the user. Confirm the deployed project uses this configuration before treating gateway-level verification as live-environment verified.
