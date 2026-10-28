@@ -12,6 +12,7 @@ on:
       - "supabase/functions/_shared/ontology-create-pipeline.ts"
       - "supabase/functions/_shared/ontology-create-pipeline.test.ts"
       - "supabase/functions/zhi-ontology-validate/index.ts"
+      - "supabase/config.toml"
       - "scripts/smoke-test-zhi-ontology-validate.mjs"
       - "schemas/zhi-ontology-draft-v1.schema.json"
       - ".github/workflows/test-ontology-contract.yml"
