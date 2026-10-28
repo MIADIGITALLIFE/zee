@@ -134,3 +134,21 @@ test('reset clears ontology draft and cognition experiment', async ({ page }) =>
   await expect(page.locator('#loop-hypothesis')).toHaveValue('');
   await expect(page.locator('#loop-status')).toContainText('实验已清空');
 });
+
+test('downloads the generated JSON draft with a stable filename', async ({ page }) => {
+  const fs = require('node:fs/promises');
+  await page.locator('#onto-id').fill('download_draft_test');
+  await page.locator('#onto-label').fill('JSON 导出测试');
+  await page.locator('#onto-generate').click();
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#onto-download').click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('download_draft_test.json');
+
+  const filePath = await download.path();
+  const saved = JSON.parse(await fs.readFile(filePath, 'utf8'));
+  expect(saved.id).toBe('download_draft_test');
+  expect(saved.verification_status).toBe('not-validated');
+  expect(saved.retention_policy).toBe('not-persisted');
+});
