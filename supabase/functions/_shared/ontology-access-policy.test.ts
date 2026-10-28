@@ -3,7 +3,9 @@ import { authorizeOntologyOperation } from "./ontology-access-policy.ts";
 function assertEquals(actual: unknown, expected: unknown): void {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(
-      `Expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`,
+      `Expected ${JSON.stringify(expected)}, received ${
+        JSON.stringify(actual)
+      }`,
     );
   }
 }
@@ -43,7 +45,9 @@ Deno.test("authenticated caller may create; server must assign ownership", () =>
 });
 
 Deno.test("owner can read, update, delete and manage sharing", () => {
-  for (const operation of ["read", "update", "delete", "manage_sharing"] as const) {
+  for (
+    const operation of ["read", "update", "delete", "manage_sharing"] as const
+  ) {
     assertEquals(
       authorizeOntologyOperation(
         { authenticatedSubjectId: "user-a", recordOwnerId: "user-a" },
@@ -74,7 +78,11 @@ Deno.test("read grant permits read only", () => {
   const context = {
     authenticatedSubjectId: "user-b",
     recordOwnerId: "user-a",
-    grants: [{ subjectId: "user-b", permission: "read" as const, active: true }],
+    grants: [{
+      subjectId: "user-b",
+      permission: "read" as const,
+      active: true,
+    }],
   };
   assertEquals(authorizeOntologyOperation(context, "read").allowed, true);
   assertEquals(authorizeOntologyOperation(context, "update").allowed, false);
@@ -85,12 +93,19 @@ Deno.test("edit grant permits read and update but not delete or sharing changes"
   const context = {
     authenticatedSubjectId: "user-b",
     recordOwnerId: "user-a",
-    grants: [{ subjectId: "user-b", permission: "edit" as const, active: true }],
+    grants: [{
+      subjectId: "user-b",
+      permission: "edit" as const,
+      active: true,
+    }],
   };
   assertEquals(authorizeOntologyOperation(context, "read").allowed, true);
   assertEquals(authorizeOntologyOperation(context, "update").allowed, true);
   assertEquals(authorizeOntologyOperation(context, "delete").allowed, false);
-  assertEquals(authorizeOntologyOperation(context, "manage_sharing").allowed, false);
+  assertEquals(
+    authorizeOntologyOperation(context, "manage_sharing").allowed,
+    false,
+  );
 });
 
 Deno.test("ownership transfer is owner-only", () => {
