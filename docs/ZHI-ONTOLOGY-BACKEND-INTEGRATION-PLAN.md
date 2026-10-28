@@ -12,6 +12,8 @@ A dependency-free semantic validation helper exists at `../supabase/functions/_s
 
 This document remains a design proposal. It does not assert that any table, API endpoint, migration, permission policy, or production write path exists. Do not deploy or run write operations based only on this plan.
 
+Ownership and sharing are a separate pre-implementation decision gate. See [ZHI Ontology Ownership, Sharing, and Access Policy](ZHI-ONTOLOGY-OWNERSHIP-AND-SHARING-POLICY.md). The recommended default is private-by-default with explicit sharing; this is not implemented yet and should be confirmed before persistent writes.
+
 The ontology draft is distinct from the existing AI chat flow documented in `../AI_BRAIN_INTEGRATION.md`. Ontology persistence should not silently invoke a model or alter agent state, balances, or world-state fields.
 
 ## 2. Recommended architecture
