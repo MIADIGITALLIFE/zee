@@ -1,4 +1,4 @@
-name: Publish ZEE Model Page to GitHub Pages
+name: Publish ZEE Model and SIP Pages to GitHub Pages
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - "model.html"
       - "admin.html"
+      - "sip-engine/**"
       - ".github/workflows/deploy-model-pages.yml"
   workflow_dispatch:
 
@@ -30,10 +31,11 @@ jobs:
 
       - name: Prepare static pages for publishing
         run: |
-          mkdir -p dist
+          mkdir -p dist/sip-engine
           cp model.html dist/model.html
           cp model.html dist/index.html
           cp admin.html dist/admin.html
+          cp sip-engine/index.html dist/sip-engine/index.html
           touch dist/.nojekyll
 
       - name: Enable and configure GitHub Pages
