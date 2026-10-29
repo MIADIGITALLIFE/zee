@@ -11,19 +11,24 @@ for (const id of [
   assert.ok(html.includes(`id="${id}"`), `Missing expected UI element: ${id}`);
 }
 
-const scripts = [...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/gi)];
-assert.equal(scripts.length, 1, "Expected one inline application script");
-new vm.Script(scripts[0][1], { filename: "sip-engine-inline.js" });
+const scriptStart = html.indexOf("<script>");
+const scriptEnd = html.indexOf("</script>", scriptStart);
+assert.ok(scriptStart >= 0 && scriptEnd > scriptStart, "Expected one inline application script");
+const script = html.slice(scriptStart + "<script>".length, scriptEnd);
+assert.equal(html.indexOf("<script>", scriptEnd + 1), -1, "Expected only one inline application script");
+new vm.Script(script, { filename: "sip-engine-inline.js" });
 
 for (const symbol of [
   "function normalize(", "function runAnalysis(", "function simulateTask(",
   "function exportJSON(", "function importJSON(", "function validWeights(",
   "function saveLocalState("
 ]) {
-  assert.ok(scripts[0][1].includes(symbol), `Missing expected engine function: ${symbol}`);
+  assert.ok(script.includes(symbol), `Missing expected engine function: ${symbol}`);
 }
-assert.match(html, /schema_version:'1\.0'/, "Export should include schema version 1.0");
-assert.match(html, /localStorage/, "Prototype should explicitly use browser-local storage");
-assert.doesNotMatch(scripts[0][1], /\\bfetch\\s*\\(|XMLHttpRequest|\\bWebSocket\\s*\\(/, "Offline prototype must not make network requests");
+assert.ok(html.includes("schema_version:'1.0'"), "Export should include schema version 1.0");
+assert.ok(script.includes("localStorage"), "Prototype should explicitly use browser-local storage");
+assert.ok(!script.includes("fetch("), "Offline prototype must not call fetch()");
+assert.ok(!script.includes("XMLHttpRequest"), "Offline prototype must not use XMLHttpRequest");
+assert.ok(!script.includes("WebSocket("), "Offline prototype must not use WebSocket");
 
 console.log("SIP static smoke checks passed. Browser interactions remain unverified.");
