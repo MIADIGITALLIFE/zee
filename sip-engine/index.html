@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101713">
+<title>SIP HTML Engine · Offline V1.0</title>
+<style>
+:root{color-scheme:dark;--bg:#101713;--panel:#18221c;--panel2:#202c24;--line:#35483a;--text:#edf3e9;--muted:#a8b7a6;--accent:#c4d8a4;--accent2:#8fb7a0;--danger:#f2a7a7;--warn:#e8cb8c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#24372a 0,#101713 55%);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}.wrap{width:min(1180px,calc(100% - 28px));margin:auto;padding:32px 0 60px}.hero{padding:18px 0 28px}.eyebrow{letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-size:.76rem}.hero h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.12;margin:8px 0}.hero p{max-width:780px;color:var(--muted);margin:0}.statebar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--muted);font-size:.76rem}.pill.good{color:var(--accent);border-color:#607955}.pill.warn{color:var(--warn)}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.panel{grid-column:span 6;background:rgba(24,34,28,.94);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0}.panel.wide{grid-column:span 12}.panel.third{grid-column:span 4}.panel h2{font-size:1.05rem;margin:0 0 14px;color:var(--accent);letter-spacing:.02em}.sub{color:var(--muted);font-size:.85rem;margin:-7px 0 15px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.row button{flex:0 0 auto}.field{display:grid;gap:5px;margin-bottom:12px}.field label{color:#d4e0d0;font-size:.88rem}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:#101812;color:var(--text);padding:10px 11px;min-width:0}.field textarea{min-height:76px;resize:vertical}.field input[type=range]{padding:0;accent-color:var(--accent)}.value{color:var(--accent);font-variant-numeric:tabular-nums}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{border:1px solid #4a604b;background:#27372b;color:var(--text);border-radius:10px;padding:9px 13px}.btn.primary{background:var(--accent);color:#172016;border-color:var(--accent);font-weight:700}.btn.subtle{background:transparent}.btn.danger{border-color:#754848;color:var(--danger);background:#2b1d1d}.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.list{display:grid;gap:8px}.item{border:1px solid var(--line);background:#131c16;border-radius:12px;padding:12px}.item strong{display:block;margin-bottom:3px}.item small,.muted{color:var(--muted)}.status{min-height:1.5em;color:var(--accent);font-size:.86rem;margin-top:10px}.status.error{color:var(--danger)}.status.warn{color:var(--warn)}.metric{font-size:1.8rem;color:var(--accent);font-weight:700}.weightrow{display:grid;grid-template-columns:minmax(0,1fr) 65px;gap:12px;align-items:center;margin:12px 0}.weightrow label{display:block;font-size:.88rem}.weightrow input{width:100%;accent-color:var(--accent)}.log{max-height:230px;overflow:auto;font: .8rem/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#0e1510;border:1px solid var(--line);border-radius:10px;padding:12px}.foot{color:var(--muted);font-size:.78rem;margin-top:20px}.hidden{display:none!important}
+@media(max-width:820px){.panel,.panel.third{grid-column:span 12}.wrap{padding-top:22px}.panel{padding:16px}.row>*{flex-basis:100%}.row button{flex:1}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="hero">
+<div class="eyebrow">SIP · OFFLINE HTML ENGINE · V1.0 DRAFT</div>
+<h1>多体系交叉演化与主动任务引擎</h1>
+<p>一个无需 AI 模型、无需网络请求的本地原型。用于管理配置、验证参数、生成确定性规则结果、查看交叉关联候选，并模拟主动任务流程。它不是意识证明，也不会执行外部操作。</p>
+<div class="statebar"><span class="pill good">本地优先</span><span class="pill">无模型连接</span><span class="pill">规则模拟</span><span class="pill warn">原型待完整测试</span></div>
+</header>
+<div class="grid">
+<section class="panel">
+<h2>01 · 配置档案</h2>
+<p class="sub">配置保存在当前浏览器的 localStorage。清理浏览器数据可能导致本地记录丢失。</p>
+<div class="field"><label for="profileName">档案名称</label><input id="profileName" maxlength="80" value="SIP 默认档案"></div>
+<div class="field"><label for="goal">当前目标</label><textarea id="goal" maxlength="1000">在离线环境中检验多体系规则与任务流程。</textarea></div>
+<div class="field"><label for="risk">风险容忍度 <span id="riskVal" class="value">30</span>/100</label><input id="risk" type="range" min="0" max="100" value="30"></div>
+<div class="field"><label for="initiative">主动程度 <span id="initiativeVal" class="value">40</span>/100</label><input id="initiative" type="range" min="0" max="100" value="40"></div>
+<div class="actions"><button class="btn primary" id="saveProfile">保存档案</button><button class="btn" id="loadProfile">载入已保存档案</button><button class="btn subtle" id="resetProfile">恢复默认</button></div>
+<div id="profileStatus" class="status" role="status" aria-live="polite"></div>
+</section>
+<section class="panel">
+<h2>02 · 多体系参数</h2>
+<p class="sub">每个体系的权重由滑块调整；系统会自动归一化为总和 100。</p>
+<div id="weights"></div>
+<div class="row"><div><span class="muted">当前权重合计</span><div class="metric" id="weightTotal">100%</div></div><div><span class="muted">启用体系</span><div class="metric" id="systemCount">4</div></div></div>
+<div class="actions"><button class="btn" id="normalize">重新归一化</button><button class="btn primary" id="runAnalysis">运行交叉分析</button></div>
+<div id="weightStatus" class="status" role="status" aria-live="polite"></div>
+</section>
+<section class="panel">
+<h2>03 · 交叉关联候选</h2>
+<p class="sub">基于权重和目标关键词的确定性规则生成候选，不是模型推理或事实发现。</p>
+<div id="analysisResults" class="list"><div class="item">尚未运行分析。点击“运行交叉分析”生成候选。</div></div>
+</section>
+<section class="panel">
+<h2>04 · 主动任务模拟</h2>
+<p class="sub">只模拟触发与状态流转，不会启动后台计划或执行外部动作。</p>
+<div class="field"><label for="triggerType">触发来源</label><select id="triggerType"><option value="manual">手动触发</option><option value="event">模拟事件</option><option value="goal">目标变化</option><option value="schedule">定时触发模拟</option></select></div>
+<div class="field"><label for="taskTitle">任务内容</label><input id="taskTitle" maxlength="160" value="检查配置是否完整"></div>
+<div class="field"><label for="priority">优先级</label><select id="priority"><option value="low">低</option><option value="normal" selected>普通</option><option value="high">高</option></select></div>
+<div class="actions"><button class="btn primary" id="simulateTask">模拟任务</button><button class="btn" id="clearTasks">清空任务记录</button></div>
+<div id="taskResults" class="list" style="margin-top:12px"><div class="item">尚无任务记录。</div></div>
+<div id="taskStatus" class="status" role="status" aria-live="polite"></div>
+</section>
+<section class="panel">
+<h2>05 · JSON 导入 / 导出</h2>
+<p class="sub">导入前先解析和校验结构。导入只影响当前浏览器中的本地档案。</p>
+<div class="actions"><button class="btn primary" id="exportJson">导出 JSON</button><button class="btn" id="chooseImport">选择 JSON 文件导入</button><input id="importFile" type="file" accept=".json,application/json" class="hidden"></div>
+<div id="ioStatus" class="status" role="status" aria-live="polite"></div>
+<div class="foot">导入格式要求：schema_version 为 1.0，profile 为对象，systems 为数组，weights 为数值映射。</div>
+</section>
+<section class="panel">
+<h2>06 · 审计日志</h2>
+<p class="sub">日志仅保存在本页面运行期间；刷新后不保证保留。不要将机密信息写入日志。</p>
+<div class="actions"><button class="btn" id="exportLog">导出日志 JSON</button><button class="btn subtle" id="clearLog">清空日志</button></div>
+<div id="auditLog" class="log" aria-live="polite">引擎启动。当前为离线规则原型。</div>
+</section>
+<section class="panel wide">
+<h2>07 · 验证边界与状态</h2>
+<div class="grid">
+<div class="panel third"><strong>DESIGNED</strong><p class="muted">产品结构与交互设计。不是代码完成证明。</p></div>
+<div class="panel third"><strong>IMPLEMENTED</strong><p class="muted">本页面包含配置、权重、规则候选、任务模拟和 JSON 处理代码；尚需浏览器实测。</p></div>
+<div class="panel third"><strong>NOT VERIFIED</strong><p class="muted">未在此环境运行浏览器自动化测试。不得标记为 VERIFIED。</p></div>
+</div>
+</section>
+</div>
+<p class="foot">SIP HTML Engine V1.0 · 纯前端实验版 · 无外部 CDN、无 fetch/XHR、无 AI 接口。建议使用“导出 JSON”定期备份。</p>
+</main>
+<script>
+(function(){
+'use strict';
+const KEY='sip-html-engine-v1-profile';
+const systemDefs=[
+{id:'reasoning',label:'逻辑与推理',weight:35,keywords:['检验','规则','逻辑','分析','验证','完整']},
+{id:'memory',label:'记忆与上下文',weight:25,keywords:['记录','历史','保存','上下文','档案','目标']},
+{id:'creative',label:'探索与创新',weight:20,keywords:['探索','新方案','创新','候选','替代','变化']},
+{id:'safety',label:'风险与边界',weight:20,keywords:['风险','安全','限制','确认','权限','校验']}
+];
+let weights=Object.fromEntries(systemDefs.map(s=>[s.id,s.weight]));
+let tasks=[];let logs=[];
+const $=id=>document.getElementById(id);
+const stamp=()=>new Date().toISOString();
+function log(action,detail){logs.unshift({time:stamp(),action,detail});logs=logs.slice(0,100);$('auditLog').textContent=logs.map(x=>'['+x.time+'] '+x.action+' — '+x.detail).join('\n')||'暂无日志';}
+function status(id,msg,type){const el=$(id);el.textContent=msg;el.className='status'+(type?' '+type:'');}
+function profile(){return {name:$('profileName').value.trim(),goal:$('goal').value.trim(),risk:Number($('risk').value),initiative:Number($('initiative').value)}}
+function validProfile(p){return !!p&&typeof p==='object'&&typeof p.name==='string'&&p.name.length>0&&p.name.length<=80&&typeof p.goal==='string'&&p.goal.length<=1000&&Number.isInteger(p.risk)&&p.risk>=0&&p.risk<=100&&Number.isInteger(p.initiative)&&p.initiative>=0&&p.initiative<=100}
+function readProfile(){const raw=localStorage.getItem(KEY);if(!raw)return false;const data=JSON.parse(raw);if(!validProfile(data))throw new Error('本地档案格式不正确');applyProfile(data);return true}
+function applyProfile(p){$('profileName').value=p.name;$('goal').value=p.goal;$('risk').value=p.risk;$('initiative').value=p.initiative;updateRangeLabels()}
+function updateRangeLabels(){$('riskVal').textContent=$('risk').value;$('initiativeVal').textContent=$('initiative').value}
+function renderWeights(){const root=$('weights');root.replaceChildren();systemDefs.forEach(s=>{const row=document.createElement('div');row.className='weightrow';const left=document.createElement('div');const label=document.createElement('label');label.htmlFor='w-'+s.id;label.textContent=s.label;const input=document.createElement('input');input.type='range';input.min='0';input.max='100';input.value=weights[s.id];input.id='w-'+s.id;input.addEventListener('input',()=>{weights[s.id]=Number(input.value);normalize(s.id);updateWeightValues();renderWeightTotals()});left.append(label,input);const val=document.createElement('div');val.className='value';val.id='val-w-'+s.id;val.textContent=weights[s.id]+'%';row.append(left,val);root.append(row)})}
+function normalize(changed){const ids=systemDefs.map(s=>s.id);if(changed&&ids.includes(changed)){const others=ids.filter(id=>id!==changed);const remaining=100-weights[changed];const sum=others.reduce((n,id)=>n+weights[id],0);if(sum===0){const each=Math.floor(remaining/others.length);let left=remaining;others.forEach((id,i)=>{weights[id]=i===others.length-1?left:each;left-=weights[id]})}else{const parts=others.map(id=>({id,exact:weights[id]*remaining/sum}));let used=0;parts.forEach(p=>{p.base=Math.floor(p.exact);p.frac=p.exact-p.base;used+=p.base});parts.sort((a,b)=>b.frac-a.frac);for(let i=0;i<remaining-used;i++)parts[i%parts.length].base++;parts.forEach(p=>weights[p.id]=p.base)}return}let sum=ids.reduce((n,id)=>n+weights[id],0);if(sum===100)return;if(sum<=0){ids.forEach(id=>weights[id]=Math.floor(100/ids.length));weights[ids[0]]+=100-ids.reduce((n,id)=>n+weights[id],0);return}const raw=ids.map(id=>({id,exact:weights[id]*100/sum}));let used=0;raw.forEach(x=>{x.base=Math.floor(x.exact);x.frac=x.exact-x.base;used+=x.base});raw.sort((a,b)=>b.frac-a.frac);for(let i=0;i<100-used;i++)raw[i%raw.length].base++;raw.forEach(x=>weights[x.id]=x.base)}
+function updateWeightValues(){systemDefs.forEach(s=>{const input=$('w-'+s.id);const value=$('val-w-'+s.id);if(input)input.value=weights[s.id];if(value)value.textContent=weights[s.id]+'%'})}
+function renderWeightTotals(){const total=systemDefs.reduce((n,s)=>n+weights[s.id],0);$('weightTotal').textContent=total+'%';$('weightTotal').style.color=total===100?'var(--accent)':'var(--danger)';$('systemCount').textContent=systemDefs.filter(s=>weights[s.id]>0).length}
+function runAnalysis(){const goal=profile().goal.toLowerCase();const candidates=systemDefs.map(s=>{const hits=s.keywords.filter(k=>goal.includes(k.toLowerCase()));return {...s,hits,score:weights[s.id]+hits.length*5}}).filter(s=>weights[s.id]>0).sort((a,b)=>b.score-a.score);const root=$('analysisResults');root.replaceChildren();const top=candidates.slice(0,3);top.forEach((s,i)=>{const card=document.createElement('div');card.className='item';const title=document.createElement('strong');title.textContent=(i+1)+'. '+s.label+' · 候选分 '+s.score;const detail=document.createElement('small');detail.textContent='权重 '+weights[s.id]+'%；关键词命中：'+(s.hits.join('、')||'无直接命中')+'。分数仅用于原型排序。';card.append(title,detail);root.append(card)});if(!top.length)root.textContent='没有启用的体系。';log('cross-analysis','生成 '+top.length+' 个确定性关联候选');status('weightStatus','分析完成：已生成 '+top.length+' 个候选；不代表外部事实或模型结论。')}
+function renderTasks(){const root=$('taskResults');root.replaceChildren();if(!tasks.length){root.textContent='尚无任务记录。';return}tasks.forEach(t=>{const card=document.createElement('div');card.className='item';const title=document.createElement('strong');title.textContent=t.title;const detail=document.createElement('small');detail.textContent='状态：'+t.state+' · 触发：'+t.trigger+' · 优先级：'+t.priority+' · '+t.time;card.append(title,detail);root.append(card)})}
+function simulateTask(){const title=$('taskTitle').value.trim();if(!title){status('taskStatus','请先填写任务内容。','error');return}const trigger=$('triggerType').value;const priority=$('priority').value;const p=profile();let state='awaiting_confirmation';let reason='模拟任务已生成，等待用户确认。';if(p.initiative>=75&&priority==='low'){state='pending';reason='主动程度较高，但低优先级任务仍保持待处理。'}if(p.risk>=80&&priority==='high'){state='blocked';reason='风险容忍度设置较高且任务优先级高；原型规则将其阻断以便人工复核。'}const task={id:'task-'+Date.now(),title,trigger,priority,state,reason,time:stamp()};tasks.unshift(task);tasks=tasks.slice(0,30);renderTasks();log('task-simulation',title+' → '+state+'；'+reason);status('taskStatus',reason,state==='blocked'?'warn':'');}
+function exportJSON(){const data={schema_version:'1.0',product:'SIP HTML Engine',exported_at:stamp(),profile:profile(),systems:systemDefs.map(s=>({id:s.id,label:s.label})),weights:{...weights},notes:{mode:'offline-rule-prototype',model_connected:false,verified:false}};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});download(blob,'sip-engine-profile.json');log('export','导出配置 JSON');status('ioStatus','配置 JSON 已导出。')}
+function exportLog(){const blob=new Blob([JSON.stringify(logs,null,2)],{type:'application/json;charset=utf-8'});download(blob,'sip-engine-audit-log.json');status('ioStatus','审计日志已导出。')}
+function download(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function importJSON(file){if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(String(reader.result));if(!data||data.schema_version!=='1.0'||!validProfile(data.profile)||!Array.isArray(data.systems)||!data.weights||typeof data.weights!=='object'||Array.isArray(data.weights))throw new Error('结构不符合 SIP 1.0 导入规范');const expected=systemDefs.map(s=>s.id);if(data.systems.length!==expected.length||!expected.every((id,i)=>data.systems[i]&&data.systems[i].id===id))throw new Error('systems 必须包含 SIP 1.0 定义的四个体系且顺序一致');if(!expected.every(id=>Number.isInteger(data.weights[id])&&data.weights[id]>=0&&data.weights[id]<=100)||Object.keys(data.weights).some(id=>!expected.includes(id))||expected.reduce((n,id)=>n+data.weights[id],0)!==100)throw new Error('权重必须是 0–100 的非负整数，且仅包含四个体系、合计 100');applyProfile(data.profile);weights=Object.fromEntries(expected.map(id=>[id,data.weights[id]]));localStorage.setItem(KEY,JSON.stringify(profile()));renderWeights();renderWeightTotals();log('import','成功导入配置 JSON');status('ioStatus','导入成功，已应用到本地档案。')}catch(e){log('import-failed',e.message);status('ioStatus','导入失败：'+e.message,'error')}finally{$('importFile').value=''}};reader.onerror=()=>status('ioStatus','无法读取该文件。','error');reader.readAsText(file)}
+$('saveProfile').addEventListener('click',()=>{const p=profile();if(!validProfile(p)){status('profileStatus','档案名称不能为空，且字段长度或数值范围必须有效。','error');return}try{localStorage.setItem(KEY,JSON.stringify(p));log('profile-save','本地档案已保存');status('profileStatus','已保存到当前浏览器。')}catch(e){status('profileStatus','保存失败：'+e.message,'error')}});
+$('loadProfile').addEventListener('click',()=>{try{status('profileStatus',readProfile()?'已载入本地档案。':'当前浏览器还没有保存的档案。', '');if(localStorage.getItem(KEY))log('profile-load','载入本地档案')}catch(e){status('profileStatus','载入失败：'+e.message,'error')}});
+$('resetProfile').addEventListener('click',()=>{applyProfile({name:'SIP 默认档案',goal:'在离线环境中检验多体系规则与任务流程。',risk:30,initiative:40});status('profileStatus','已恢复默认值；尚未保存。');log('profile-reset','恢复默认值')});
+['risk','initiative'].forEach(id=>$(id).addEventListener('input',updateRangeLabels));
+$('normalize').addEventListener('click',()=>{normalize();renderWeights();renderWeightTotals();log('weights-normalize','权重归一化');status('weightStatus','权重已归一化为 100%。')});
+$('runAnalysis').addEventListener('click',runAnalysis);
+$('simulateTask').addEventListener('click',simulateTask);
+$('clearTasks').addEventListener('click',()=>{tasks=[];renderTasks();log('tasks-clear','清空本次会话任务');status('taskStatus','本次会话任务记录已清空。')});
+$('exportJson').addEventListener('click',exportJSON);$('exportLog').addEventListener('click',exportLog);
+$('chooseImport').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',e=>importJSON(e.target.files&&e.target.files[0]));
+$('clearLog').addEventListener('click',()=>{logs=[];$('auditLog').textContent='日志已清空。';});
+renderWeights();renderWeightTotals();updateRangeLabels();log('startup','SIP 离线原型启动');try{readProfile()}catch(e){log('local-load-warning',e.message)}
+})();
+</script>
+</body>
+</html>
