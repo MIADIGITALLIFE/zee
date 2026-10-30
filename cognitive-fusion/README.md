@@ -38,3 +38,17 @@ The validated profile and weights are supplied to the model as preference metada
 - Preserve conflicts rather than silently choosing a winner.
 - Require explicit authorization and separate policy checks before any external action or persistent write.
 - Keep human review and versioned rollback for changes to core identity, values, and long-term memory.
+
+## Feedback and memory governance primitives
+
+`feedback-governance.mjs` adds two pure, proposal-only functions:
+
+- `reviewPrediction()` records a human-supplied assessment (supported, contradicted, mixed, or inconclusive) with evidence references. It explicitly labels the review as source-supplied and not independently verified.
+- `proposeMemoryCandidate()` accepts only a human-reviewed summary with source references and returns a pending-approval candidate. It does not persist the candidate or update identity.
+
+Both functions are side-effect free. They do not independently decide whether a prediction is true, change SIP weights, write memories, or perform actions. An explicit reviewer workflow and persistence adapter remain future work.
+
+## Updated status
+- Implemented: deterministic feedback-review classification and human-reviewed memory-candidate envelope, with smoke tests.
+- Not implemented: outcome collection, independent evidence verification, feedback database tables, approval UI, memory persistence, SIP weight adaptation, scheduled evolution.
+- Not verified: end-to-end human review workflow or live Supabase behavior.
