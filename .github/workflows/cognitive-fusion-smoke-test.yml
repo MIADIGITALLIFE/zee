@@ -6,6 +6,7 @@ on:
       - "cognitive-fusion/**"
       - "tests/cognitive-fusion-smoke-test.mjs"
       - "tests/feedback-governance-test.mjs"
+      - "tests/evolution-governance-test.mjs"
       - ".github/workflows/cognitive-fusion-smoke-test.yml"
   push:
     branches: [main]
@@ -13,6 +14,7 @@ on:
       - "cognitive-fusion/**"
       - "tests/cognitive-fusion-smoke-test.mjs"
       - "tests/feedback-governance-test.mjs"
+      - "tests/evolution-governance-test.mjs"
       - ".github/workflows/cognitive-fusion-smoke-test.yml"
 
 jobs:
@@ -27,3 +29,5 @@ jobs:
         run: node tests/cognitive-fusion-smoke-test.mjs
       - name: Run feedback governance tests
         run: node tests/feedback-governance-test.mjs
+      - name: Run SIP evolution governance tests
+        run: node tests/evolution-governance-test.mjs
