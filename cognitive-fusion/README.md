@@ -19,6 +19,13 @@ cognitive-fusion-v1.schema.json defines the input/output envelope. coordinator.m
 4. Build a bounded reasoning plan.
 5. Return a response brief and proposed memory candidates; nothing is persisted automatically.
 
+
+## SIP 1.0 profile input
+
+The chat endpoint may receive an optional `sip_profile` property containing the complete JSON export from SIP HTML Engine 1.0 (the exported file object, not just its nested profile). The coordinator validates the profile fields, the four system IDs in their required order, and integer weights totaling 100.
+
+The validated profile and weights are supplied to the model as preference metadata. They influence emphasis only; they do not override evidence, authorization, safety policy, or recorded memories. The endpoint does not store the imported SIP configuration.
+
 ## Status
 - Implemented here: contract, deterministic coordinator, unit tests.
 - Not implemented: model/provider adapter, database persistence, background evolution, autonomous action execution.
