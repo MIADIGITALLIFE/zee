@@ -4,10 +4,10 @@ import { coordinateCognition, DOMAINS } from "../cognitive-fusion/coordinator.mj
 const result = coordinateCognition({
   agent_id: "test-agent", request_id: "test-001", message: "Please assess this situation.",
   ontology_records: [
-    { id: "self-1", type: "Self", label: "Agent identity", epistemic_status: "observed", source_refs: ["profile"] },
-    { id: "world-1", type: "WorldObject", label: "A place", epistemic_status: "reported", evidence: ["scene-log"] },
-    { id: "claim-2", type: "EpistemicClaim", label: "Unconfirmed claim", epistemic_status: "hypothesis", source_refs: [] },
-    { id: "conflict-3", type: "Relation", label: "Conflicting relation", epistemic_status: "conflicted", source_refs: ["memory-a", "memory-b"] }
+    { id: "self-1", ontology_type: "Self", label: "Agent identity", epistemic_status: "observed", source_refs: ["profile"] },
+    { id: "world-1", ontology_type: "WorldObject", label: "A place", epistemic_status: "reported", evidence: ["scene-log"] },
+    { id: "claim-2", ontology_type: "EpistemicClaim", label: "Unconfirmed claim", epistemic_status: "hypothesis", source_refs: [] },
+    { id: "conflict-3", ontology_type: "Relation", label: "Conflicting relation", epistemic_status: "conflicted", source_refs: ["memory-a", "memory-b"] }
   ]
 });
 assert.equal(result.schema_version, "ZHI-Cognitive-Fusion-V1.0");
