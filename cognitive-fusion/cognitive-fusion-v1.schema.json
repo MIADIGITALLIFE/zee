@@ -12,6 +12,7 @@
     "input_summary",
     "domain_coverage",
     "sip_profile",
+    "agent_state_summary",
     "epistemic_review",
     "reasoning_plan",
     "memory_candidates",
@@ -221,6 +222,64 @@
           }
         }
       ]
+    },
+    "agent_state_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_goal_present",
+        "short_term_goal_present",
+        "long_term_goal_present",
+        "mood_present",
+        "energy_present",
+        "stress_present",
+        "curiosity_present",
+        "confidence_present",
+        "memory_count",
+        "conversation_count",
+        "position_present",
+        "activity_present"
+      ],
+      "properties": {
+        "current_goal_present": {
+          "type": "boolean"
+        },
+        "short_term_goal_present": {
+          "type": "boolean"
+        },
+        "long_term_goal_present": {
+          "type": "boolean"
+        },
+        "mood_present": {
+          "type": "boolean"
+        },
+        "energy_present": {
+          "type": "boolean"
+        },
+        "stress_present": {
+          "type": "boolean"
+        },
+        "curiosity_present": {
+          "type": "boolean"
+        },
+        "confidence_present": {
+          "type": "boolean"
+        },
+        "position_present": {
+          "type": "boolean"
+        },
+        "activity_present": {
+          "type": "boolean"
+        },
+        "memory_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conversation_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     }
   }
 }
