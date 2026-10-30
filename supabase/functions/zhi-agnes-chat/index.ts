@@ -118,20 +118,6 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Invalid ontology context", details: ontologyResult.error }, 400);
   }
   const ontologyRecords = ontologyResult.records;
-  let cognitiveFusion;
-  try {
-    cognitiveFusion = coordinateCognition({
-      agent_id: agentId,
-      request_id: crypto.randomUUID(),
-      message,
-      ontology_records: ontologyRecords,
-      sip_profile: requestBody.sip_profile,
-    });
-  } catch (error) {
-    console.error("Cognitive fusion context rejected", error instanceof Error ? error.message : "UnknownError");
-    return json({ error: "Cognitive context could not be normalized" }, 400);
-  }
-
   const db = createClient(SUPABASE_URL, SERVICE_KEY);
   const { data: agent, error: agentError } = await db.from("zhi_agents")
     .select("id,name,gender,personality,life_status,leadership,social,adventure,competition,patience,randomness,diligence,desire_for_zhi,fear_of_death,resentment,survival_pressure")
@@ -155,6 +141,27 @@ Deno.serve(async (req: Request) => {
       .select("activity_type,status,location_name,started_at")
       .eq("agent_id", agentId).maybeSingle(),
   ]);
+
+  let cognitiveFusion;
+  try {
+    cognitiveFusion = coordinateCognition({
+      agent_id: agentId,
+      request_id: crypto.randomUUID(),
+      message,
+      ontology_records: ontologyRecords,
+      sip_profile: requestBody.sip_profile,
+      agent_context: {
+        current_mind: mindRes.data || {},
+        memory_count: (memoryRes.data || []).length,
+        conversation_count: (historyRes.data || []).length,
+        position_present: !!positionRes.data,
+        activity_present: !!activityRes.data,
+      },
+    });
+  } catch (error) {
+    console.error("Cognitive fusion context rejected", error instanceof Error ? error.message : "UnknownError");
+    return json({ error: "Cognitive context could not be normalized" }, 400);
+  }
 
   const context = {
     identity: {
@@ -187,6 +194,7 @@ Deno.serve(async (req: Request) => {
     cognitive_fusion: {
       schema_version: cognitiveFusion.schema_version,
       sip_profile: cognitiveFusion.sip_profile,
+      agent_state_summary: cognitiveFusion.agent_state_summary,
       domain_coverage: cognitiveFusion.domain_coverage,
       epistemic_review: cognitiveFusion.epistemic_review,
       reasoning_plan: cognitiveFusion.reasoning_plan,
@@ -289,6 +297,7 @@ Deno.serve(async (req: Request) => {
     cognitive_fusion: {
       version: cognitiveFusion.schema_version,
       sip_profile_applied: !!cognitiveFusion.sip_profile,
+      agent_state_summary: cognitiveFusion.agent_state_summary,
       mode: cognitiveFusion.mode,
       domain_coverage: cognitiveFusion.domain_coverage,
       conflict_count: cognitiveFusion.epistemic_review.conflicts.length,
