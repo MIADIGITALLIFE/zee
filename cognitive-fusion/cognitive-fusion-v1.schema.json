@@ -11,6 +11,7 @@
     "request_id",
     "input_summary",
     "domain_coverage",
+    "sip_profile",
     "epistemic_review",
     "reasoning_plan",
     "memory_candidates",
@@ -140,6 +141,86 @@
     },
     "model_reasoning_performed": {
       "const": false
+    },
+    "sip_profile": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile",
+            "weights"
+          ],
+          "properties": {
+            "profile": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "goal",
+                "risk",
+                "initiative"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "goal": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "risk": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "initiative": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              }
+            },
+            "weights": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "reasoning",
+                "memory",
+                "creative",
+                "safety"
+              ],
+              "properties": {
+                "reasoning": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "memory": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "creative": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "safety": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 100
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
