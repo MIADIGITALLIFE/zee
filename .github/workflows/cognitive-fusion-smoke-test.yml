@@ -5,12 +5,14 @@ on:
     paths:
       - "cognitive-fusion/**"
       - "tests/cognitive-fusion-smoke-test.mjs"
+      - "tests/feedback-governance-test.mjs"
       - ".github/workflows/cognitive-fusion-smoke-test.yml"
   push:
     branches: [main]
     paths:
       - "cognitive-fusion/**"
       - "tests/cognitive-fusion-smoke-test.mjs"
+      - "tests/feedback-governance-test.mjs"
       - ".github/workflows/cognitive-fusion-smoke-test.yml"
 
 jobs:
@@ -23,3 +25,5 @@ jobs:
           node-version: 22
       - name: Run deterministic coordinator tests
         run: node tests/cognitive-fusion-smoke-test.mjs
+      - name: Run feedback governance tests
+        run: node tests/feedback-governance-test.mjs
