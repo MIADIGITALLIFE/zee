@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://miadigitallife.github.io/zee/cognitive-fusion/cognitive-fusion-v1.schema.json",
+  "title": "ZHI Cognitive Fusion Envelope V1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mode",
+    "agent_id",
+    "request_id",
+    "input_summary",
+    "domain_coverage",
+    "epistemic_review",
+    "reasoning_plan",
+    "memory_candidates",
+    "action_proposals",
+    "required_review",
+    "persistence",
+    "model_reasoning_performed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ZHI-Cognitive-Fusion-V1.0"
+    },
+    "mode": {
+      "const": "proposal_only"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "request_id": {
+      "type": "string"
+    },
+    "input_summary": {
+      "type": "object",
+      "required": [
+        "message_present",
+        "ontology_record_count"
+      ],
+      "properties": {
+        "message_present": {
+          "type": "boolean"
+        },
+        "ontology_record_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        }
+      }
+    },
+    "domain_coverage": {
+      "type": "object",
+      "required": [
+        "Self",
+        "Other",
+        "World",
+        "Relation",
+        "Change",
+        "Feedback"
+      ],
+      "properties": {
+        "Self": {
+          "type": "boolean"
+        },
+        "Other": {
+          "type": "boolean"
+        },
+        "World": {
+          "type": "boolean"
+        },
+        "Relation": {
+          "type": "boolean"
+        },
+        "Change": {
+          "type": "boolean"
+        },
+        "Feedback": {
+          "type": "boolean"
+        }
+      }
+    },
+    "epistemic_review": {
+      "type": "object",
+      "required": [
+        "conflicts",
+        "unknowns",
+        "hypotheses",
+        "claims_missing_sources"
+      ],
+      "properties": {
+        "conflicts": {
+          "type": "array"
+        },
+        "unknowns": {
+          "type": "array"
+        },
+        "hypotheses": {
+          "type": "array"
+        },
+        "claims_missing_sources": {
+          "type": "array"
+        }
+      }
+    },
+    "reasoning_plan": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "step",
+          "operation",
+          "purpose"
+        ],
+        "properties": {
+          "step": {
+            "type": "integer"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "memory_candidates": {
+      "type": "array"
+    },
+    "action_proposals": {
+      "type": "array"
+    },
+    "required_review": {
+      "const": true
+    },
+    "persistence": {
+      "const": "not_performed"
+    },
+    "model_reasoning_performed": {
+      "const": false
+    }
+  }
+}
