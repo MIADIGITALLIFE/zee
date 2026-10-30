@@ -3,6 +3,12 @@ import { coordinateCognition, DOMAINS } from "../cognitive-fusion/coordinator.mj
 
 const result = coordinateCognition({
   agent_id: "test-agent", request_id: "test-001", message: "Please assess this situation.",
+  sip_profile: {
+    schema_version: "1.0",
+    profile: { name: "Test persona", goal: "Explore carefully", risk: 40, initiative: 60 },
+    systems: [{ id: "reasoning" }, { id: "memory" }, { id: "creative" }, { id: "safety" }],
+    weights: { reasoning: 35, memory: 25, creative: 20, safety: 20 }
+  },
   ontology_records: [
     { id: "self-1", ontology_type: "Self", label: "Agent identity", epistemic_status: "observed", source_refs: ["profile"] },
     { id: "world-1", ontology_type: "WorldObject", label: "A place", epistemic_status: "reported", evidence: ["scene-log"] },
@@ -12,6 +18,9 @@ const result = coordinateCognition({
 });
 assert.equal(result.schema_version, "ZHI-Cognitive-Fusion-V1.0");
 assert.equal(result.mode, "proposal_only");
+assert.equal(result.sip_profile.profile.name, "Test persona");
+assert.equal(result.sip_profile.weights.safety, 20);
+assert.throws(() => coordinateCognition({ sip_profile: { schema_version: "1.0" } }), /complete SIP 1.0 export/);
 assert.equal(result.input_summary.ontology_record_count, 4);
 assert.equal(result.domain_coverage.Self, true);
 assert.equal(result.domain_coverage.World, true, "The production ontology schema uses type: WorldObject");
