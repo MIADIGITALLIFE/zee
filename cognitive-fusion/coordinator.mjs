@@ -22,12 +22,12 @@ export function coordinateCognition(input) {
     const status = EPISTEMIC.has(record.epistemic_status) ? record.epistemic_status : "unknown";
     return {
       id: String(record.id ?? "unidentified-" + (index + 1)),
-      ontology_type: String(record.type ?? record.ontology_type ?? "Unknown"),
+      ontology_type: String(record.ontology_type ?? record.type ?? "Unknown"),
       label: String(record.label ?? "Unlabelled record"),
       description: String(record.description ?? ""),
       epistemic_status: status,
       source_refs: Array.isArray(record.source_refs) ? record.source_refs.map(String) :
-        (Array.isArray(record.evidence) ? record.evidence.map(String) : []),
+        (Array.isArray(record.evidence) ? record.evidence.map(item => String(item?.source_ref ?? "")).filter(Boolean) : []),
       relations: Array.isArray(record.relations) ? record.relations : []
     };
   });
