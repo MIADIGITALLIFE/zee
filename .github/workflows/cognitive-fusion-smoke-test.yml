@@ -1,0 +1,33 @@
+name: Cognitive Fusion Smoke Test
+
+on:
+  pull_request:
+    paths:
+      - "cognitive-fusion/**"
+      - "tests/cognitive-fusion-smoke-test.mjs"
+      - "tests/feedback-governance-test.mjs"
+      - "tests/evolution-governance-test.mjs"
+      - ".github/workflows/cognitive-fusion-smoke-test.yml"
+  push:
+    branches: [main]
+    paths:
+      - "cognitive-fusion/**"
+      - "tests/cognitive-fusion-smoke-test.mjs"
+      - "tests/feedback-governance-test.mjs"
+      - "tests/evolution-governance-test.mjs"
+      - ".github/workflows/cognitive-fusion-smoke-test.yml"
+
+jobs:
+  cognitive-fusion-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run deterministic coordinator tests
+        run: node tests/cognitive-fusion-smoke-test.mjs
+      - name: Run feedback governance tests
+        run: node tests/feedback-governance-test.mjs
+      - name: Run SIP evolution governance tests
+        run: node tests/evolution-governance-test.mjs
