@@ -5,7 +5,6 @@
 export const DOMAINS = ["Self", "Other", "World", "Relation", "Change", "Feedback"];
 export const MAX_RECORDS = 32;
 export const MAX_BYTES = 64 * 1024;
-
 const EPISTEMIC = new Set(["observed", "reported", "verified", "inferred", "hypothesis", "unknown", "conflicted"]);
 
 export function coordinateCognition(input) {
@@ -23,11 +22,12 @@ export function coordinateCognition(input) {
     const status = EPISTEMIC.has(record.epistemic_status) ? record.epistemic_status : "unknown";
     return {
       id: String(record.id ?? "unidentified-" + (index + 1)),
-      ontology_type: String(record.ontology_type ?? "Unknown"),
+      ontology_type: String(record.type ?? record.ontology_type ?? "Unknown"),
       label: String(record.label ?? "Unlabelled record"),
       description: String(record.description ?? ""),
       epistemic_status: status,
-      source_refs: Array.isArray(record.source_refs) ? record.source_refs.map(String) : [],
+      source_refs: Array.isArray(record.source_refs) ? record.source_refs.map(String) :
+        (Array.isArray(record.evidence) ? record.evidence.map(String) : []),
       relations: Array.isArray(record.relations) ? record.relations : []
     };
   });
@@ -37,20 +37,10 @@ export function coordinateCognition(input) {
   const hypotheses = normalized.filter(r => ["hypothesis", "inferred"].includes(r.epistemic_status));
   const unsupported = normalized.filter(r => r.source_refs.length === 0 &&
     ["observed", "reported", "verified"].includes(r.epistemic_status));
-
   const typeForDomain = { Self: "Self", Other: "Other", World: "WorldObject", Relation: "Relation", Change: "Change", Feedback: "Feedback" };
   const domainCoverage = Object.fromEntries(DOMAINS.map(domain => [
     domain, normalized.some(r => r.ontology_type === domain || r.ontology_type === typeForDomain[domain])
   ]));
-
-  const plan = [
-    { step: 1, operation: "interpret_input", purpose: "Identify the request, entities and constraints." },
-    { step: 2, operation: "retrieve_context", purpose: "Associate relevant memories and ontology records with source references." },
-    { step: 3, operation: "cross_examine", purpose: "Compare alternative explanations and inspect contradictions." },
-    { step: 4, operation: "evaluate", purpose: "Assess goals, values, uncertainty and applicable permissions." },
-    { step: 5, operation: "respond_or_propose", purpose: "Prepare a response or a reviewable action proposal." },
-    { step: 6, operation: "feedback_candidate", purpose: "Identify what outcome evidence would improve a future revision." }
-  ];
 
   return {
     schema_version: "ZHI-Cognitive-Fusion-V1.0",
@@ -65,7 +55,14 @@ export function coordinateCognition(input) {
       hypotheses: hypotheses.map(({ id, label, epistemic_status }) => ({ id, label, epistemic_status })),
       claims_missing_sources: unsupported.map(({ id, label }) => ({ id, label }))
     },
-    reasoning_plan: plan,
+    reasoning_plan: [
+      { step: 1, operation: "interpret_input", purpose: "Identify the request, entities and constraints." },
+      { step: 2, operation: "retrieve_context", purpose: "Associate relevant memories and ontology records with source references." },
+      { step: 3, operation: "cross_examine", purpose: "Compare alternative explanations and inspect contradictions." },
+      { step: 4, operation: "evaluate", purpose: "Assess goals, values, uncertainty and applicable permissions." },
+      { step: 5, operation: "respond_or_propose", purpose: "Prepare a response or a reviewable action proposal." },
+      { step: 6, operation: "feedback_candidate", purpose: "Identify what outcome evidence would improve a future revision." }
+    ],
     memory_candidates: [],
     action_proposals: [],
     required_review: true,
