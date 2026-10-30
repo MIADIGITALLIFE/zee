@@ -39,6 +39,22 @@ export function coordinateCognition(input) {
   const encoded = JSON.stringify(input);
   if (new TextEncoder().encode(encoded).byteLength > MAX_BYTES) throw new RangeError("cognitive context exceeds size limit");
   const sipProfile = normalizeSipExport(input.sip_profile);
+  const suppliedState = input.agent_context && typeof input.agent_context === "object" ? input.agent_context : {};
+  const mind = suppliedState.current_mind && typeof suppliedState.current_mind === "object" ? suppliedState.current_mind : {};
+  const agentStateSummary = {
+    current_goal_present: typeof mind.current_goal === "string" && mind.current_goal.trim().length > 0,
+    short_term_goal_present: typeof mind.short_term_goal === "string" && mind.short_term_goal.trim().length > 0,
+    long_term_goal_present: typeof mind.long_term_goal === "string" && mind.long_term_goal.trim().length > 0,
+    mood_present: mind.mood !== null && mind.mood !== undefined,
+    energy_present: Number.isFinite(Number(mind.energy)),
+    stress_present: Number.isFinite(Number(mind.stress)),
+    curiosity_present: Number.isFinite(Number(mind.curiosity)),
+    confidence_present: Number.isFinite(Number(mind.confidence)),
+    memory_count: Number.isInteger(suppliedState.memory_count) ? Math.max(0, suppliedState.memory_count) : 0,
+    conversation_count: Number.isInteger(suppliedState.conversation_count) ? Math.max(0, suppliedState.conversation_count) : 0,
+    position_present: !!suppliedState.position_present,
+    activity_present: !!suppliedState.activity_present
+  };
   const records = input.ontology_records ?? [];
   if (!Array.isArray(records)) throw new TypeError("ontology_records must be an array");
   if (records.length > MAX_RECORDS) throw new RangeError("too many ontology records");
@@ -78,6 +94,7 @@ export function coordinateCognition(input) {
     input_summary: { message_present: typeof input.message === "string" && input.message.trim().length > 0, ontology_record_count: normalized.length },
     domain_coverage: domainCoverage,
     sip_profile: sipProfile,
+    agent_state_summary: agentStateSummary,
     epistemic_review: {
       conflicts: conflicts.map(({ id, label, source_refs }) => ({ id, label, source_refs })),
       unknowns: unknowns.map(({ id, label }) => ({ id, label })),
