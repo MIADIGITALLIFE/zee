@@ -9,6 +9,7 @@ const result = coordinateCognition({
     systems: [{ id: "reasoning" }, { id: "memory" }, { id: "creative" }, { id: "safety" }],
     weights: { reasoning: 35, memory: 25, creative: 20, safety: 20 }
   },
+  agent_context: { current_mind: { current_goal: "Explore", energy: 70, stress: null }, memory_count: 5, conversation_count: 4, position_present: true, activity_present: false },
   ontology_records: [
     { id: "self-1", ontology_type: "Self", label: "Agent identity", epistemic_status: "observed", source_refs: ["profile"] },
     { id: "world-1", ontology_type: "WorldObject", label: "A place", epistemic_status: "reported", evidence: ["scene-log"] },
@@ -20,6 +21,13 @@ assert.equal(result.schema_version, "ZHI-Cognitive-Fusion-V1.0");
 assert.equal(result.mode, "proposal_only");
 assert.equal(result.sip_profile.profile.name, "Test persona");
 assert.equal(result.sip_profile.weights.safety, 20);
+assert.equal(result.agent_state_summary.current_goal_present, true);
+assert.equal(result.agent_state_summary.energy_present, true);
+assert.equal(result.agent_state_summary.stress_present, false);
+assert.equal(result.agent_state_summary.memory_count, 5);
+assert.equal(result.agent_state_summary.conversation_count, 4);
+assert.equal(result.agent_state_summary.position_present, true);
+assert.equal(Object.hasOwn(result.agent_state_summary, "current_goal"), false, "state summary must not copy raw goal text");
 assert.throws(() => coordinateCognition({ sip_profile: { schema_version: "1.0" } }), /complete SIP 1.0 export/);
 assert.equal(result.input_summary.ontology_record_count, 4);
 assert.equal(result.domain_coverage.Self, true);
