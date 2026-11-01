@@ -7,7 +7,7 @@ Outputs:
 - mia/en/todays-philosophy.json
 - mia/en/sections.json
 
-Chinese source feeds are read-only. Stable dates and section IDs are preserved. The machine marks output published only after structural and basic untranslated-Chinese checks pass. This is fully automated machine publication, not human editorial certification; machine translation can still make nuanced or factual mistakes.
+Chinese source feeds are read-only. Stable dates and section IDs are preserved. The machine marks output published only after structural and basic untranslated-Chinese checks pass. A committed `mia/en/translation-state.json` stores source hashes so repeated scheduled runs avoid duplicate translation API calls. This is fully automated machine publication, not human editorial certification; machine translation can still make nuanced or factual mistakes.
 
 ## One-time setup
 
