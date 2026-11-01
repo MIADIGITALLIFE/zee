@@ -1,0 +1,73 @@
+name: Mia Automatic English Translation
+
+on:
+  schedule:
+    - cron: "25 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mia-auto-translation
+  cancel-in-progress: false
+
+jobs:
+  translate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare source hash cache
+        run: |
+          mkdir -p mia/en
+          if [ ! -f mia/en/translation-state.json ]; then printf '{"source_hashes":{}}\n' > mia/en/translation-state.json; fi
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('mia/en/translation-state.json','utf8'));fs.writeFileSync('request.json',JSON.stringify({source_hashes:x.source_hashes||{}}))"
+      - name: Translate only changed source feeds
+        env:
+          TOKEN: ${{ secrets.MIA_TRANSLATION_WORKFLOW_TOKEN }}
+          ENDPOINT: ${{ vars.SUPABASE_TRANSLATION_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$TOKEN"
+          test -n "$ENDPOINT"
+          curl --fail --silent --show-error -X POST "$ENDPOINT" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @request.json -o result.json
+          node - <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const r=JSON.parse(fs.readFileSync('result.json','utf8'));
+          if(!r.ok||r.quality_gate!=='passed'||!r.source_hashes||!r.outputs)throw new Error('Automated quality gate failed');
+          for(const [name,value] of Object.entries(r.outputs)){
+            if(!name.startsWith('mia/en/'))throw new Error('Unexpected output path');
+            fs.mkdirSync(path.dirname(name),{recursive:true});
+            fs.writeFileSync(name,JSON.stringify(value,null,2)+'\n');
+          }
+          if(Object.values(r.changed||{}).some(Boolean)){
+            fs.writeFileSync('mia/en/translation-state.json',JSON.stringify({source_hashes:r.source_hashes,checked_at:new Date().toISOString()},null,2)+'\n');
+          } else {
+            console.log('All source hashes unchanged; cache file left untouched.');
+          }
+          console.log('Changed feeds:',JSON.stringify(r.changed));
+          NODE
+      - name: Validate English feed structure
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const state=JSON.parse(fs.readFileSync('mia/en/translation-state.json','utf8'));
+          for(const [name,hash] of Object.entries(state.source_hashes||{}))if(typeof hash!=='string'||hash.length!==64)throw new Error('Invalid hash: '+name);
+          for(const f of ['mia/en/daily.json','mia/en/todays-philosophy.json'])if(fs.existsSync(f)){
+            const x=JSON.parse(fs.readFileSync(f,'utf8'));
+            if(!x.date||x.translations?.en?.status!=='published')throw new Error('Invalid '+f);
+          }
+          if(fs.existsSync('mia/en/sections.json')){
+            const s=JSON.parse(fs.readFileSync('mia/en/sections.json','utf8'));
+            if(!Array.isArray(s.sections)||s.sections.length!==4||s.sections.some(x=>!x.id||x.translations?.en?.status!=='published'))throw new Error('Invalid sections feed');
+          }
+          NODE
+      - name: Commit changed English feeds and cache
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- mia/en; then echo "No source changes; translation API calls skipped."; exit 0; fi
+          git add mia/en
+          git commit -m "Publish changed Mia English translations"
+          git push
