@@ -1,0 +1,58 @@
+name: Mia Automatic English Translation
+
+on:
+  schedule:
+    - cron: "25 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mia-auto-translation
+  cancel-in-progress: false
+
+jobs:
+  translate-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate translations using the Supabase AI backend
+        env:
+          TOKEN: ${{ secrets.MIA_TRANSLATION_WORKFLOW_TOKEN }}
+          ENDPOINT: ${{ vars.SUPABASE_TRANSLATION_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$TOKEN"
+          test -n "$ENDPOINT"
+          curl --fail --silent --show-error -X POST "$ENDPOINT" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{}' -o result.json
+          node - <<'NODE'
+          const fs = require('fs'), path = require('path');
+          const r = JSON.parse(fs.readFileSync('result.json','utf8'));
+          if (!r.ok || r.quality_gate !== 'passed' || !r.outputs) throw new Error('Automated quality gate failed');
+          for (const [name, value] of Object.entries(r.outputs)) {
+            if (!name.startsWith('mia/en/')) throw new Error('Unexpected output path');
+            fs.mkdirSync(path.dirname(name), {recursive:true});
+            fs.writeFileSync(name, JSON.stringify(value,null,2)+'\n');
+          }
+          NODE
+      - name: Validate translation feeds
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          for (const f of ['mia/en/daily.json','mia/en/todays-philosophy.json']) {
+            const x=JSON.parse(fs.readFileSync(f,'utf8'));
+            if (!x.date || x.translations?.en?.status!=='published') throw new Error('Invalid '+f);
+          }
+          const s=JSON.parse(fs.readFileSync('mia/en/sections.json','utf8'));
+          if (!Array.isArray(s.sections) || s.sections.length!==4 || s.sections.some(x=>!x.id || x.translations?.en?.status!=='published')) throw new Error('Invalid sections feed');
+          NODE
+      - name: Commit changed English feeds
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- mia/en; then exit 0; fi
+          git add mia/en
+          git commit -m "Publish Mia automatic English translations"
+          git push
