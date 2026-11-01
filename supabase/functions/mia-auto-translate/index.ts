@@ -39,9 +39,10 @@ async function translate(kind: string, input: unknown, fields: string[]) {
 }
 function textField(v: unknown, label: string) {
   if (typeof v !== "string" || v.trim().length < 2) throw new Error("Missing translation: " + label);
-  if (/^[\u3400-\u9fff\s，。！？、；：‘’“”（）《》]+$/.test(v.trim())) throw new Error("Chinese-only output detected: " + label);
+  if (/[\u3400-\u9fff]/.test(v)) throw new Error("Chinese characters remain in English output: " + label);
 }
-function publish(fields: Record<string, unknown>) {
+function publish(fields: Record<string, unknown>, required: string[]) {
+  for (const key of required) if (!(key in fields)) throw new Error("Missing required translation field: " + key);
   for (const [k, v] of Object.entries(fields)) textField(v, k);
   return { status: "published", ...fields, translation_meta: { engine: AGNES_MODEL, review_mode: "automated", quality_gate: "passed", translated_at: new Date().toISOString() } };
 }
@@ -66,19 +67,19 @@ Deno.serve(async (req: Request) => {
     if (changed.daily) {
       const id = String(daily.date), fields = byId(d, id);
       if (!fields) throw new Error("Daily translation identity/date mismatch");
-      outputs["mia/en/daily.json"] = { id, date: daily.date, source_locale: "zh-CN", source_hash: sourceHashes.daily, translations: { en: publish(fields) } };
+      outputs["mia/en/daily.json"] = { id, date: daily.date, source_locale: "zh-CN", source_hash: sourceHashes.daily, translations: { en: publish(fields, ["title", "diary", "theme_label"]) } };
     }
     if (changed.philosophy) {
       const id = String(philosophy.date), fields = byId(p, id);
       if (!fields) throw new Error("Philosophy translation identity/date mismatch");
-      outputs["mia/en/todays-philosophy.json"] = { id, date: philosophy.date, source_locale: "zh-CN", source_hash: sourceHashes.philosophy, translations: { en: publish(fields) } };
+      outputs["mia/en/todays-philosophy.json"] = { id, date: philosophy.date, source_locale: "zh-CN", source_hash: sourceHashes.philosophy, translations: { en: publish(fields, ["title", "philosophy", "reflection", "author"]) } };
     }
     if (changed.sections) {
       const outSections = sections.sections.map((item: any) => {
         const fields = byId(s, String(item.id));
         if (!fields) throw new Error("Missing section translation: " + item.id);
         for (const key of ["title", "subtitle", "trigger", "focus", "content"]) textField(fields[key], item.id + "." + key);
-        return { id: item.id, translations: { en: publish(fields) } };
+        return { id: item.id, translations: { en: publish(fields, ["title", "subtitle", "trigger", "focus", "content"]) } };
       });
       outputs["mia/en/sections.json"] = { title: "Mia Four Dimensions", language: "en", status: "published", source_hash: sourceHashes.sections, updated_at: sections.updated_at, generated_at: new Date().toISOString(), sections: outSections };
     }
