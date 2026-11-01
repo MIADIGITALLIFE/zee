@@ -40,7 +40,11 @@ jobs:
             fs.mkdirSync(path.dirname(name),{recursive:true});
             fs.writeFileSync(name,JSON.stringify(value,null,2)+'\n');
           }
-          fs.writeFileSync('mia/en/translation-state.json',JSON.stringify({source_hashes:r.source_hashes,checked_at:new Date().toISOString()},null,2)+'\n');
+          if(Object.values(r.changed||{}).some(Boolean)){
+            fs.writeFileSync('mia/en/translation-state.json',JSON.stringify({source_hashes:r.source_hashes,checked_at:new Date().toISOString()},null,2)+'\n');
+          } else {
+            console.log('All source hashes unchanged; cache file left untouched.');
+          }
           console.log('Changed feeds:',JSON.stringify(r.changed));
           NODE
       - name: Validate English feed structure
