@@ -7,6 +7,8 @@ on:
       - "supabase/functions/cognitive-evidence-validator/**"
       - "supabase/migrations/**"
       - ".github/workflows/cmm-validation.yml"
+      - ".github/workflows/cmm-live-e2e.yml"
+      - "scripts/cmm-live-e2e.mjs"
   push:
     branches: [main]
     paths:
@@ -26,6 +28,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Syntax-check live acceptance script
+        run: node --check scripts/cmm-live-e2e.mjs
       - name: Type-check consolidation API
         run: deno check supabase/functions/cognitive-memory-manager/index.ts
       - name: Type-check evidence validator
