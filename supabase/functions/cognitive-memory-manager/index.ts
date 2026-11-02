@@ -104,6 +104,27 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Independent verification is missing or invalid", code: "INDEPENDENT_VERIFICATION_REQUIRED" }, 409);
   }
 
+  // Verification metadata is not sufficient by itself: require a matching,
+  // append-only audit record whose decision is explicitly verified.
+  const { data: verification, error: verificationError } = await db.from("cmm_verification_audit")
+    .select("id,decision,verifier_user_id,seed_version")
+    .eq("verification_ref", seed.independent_verification_ref)
+    .eq("seed_id", seed.id)
+    .eq("owner_user_id", user.id)
+    .eq("agent_id", seed.agent_id)
+    .eq("verifier_user_id", seed.independently_verified_by)
+    .eq("seed_version", seed.version)
+    .eq("decision", "verified")
+    .maybeSingle();
+
+  if (verificationError) {
+    console.error("CMM verification audit lookup failed", verificationError.message);
+    return json({ error: "Unable to validate independent verification" }, 500);
+  }
+  if (!verification) {
+    return json({ error: "A matching successful independent verification audit is required", code: "VERIFICATION_AUDIT_REQUIRED" }, 409);
+  }
+
   const proposalPayload = {
     claim: claim.trim(),
     evidence_summary: evidence_summary.trim(),
