@@ -3,11 +3,7 @@
 alter table public.cmm_verification_audit
   add column if not exists resulting_seed_version integer;
 
--- Preserve compatibility for successful reviews recorded by Phase 3 before this migration.
-update public.cmm_verification_audit
-  set resulting_seed_version = seed_version
-  where resulting_seed_version is null;
-
+-- Existing Phase 3 audit rows remain unchanged to preserve append-only semantics.
 comment on column public.cmm_verification_audit.seed_version is
   'The seed version reviewed by the verifier (pre-transition version).';
 comment on column public.cmm_verification_audit.resulting_seed_version is
