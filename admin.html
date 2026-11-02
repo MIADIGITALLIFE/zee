@@ -24,12 +24,12 @@
 <div class="topline"><h2 style="margin:0">② 与智能人对话</h2><span class="pill" id="signed-in">已登录</span><button id="logout-btn">退出登录</button></div>
 <label for="agent-id">智能人 ID（UUID）</label><input id="agent-id" autocomplete="off" placeholder="粘贴 zhi_agents 表中该智能人的 id">
 <p class="hint">可使用之前创建的测试智能人记录。不要填写 Supabase 密钥。</p>
-<label for="ontology-json">可选：注入调香室本体 JSON</label>
-<textarea id="ontology-json" rows="5" spellcheck="false" placeholder='粘贴 model.html 导出的单条 JSON 草稿，或 JSON 数组。留空则按原有聊天方式运行。'></textarea>
+<label for="ontology-json">可选：导入调香室 JSON（人格配置 / 本体草案）</label>
+<textarea id="ontology-json" rows="5" spellcheck="false" placeholder='支持“导出 JSON 配置”人格参数文件，也支持本体字典 JSON 或对象数组。留空则按原有聊天方式运行。'></textarea>
 <label for="ontology-file">或者选择本地 JSON 文件</label>
 <input id="ontology-file" type="file" accept=".json,application/json">
 <div class="hint" id="ontology-file-status" role="status" aria-live="polite">支持 .json 文件；读取后会填入上方文本框，你可以检查或继续编辑。</div>
-<p class="hint">草稿会随本次消息发送，经过服务端结构与语义校验后作为认知上下文；不会在此步骤登记为持久化本体。最多 8 条，总大小受服务端限制。</p>
+<p class="hint">人格配置经过独立字段与数值校验后作为人格参数上下文；本体草案仍走原有结构与语义校验。两者仅用于本次对话，不会因此登记为持久化本体。</p>
 <div class="chatlog" id="chatlog" aria-live="polite"><div class="hint">登录并发送第一条消息后，对话会显示在这里。</div></div>
 <label for="message">发送给智能人的话</label>
 <div class="message-row"><textarea id="message" maxlength="2000" placeholder="例如：你今天在想什么？"></textarea><button class="primary" id="send-btn">发送消息</button></div>
@@ -77,21 +77,23 @@ $("send-btn").addEventListener("click",async()=>{
 const agent_id=$("agent-id").value.trim(),message=$("message").value.trim();
 if(!agent_id){chatStatus("请先填写智能人 UUID。",true);return}
 if(!message){chatStatus("请先输入消息。",true);return}
-let ontologyPayload={};
+let contextPayload={};
 const ontologyText=$("ontology-json").value.trim();
 if(ontologyText){
 let parsed;
-try{parsed=JSON.parse(ontologyText)}catch{chatStatus("本体 JSON 格式无效，请检查后重试。",true);return}
-if(Array.isArray(parsed)){ontologyPayload.ontology_records=parsed}
-else if(parsed&&typeof parsed==="object"){ontologyPayload.ontology_record=parsed}
-else{chatStatus("本体 JSON 必须是一个对象或对象数组。",true);return}
+try{parsed=JSON.parse(ontologyText)}catch{chatStatus("JSON 格式无效，请检查后重试。",true);return}
+if(parsed&&typeof parsed==="object"&&!Array.isArray(parsed)&&parsed.product==="ZEE"&&parsed.model==="digital-persona-profile"){
+contextPayload.persona_config=parsed;
+}else if(Array.isArray(parsed)){contextPayload.ontology_records=parsed}
+else if(parsed&&typeof parsed==="object"){contextPayload.ontology_record=parsed}
+else{chatStatus("JSON 顶层必须是人格配置对象、本体记录对象或本体记录数组。",true);return}
 }
 const btn=$("send-btn");btn.disabled=true;chatStatus("正在请求 ZHI AI 大脑…");
 try{
 const {data:{session},error:sessionError}=await supabase.auth.getSession();
 if(sessionError||!session)throw new Error("登录会话已失效，请重新登录。");
 addBubble("admin",message);$("message").value="";
-const {data,error}=await supabase.functions.invoke(FUNCTION_NAME,{body:{agent_id,message,...ontologyPayload}});
+const {data,error}=await supabase.functions.invoke(FUNCTION_NAME,{body:{agent_id,message,...contextPayload}});
 if(error){
 let detail=error.message||"Edge Function 请求失败";
 try{const ctx=error.context;if(ctx?.json){const payload=await ctx.json();detail=payload.details||payload.error||detail}}catch{}
