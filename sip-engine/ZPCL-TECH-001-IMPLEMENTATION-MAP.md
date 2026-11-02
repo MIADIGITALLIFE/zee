@@ -9,6 +9,8 @@ This document maps the uploaded **ZHI-ZPCL-TECH-001 v1.0** contract to the curre
 | Event input envelope | Required envelope fields validated by evaluator | Partial schema validation |
 | Safety Gate | PASS / WARN / BLOCK; WARN is observation-only; BLOCK rejects | Prototype implemented |
 | Cognitive Seed | S2 hypothesized seed factory; no auto-persistence | Prototype implemented |
+| NPRM adapter | Validates NPRM modes/paths and maps explicit observation records into TECH-001 event envelope | Implemented as stateless mapper |
+| NPRM runtime / sensing | No live observation loop, sensor connector, or automatic feedback selection | Not implemented |
 | Event Collector / Observation Processor | Caller supplies normalized event and feature annotations | Not implemented as services |
 | Prediction / Discovery engines | Information gain accepted only with an explicit reference scale; no probability model included | Interface-level only |
 | Exploration Planner / Verification Engine | Not implemented; no autonomous action | Not implemented |
@@ -33,4 +35,4 @@ This is a local deterministic library. It does not implement the nine independen
 
 ## Validation
 
-Unit tests are provided in `evaluator.test.js`. They have not yet been run in a Node.js environment in this change. The test file is not evidence of passing tests.
+Unit tests are provided in `evaluator.test.js` and `nprm-adapter.test.js`; the workflow runs `node --test *.test.js`. A successful CI result must be observed before marking this implementation VERIFIED.
