@@ -7,8 +7,8 @@ Prototype evaluator aligned to the ZHI-ZPCL-TECH-001 integration boundary. It is
 - NPRM: organizes observation cadence, feedback mode and observation paths.
 - Adapter: validates and maps an explicit NPRM observation record into the ZPCL event envelope.
 - ZPCL: evaluates supplied feature annotations and evidence; it does not infer them.
-- Cognitive Seed Manager: may create an S2 hypothesized candidate after complete evaluation and Safety PASS.
-- Verification and evolution services: remain external and are not implemented in this prototype.
+- Cognitive Seed Manager: creates an S2 hypothesized candidate after complete evaluation and Safety PASS, and guards later lifecycle transitions.
+- Verification and evolution services: remain external; the manager does not perform verification or evolution itself.
 
 ## Six soft-loss dimensions and independent safety gate
 The six soft dimensions are grounding, discovery, agency, continuity, creativity and evolution. Safety is an independent PASS / WARN / BLOCK gate and cannot be compensated by soft scores.
@@ -56,14 +56,19 @@ Seven checks are explicit: authorization, dataIntegrity, privacy, productionWrit
 - Any failed check or hard violation => BLOCK / REJECT.
 - Any missing check or warning => WARN / OBSERVE.
 - Only all seven checks true with no warnings/violations => PASS.
-Seed factory requires PASS and a complete total score.
+Seed creation and every lifecycle transition require PASS.
 
 ## Event envelope
 Required fields: schema_version, event_id, agent_id, timestamp with explicit timezone, event_type, source.type, source.id, payload.observation, idempotency_key.
 NPRM extension records feedback_mode, paths, observation cycle and cadence. Adapter carries the idempotency key but does not provide durable duplicate detection.
 
-## Cognitive seed boundary
-The factory creates only S2 / hypothesized seed data with verification pending. It does not mark a seed verified, persist it, promote stages, or mutate agent identity/personality.
+## Cognitive Seed lifecycle
+The lifecycle vocabulary is S0 Observation, S1 Signal, S2 Hypothesis, S3 Verified, S4 Integrated, S5 Evolved. The current factory emits S2; the in-memory manager permits only adjacent forward transitions.
+- S3 requires evidence references and a verifier actor distinct from agent_id.
+- S4 requires evidence references and the `integration-reviewer` role.
+- S5 requires evidence references, the `evolution-reviewer` role, and at least one explicitly identified longitudinal/history/period evidence reference.
+- Every transition requires safety PASS and an actor. Each accepted transition increments version and appends history in a new immutable snapshot.
+- The manager checks metadata and progression rules; it does not validate evidence content, authenticate reviewer roles, or persist history. These remain external responsibilities.
 
 ## Validation
-Tests cover envelope mapping, unsupported NPRM vocabulary, unavailable feature handling, safety BLOCK/WARN, and hypothesized seed behavior. CI must pass before this prototype can be considered test-verified.
+Unit tests cover envelope mapping, unsupported NPRM vocabulary, unavailable feature handling, safety BLOCK/WARN, hypothesized seed behavior, and lifecycle transition guards. CI must pass before this prototype can be considered test-verified.
