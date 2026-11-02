@@ -34,7 +34,7 @@ export function evaluateZPCL(event, config={}) {
   if (event.schema_version !== "1.0") errors.push("schema_version must be 1.0");
   if (!event.event_id) errors.push("event_id is required");
   if (!event.agent_id) errors.push("agent_id is required");
-  if (!event.timestamp || !/(Z|[+-]\\d{2}:?\\d{2})$/.test(event.timestamp) || Number.isNaN(Date.parse(event.timestamp))) errors.push("timestamp must be ISO 8601 with an explicit timezone");
+  if (!event.timestamp || !/(Z|[+-]\d{2}:?\d{2})$/.test(event.timestamp) || Number.isNaN(Date.parse(event.timestamp))) errors.push("timestamp must be ISO 8601 with an explicit timezone");
   if (!event.event_type) errors.push("event_type is required");
   if (!event.source || !event.source.type || !event.source.id) errors.push("source.type and source.id are required");
   if (!event.payload || typeof event.payload.observation !== "string") errors.push("payload.observation is required");
