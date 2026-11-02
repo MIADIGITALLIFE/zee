@@ -113,7 +113,7 @@ Deno.serve(async (req: Request) => {
     .eq("owner_user_id", user.id)
     .eq("agent_id", seed.agent_id)
     .eq("verifier_user_id", seed.independently_verified_by)
-    .eq("resulting_seed_version", seed.version)
+    .or(`resulting_seed_version.eq.${seed.version},and(resulting_seed_version.is.null,seed_version.eq.${seed.version})`)
     .eq("decision", "verified")
     .maybeSingle();
 
