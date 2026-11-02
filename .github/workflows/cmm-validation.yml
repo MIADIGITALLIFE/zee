@@ -26,3 +26,5 @@ jobs:
           deno-version: v2.x
       - name: Type-check consolidation API
         run: deno check supabase/functions/cognitive-memory-manager/index.ts
+      - name: Type-check evidence validator
+        run: deno check supabase/functions/cognitive-evidence-validator/index.ts
