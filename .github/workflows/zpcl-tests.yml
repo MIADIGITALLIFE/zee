@@ -22,4 +22,4 @@ jobs:
           node-version: 22
       - name: Run evaluator unit tests
         working-directory: sip-engine/zpcl
-        run: node --test evaluator.test.js
+        run: node --test *.test.js
