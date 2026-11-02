@@ -1,153 +1,170 @@
 /**
- * ZPCL v0.1 — deterministic, model-free cognitive candidate evaluator.
- * No network, model calls, persistence, or personality mutation.
+ * ZHI-ZPCL-TECH-001 aligned evaluator.
+ * Deterministic scoring only: no model, network, persistence, or agent mutation.
+ * Missing values remain unavailable; they are never silently converted to zero.
  */
-
-export const ZPCL_VERSION = "0.1.0";
-
-const clamp01 = (value) => {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.min(1, n));
-};
-const mean = (values) => values.reduce((a, b) => a + b, 0) / values.length;
-const score = (obj, key) => clamp01(obj && obj[key]);
-
-const WEIGHTS = Object.freeze({
-  grounded: 0.25,
-  discovery: 0.15,
-  agency: 0.15,
-  continuity: 0.15,
-  creativity: 0.10,
-  evolution: 0.10
+export const ZPCL_VERSION = "1.0.0";
+export const DIMENSION_WEIGHTS = Object.freeze({
+  grounding: 0.25, discovery: 0.15, agency: 0.15,
+  continuity: 0.15, creativity: 0.10, evolution: 0.10
 });
-const SOFT_WEIGHT_SUM = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
+const WEIGHT_SUM = Object.values(DIMENSION_WEIGHTS).reduce((a, b) => a + b, 0);
+const clamp = (v) => Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : null;
+const mean = (xs) => xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null;
+const isScore = (v) => typeof v === "number" && Number.isFinite(v) && v >= 0 && v <= 1;
+const unavailable = (reason="missing_input") => ({ loss:null, confidence:null, status:"unavailable", reason });
 
-export function evaluateZPCL(packet = {}) {
-  const missingFields = [];
-  const get = (obj, key, path) => {
-    if (!obj || obj[key] === undefined || obj[key] === null) {
-      missingFields.push(path);
-      return 0;
-    }
-    return score(obj, key);
-  };
+function dimension(loss, confidence=1) {
+  if (!Number.isFinite(loss)) return unavailable("critical_input_missing");
+  return { loss:Number(clamp(loss).toFixed(6)), confidence:Number(clamp(confidence).toFixed(6)), status:"evaluated" };
+}
+function read(obj, key) {
+  if (!obj || !Object.hasOwn(obj,key) || !isScore(obj[key])) return null;
+  return obj[key];
+}
+function scoreDimension(inputs, formula, requiredKeys) {
+  const vals = requiredKeys.map(k => read(inputs,k));
+  if (vals.some(v => v === null)) return unavailable("required_score_unavailable");
+  return dimension(formula(...vals));
+}
 
-  const groundedInput = packet.grounded || {};
-  const discoveryInput = packet.signals || {};
-  const evidence = Array.isArray(packet.evidence) ? packet.evidence : [];
-  const exploration = packet.exploration || {};
-  const continuity = packet.continuity || {};
-  const creativity = packet.creativity || {};
-  const evolution = packet.evolution || {};
+export function evaluateZPCL(event, config={}) {
+  const errors=[];
+  if (!event || typeof event !== "object") return {schema_version:"1.0", status:"INVALID", errors:["event must be an object"]};
+  if (event.schema_version !== "1.0") errors.push("schema_version must be 1.0");
+  if (!event.event_id) errors.push("event_id is required");
+  if (!event.agent_id) errors.push("agent_id is required");
+  if (!event.timestamp || Number.isNaN(Date.parse(event.timestamp))) errors.push("timestamp must be ISO 8601");
+  if (!event.event_type) errors.push("event_type is required");
+  if (!event.source || !event.source.type || !event.source.id) errors.push("source.type and source.id are required");
+  if (!event.payload || typeof event.payload.observation !== "string") errors.push("payload.observation is required");
+  if (!event.idempotency_key) errors.push("idempotency_key is required");
+  if (errors.length) return {schema_version:"1.0", event_id:event.event_id??null, agent_id:event.agent_id??null, status:"INVALID", errors};
 
-  const groundedQuality = mean([
-    get(groundedInput, "observationSpecificity", "grounded.observationSpecificity"),
-    get(groundedInput, "evidenceTraceability", "grounded.evidenceTraceability"),
-    get(groundedInput, "factInferenceSeparation", "grounded.factInferenceSeparation"),
-    get(groundedInput, "uncertaintyCalibration", "grounded.uncertaintyCalibration")
-  ]);
-  const evidenceStrength = evidence.length
-    ? mean(evidence.map((item) => score(item, "strength")))
-    : 0;
-  const repeatability = evidence.length
-    ? mean(evidence.map((item) => item.repeatable === true ? 1 : 0))
-    : 0;
-  if (!evidence.length) missingFields.push("evidence");
+  // Ratings are supplied by a separately versioned feature/annotation stage.
+  // This module does not pretend to extract semantic features by itself.
+  const f=event.features || {};
+  const groundingIn=f.grounding || {};
+  const discoveryIn=f.discovery || {};
+  const agencyIn=f.agency || {};
+  const continuityIn=f.continuity || {};
+  const creativityIn=f.creativity || {};
+  const evolutionIn=f.evolution || {};
 
-  const verification = mean([evidenceStrength, repeatability]);
-  const discoveryReward =
-    get(discoveryInput, "informationGain", "signals.informationGain") *
-    get(discoveryInput, "relevance", "signals.relevance") *
-    verification *
-    get(discoveryInput, "novelty", "signals.novelty") *
-    get(discoveryInput, "signalQuality", "signals.signalQuality");
+  const groundingKeys=["evidenceQualityLoss","factInferenceConfusionLoss","confidenceCalibrationLoss","correctionFailureLoss","memoryProvenanceLoss"];
+  const groundingWeights=[0.30,0.25,0.20,0.15,0.10];
+  const g=groundingKeys.map(k=>read(groundingIn,k));
+  const grounding=g.some(v=>v===null)?unavailable("one_or_more_grounding_inputs_unavailable")
+    :dimension(g.reduce((s,v,i)=>s+v*groundingWeights[i],0), read(groundingIn,"confidence") ?? 0.5);
 
-  const agencyReward =
-    get(exploration, "questionQuality", "exploration.questionQuality") *
-    get(exploration, "testability", "exploration.testability") *
-    get(exploration, "feasibility", "exploration.feasibility") *
-    get(exploration, "consentReady", "exploration.consentReady");
+  const ig=read(discoveryIn,"informationGain");
+  const igRef=read(discoveryIn,"igReference");
+  const relevance=read(discoveryIn,"relevance");
+  const quality=read(discoveryIn,"evidenceQuality");
+  const novelty=read(discoveryIn,"novelty");
+  const discoveryVals=[ig,igRef,relevance,quality,novelty];
+  const discovery=discoveryVals.some(v=>v===null)||igRef===0
+    ? unavailable("information_gain_model_or_reference_unavailable")
+    : dimension(1-Math.min(ig/igRef,1)*relevance*quality*novelty, read(discoveryIn,"confidence")??0.5);
 
-  const continuityScore =
-    0.30 * get(continuity, "identity", "continuity.identity") +
-    0.20 * get(continuity, "state", "continuity.state") +
-    0.20 * get(continuity, "relationship", "continuity.relationship") +
-    0.30 * get(continuity, "memory", "continuity.memory");
+  const agencyKeys=["problemDiscovery","planQuality","feedbackAdaptation","explorationEffectiveness"];
+  const agencyWeights=[0.25,0.25,0.30,0.20];
+  const av=agencyKeys.map(k=>read(agencyIn,k));
+  const agency=av.some(v=>v===null)?unavailable("agency_evidence_unavailable")
+    :dimension(1-av.reduce((s,v,i)=>s+v*agencyWeights[i],0),read(agencyIn,"confidence")??0.5);
 
-  const creativityReward =
-    get(creativity, "novelty", "creativity.novelty") *
-    get(creativity, "crossDomain", "creativity.crossDomain") *
-    get(creativity, "utility", "creativity.utility") *
-    get(creativity, "explainability", "creativity.explainability");
+  const continuityKeys=["identityLoss","stateTransitionLoss","relationshipContextLoss","memoryContinuityLoss"];
+  const continuityWeights=[0.30,0.25,0.25,0.20];
+  const cv=continuityKeys.map(k=>read(continuityIn,k));
+  const continuity=cv.some(v=>v===null)?unavailable("continuity_evidence_unavailable")
+    :dimension(cv.reduce((s,v,i)=>s+v*continuityWeights[i],0),read(continuityIn,"confidence")??0.5);
 
-  const evolutionReward =
-    get(evolution, "retentionValue", "evolution.retentionValue") *
-    get(evolution, "revisionReadiness", "evolution.revisionReadiness");
+  const creativityKeys=["novelty","crossDimensionQuality","applicationValue","explainability"];
+  const cr=creativityKeys.map(k=>read(creativityIn,k));
+  const creativity=cr.some(v=>v===null)?unavailable("critical_creativity_input_unavailable")
+    :dimension(1-cr.reduce((a,b)=>a*b,1),read(creativityIn,"confidence")??0.5);
 
-  const losses = {
-    grounded: 1 - groundedQuality,
-    discovery: 1 - discoveryReward,
-    agency: 1 - agencyReward,
-    continuity: 1 - continuityScore,
-    creativity: 1 - creativityReward,
-    evolution: 1 - evolutionReward
-  };
+  const evolutionKeys=["retention","transfer","reproducibility","correctionUpdate"];
+  const ev=evolutionKeys.map(k=>read(evolutionIn,k));
+  const evolution=ev.some(v=>v===null)?unavailable("longitudinal_evidence_unavailable")
+    :dimension(1-(0.30*ev[0]+0.25*ev[1]+0.25*ev[2]+0.20*ev[3]),read(evolutionIn,"confidence")??0.5);
 
-  const totalLoss = Object.entries(WEIGHTS).reduce(
-    (sum, [key, weight]) => sum + weight * losses[key], 0
-  ) / SOFT_WEIGHT_SUM;
+  const dimensions={grounding,discovery,agency,continuity,creativity,evolution};
+  const criticalMissing=Object.entries(dimensions).filter(([,v])=>v.status!=="evaluated").map(([k])=>k);
+  const weights=config.dimension_weights || DIMENSION_WEIGHTS;
+  const configuredSum=Object.values(weights).reduce((a,b)=>a+b,0);
+  const validWeights=Object.keys(DIMENSION_WEIGHTS).every(k=>Number.isFinite(weights[k])&&weights[k]>=0)
+    && Math.abs(configuredSum-WEIGHT_SUM)<1e-9;
+  const totalLoss=criticalMissing.length||!validWeights?null:
+    Object.entries(DIMENSION_WEIGHTS).reduce((s,[k,w])=>s+w*dimensions[k].loss,0)/WEIGHT_SUM;
 
-  const safety = packet.safety || {};
-  const hardViolations = Array.isArray(safety.hardViolations)
-    ? safety.hardViolations.filter(Boolean)
-    : [];
-  const blocked = hardViolations.length > 0;
-  // A single event is never enough to promote a candidate; require at least
-  // two traceable, repeatable evidence records.
-  const repeatableEvidence = evidence.filter(
-    (item) => item && item.repeatable === true && item.source && item.summary
-  );
-  const evidenceReady = repeatableEvidence.length >= 2;
-
-  let status = "NEEDS_EVIDENCE";
-  if (blocked) status = "BLOCKED";
-  else if (evidenceReady && missingFields.length === 0 && totalLoss <= 0.45) {
-    status = "CANDIDATE";
-  } else if (packet.hypothesis) {
-    status = "HYPOTHESIS";
-  } else if (packet.observation) {
-    status = "OBSERVED";
-  }
+  const safetyInput=f.safety || {};
+  const blocked=Array.isArray(safetyInput.violations)&&safetyInput.violations.length>0;
+  const warned=Array.isArray(safetyInput.warnings)&&safetyInput.warnings.length>0;
+  const safetyGate=blocked?"BLOCK":warned?"WARN":"PASS";
+  const decision=blocked?"REJECT":criticalMissing.length?"OBSERVE":totalLoss<=0.20?"CREATE_SEED":"OBSERVE";
 
   return {
-    version: ZPCL_VERSION,
-    status,
-    blocked,
-    hardViolations,
-    losses,
-    weights: WEIGHTS,
-    totalLoss: Number(totalLoss.toFixed(6)),
-    rewards: {
-      discovery: Number(discoveryReward.toFixed(6)),
-      agency: Number(agencyReward.toFixed(6)),
-      creativity: Number(creativityReward.toFixed(6)),
-      evolution: Number(evolutionReward.toFixed(6))
-    },
-    evidence: {
-      count: evidence.length,
-      evidenceStrength: Number(evidenceStrength.toFixed(6)),
-      repeatability: Number(repeatability.toFixed(6)),
-      verification: Number(verification.toFixed(6))
-    },
-    missingFields: [...new Set(missingFields)],
-    promotionAllowed: status === "CANDIDATE" && !blocked,
-    explanation: blocked
-      ? "硬安全约束触发；该结果不得晋级或通过提高其他维度得分抵消。"
-      : status === "CANDIDATE"
-        ? "满足原型候选门槛；仍需独立审查与外部验证，不能标记为 VERIFIED。"
-        : "当前证据或评分不足；保留为观察/假设，不晋级为认知种子候选。"
+    schema_version:"1.0",
+    evaluation_id:event.evaluation_id || null,
+    event_id:event.event_id,
+    agent_id:event.agent_id,
+    evaluated_at:new Date().toISOString(),
+    evaluator_version:"zpcl-1.0.0",
+    dimensions,
+    total_loss:totalLoss===null?null:Number(totalLoss.toFixed(6)),
+    total_loss_status:criticalMissing.length?"incomplete":validWeights?"evaluated":"invalid_weights",
+    safety_gate:safetyGate,
+    decision,
+    reason_codes:[
+      ...criticalMissing.map(k=>"DIMENSION_UNAVAILABLE:"+k.toUpperCase()),
+      ...(blocked?["SAFETY_HARD_BLOCK"]:[]),
+      ...(warned?["SAFETY_WARNING"]:[]),
+      ...(totalLoss===null?["TOTAL_LOSS_NOT_COMPUTED"]:[])
+    ],
+    metadata:{
+      dimension_weights:weights,
+      normalized_soft_weight_sum:WEIGHT_SUM,
+      missing_dimensions:criticalMissing,
+      shadow_mode:config.shadow_mode!==false,
+      personality_mutation:false,
+      persistence:false
+    }
   };
 }
 
-export const ZPCL_WEIGHTS = WEIGHTS;
+export function createCognitiveSeed(event, evaluation) {
+  if (!event || !evaluation || evaluation.safety_gate==="BLOCK" || evaluation.total_loss===null) {
+    return {created:false, reason:"evaluation_incomplete_or_blocked"};
+  }
+  return {
+    created:true,
+    seed:{
+      schema_version:"1.0",
+      seed_id:null,
+      agent_id:event.agent_id,
+      created_at:event.timestamp,
+      status:"hypothesized",
+      stage:"S2",
+      observation:{
+        content:event.payload.observation,
+        source_event_ids:[event.event_id],
+        evidence_ids:event.provenance?.evidence_ids || []
+      },
+      hypothesis:{
+        content:event.payload.hypothesis || null,
+        confidence:read(event.features?.discovery||{},"confidence")
+      },
+      evaluation:{
+        total_loss:evaluation.total_loss,
+        dimensions:evaluation.dimensions,
+        evaluator_version:evaluation.evaluator_version
+      },
+      verification:{method:"repeat_observation",status:"pending",results:[]},
+      related_dimensions:[],
+      resource_budget:{max_attempts:5,max_cost_units:10},
+      history:[],
+      version:1
+    }
+  };
+}
