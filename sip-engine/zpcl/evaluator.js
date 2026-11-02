@@ -140,7 +140,7 @@ export function evaluateZPCL(event, config={}) {
 }
 
 export function createCognitiveSeed(event, evaluation) {
-  if (!event || !evaluation || evaluation.safety_gate!=="PASS" || evaluation.total_loss===null) {
+  if (!event || !evaluation || evaluation.safety_gate!=="PASS" || evaluation.decision!=="CREATE_SEED" || evaluation.total_loss===null) {
     return {created:false, reason:"evaluation_incomplete_or_blocked"};
   }
   return {
