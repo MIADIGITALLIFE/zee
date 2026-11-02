@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "supabase/functions/zhi-agnes-chat/**"
+      - "supabase/functions/_shared/**"
+      - "schemas/**"
       - "supabase/config.toml"
       - ".github/workflows/deploy-supabase.yml"
   workflow_dispatch:
@@ -22,6 +24,14 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Test persona configuration validator
+        run: deno test supabase/functions/_shared/persona-config-context.test.ts
 
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
