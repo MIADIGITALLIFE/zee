@@ -96,13 +96,13 @@ export function evaluateZPCL(event, config={}) {
   const validWeights=Object.keys(DIMENSION_WEIGHTS).every(k=>Number.isFinite(weights[k])&&weights[k]>=0)
     && Math.abs(configuredSum-WEIGHT_SUM)<1e-9;
   const totalLoss=criticalMissing.length||!validWeights?null:
-    Object.entries(DIMENSION_WEIGHTS).reduce((s,[k,w])=>s+w*dimensions[k].loss,0)/WEIGHT_SUM;
+    Object.entries(weights).reduce((s,[k,w])=>s+w*dimensions[k].loss,0)/WEIGHT_SUM;
 
   const safetyInput=f.safety || {};
   const blocked=Array.isArray(safetyInput.violations)&&safetyInput.violations.length>0;
   const warned=Array.isArray(safetyInput.warnings)&&safetyInput.warnings.length>0;
   const safetyGate=blocked?"BLOCK":warned?"WARN":"PASS";
-  const decision=blocked?"REJECT":criticalMissing.length?"OBSERVE":totalLoss<=0.20?"CREATE_SEED":"OBSERVE";
+  const decision=blocked?"REJECT":warned||criticalMissing.length?"OBSERVE":totalLoss<=0.20?"CREATE_SEED":"OBSERVE";
 
   return {
     schema_version:"1.0",
@@ -134,7 +134,7 @@ export function evaluateZPCL(event, config={}) {
 }
 
 export function createCognitiveSeed(event, evaluation) {
-  if (!event || !evaluation || evaluation.safety_gate==="BLOCK" || evaluation.total_loss===null) {
+  if (!event || !evaluation || evaluation.safety_gate!=="PASS" || evaluation.total_loss===null) {
     return {created:false, reason:"evaluation_incomplete_or_blocked"};
   }
   return {
