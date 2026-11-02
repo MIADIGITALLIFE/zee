@@ -24,7 +24,7 @@ revoke insert, update, delete, truncate on public.cognitive_seed_versions from a
 create or replace function public.cmm_record_seed_verification(
   p_verifier_user_id uuid, p_seed_id uuid, p_evidence_checks jsonb, p_rationale text
 ) returns jsonb
-language plpgsql security definer set search_path = pg_catalog as $
+language plpgsql security definer set search_path = pg_catalog as $cmm$
 declare
   v_seed public.cognitive_seeds%rowtype;
   v_assignment public.cmm_verifier_assignments%rowtype;
@@ -161,7 +161,7 @@ begin
     'resulting_seed_version',v_resulting_version,
     'resulting_stage',case when v_decision = 'verified' then 'S3' else 'S2' end);
 end;
-$$;
+$cmm$;
 
 revoke all on function public.cmm_record_seed_verification(uuid,uuid,jsonb,text) from public, anon, authenticated;
 grant execute on function public.cmm_record_seed_verification(uuid,uuid,jsonb,text) to service_role;
