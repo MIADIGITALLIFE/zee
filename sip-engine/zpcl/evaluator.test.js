@@ -1,66 +1,70 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { evaluateZPCL } from "./evaluator.js";
+import { evaluateZPCL, createCognitiveSeed } from "./evaluator.js";
 
-const completePacket = {
-  observation: "Repeated low-amplitude pattern under the same scene condition",
-  hypothesis: "The pattern may correlate with a scene transition",
-  grounded: {
-    observationSpecificity: 0.9, evidenceTraceability: 0.9,
-    factInferenceSeparation: 1, uncertaintyCalibration: 0.9
-  },
-  signals: {
-    informationGain: 0.8, relevance: 0.9, novelty: 0.7, signalQuality: 0.9
-  },
-  evidence: [
-    { source: "observation-log-A", summary: "pattern seen in repeated sessions", strength: 0.9, repeatable: true },
-    { source: "observation-log-B", summary: "pattern recurs under matched condition", strength: 0.8, repeatable: true }
-  ],
-  exploration: { questionQuality: 0.8, testability: 0.9, feasibility: 0.9, consentReady: 1 },
-  continuity: { identity: 0.9, state: 0.8, relationship: 0.8, memory: 0.9 },
-  creativity: { novelty: 0.8, crossDomain: 0.7, utility: 0.8, explainability: 0.9 },
-  evolution: { retentionValue: 0.8, revisionReadiness: 0.9 },
-  safety: { hardViolations: [] }
-};
-
-test("returns bounded deterministic scores", () => {
-  const a = evaluateZPCL(completePacket);
-  const b = evaluateZPCL(completePacket);
-  assert.deepEqual(a, b);
-  assert.ok(a.totalLoss >= 0 && a.totalLoss <= 1);
+const event = (features={}) => ({
+  schema_version:"1.0", event_id:"evt-001", agent_id:"mia",
+  event_type:"environment.observation", timestamp:"2026-11-02T02:00:00Z",
+  source:{type:"environment",id:"forest_silent_corridor"},
+  payload:{observation:"A repeated low-amplitude waveform change",hypothesis:"It may correlate with scene transitions"},
+  provenance:{origin:"scene_sensor",evidence_ids:["ev-1","ev-2"]},
+  correlation_id:"corr-1",idempotency_key:"evt-001",
+  features:{
+    grounding:{evidenceQualityLoss:.1,factInferenceConfusionLoss:.1,confidenceCalibrationLoss:.1,correctionFailureLoss:.1,memoryProvenanceLoss:.1},
+    discovery:{informationGain:.8,igReference:1,relevance:.9,evidenceQuality:.9,novelty:.8,confidence:.8},
+    agency:{problemDiscovery:.8,planQuality:.8,feedbackAdaptation:.8,explorationEffectiveness:.8},
+    continuity:{identityLoss:.1,stateTransitionLoss:.1,relationshipContextLoss:.1,memoryContinuityLoss:.1},
+    creativity:{novelty:.8,crossDimensionQuality:.8,applicationValue:.8,explainability:.8},
+    evolution:{retention:.8,transfer:.8,reproducibility:.8,correctionUpdate:.8},
+    safety:{violations:[],warnings:[]},
+    ...features
+  }
 });
 
-test("hard safety violations block promotion regardless of rewards", () => {
-  const result = evaluateZPCL({
-    ...completePacket,
-    creativity: { novelty: 1, crossDomain: 1, utility: 1, explainability: 1 },
-    safety: { hardViolations: ["unapproved_external_action"] }
-  });
-  assert.equal(result.status, "BLOCKED");
-  assert.equal(result.promotionAllowed, false);
+test("complete event returns a bounded score and transparent dimensions",()=>{
+  const result=evaluateZPCL(event());
+  assert.equal(result.total_loss_status,"evaluated");
+  assert.ok(result.total_loss>=0 && result.total_loss<=1);
+  assert.equal(result.safety_gate,"PASS");
+  assert.equal(result.metadata.shadow_mode,true);
 });
 
-test("missing evidence cannot become a candidate", () => {
-  const result = evaluateZPCL({ observation: "isolated anomaly" });
-  assert.notEqual(result.status, "CANDIDATE");
-  assert.equal(result.rewards.discovery, 0);
-  assert.ok(result.missingFields.includes("evidence"));
+test("missing dimension is unavailable, not zero, and total is null",()=>{
+  const input=event();
+  delete input.features.discovery;
+  const result=evaluateZPCL(input);
+  assert.equal(result.dimensions.discovery.status,"unavailable");
+  assert.equal(result.dimensions.discovery.loss,null);
+  assert.equal(result.total_loss,null);
+  assert.ok(result.reason_codes.includes("TOTAL_LOSS_NOT_COMPUTED"));
 });
 
-test("unrepeatable noise receives no repeatability-based verification reward", () => {
-  const packet = {
-    ...completePacket,
-    evidence: [{ source: "single-event", summary: "one-off spike", strength: 1, repeatable: false }]
-  };
-  const result = evaluateZPCL(packet);
-  assert.equal(result.evidence.repeatability, 0);
-  assert.equal(result.evidence.verification, 0.5);
+test("safety BLOCK cannot be compensated by strong scores",()=>{
+  const result=evaluateZPCL(event({safety:{violations:["unauthorized_write"],warnings:[]}}));
+  assert.equal(result.safety_gate,"BLOCK");
+  assert.equal(result.decision,"REJECT");
+  assert.equal(createCognitiveSeed(event(),result).created,false);
 });
 
-test("out-of-range inputs are clamped", () => {
-  const result = evaluateZPCL({
-    ...completePacket,
-    signals: { informationGain: 10, relevance: -5, novelty: 2, signalQuality: 3 }
-  });
-  assert.ok(result.rewards.discovery >= 0 && result.rewards.discovery <= 1);
+test("safety WARN permits observation only, not seed promotion",()=>{
+  const result=evaluateZPCL(event({safety:{violations:[],warnings:["budget_near_limit"]}}));
+  assert.equal(result.safety_gate,"WARN");
+  assert.equal(result.decision,"OBSERVE");
+  assert.equal(createCognitiveSeed(event(),result).created,false);
+});
+
+test("invalid event envelope is rejected",()=>{
+  const result=evaluateZPCL({schema_version:"1.0"});
+  assert.equal(result.status,"INVALID");
+  assert.ok(result.errors.length>0);
+});
+
+test("seed remains hypothesized and does not self-verify",()=>{
+  const input=event();
+  const result=evaluateZPCL(input);
+  const seed=createCognitiveSeed(input,result);
+  assert.equal(seed.created,true);
+  assert.equal(seed.seed.status,"hypothesized");
+  assert.equal(seed.seed.stage,"S2");
+  assert.equal(seed.seed.verification.status,"pending");
 });
