@@ -11,10 +11,10 @@ const event = (features={}) => ({
   correlation_id:"corr-1",idempotency_key:"evt-001",
   features:{
     grounding:{evidenceQualityLoss:.1,factInferenceConfusionLoss:.1,confidenceCalibrationLoss:.1,correctionFailureLoss:.1,memoryProvenanceLoss:.1},
-    discovery:{informationGain:.8,igReference:1,relevance:.9,evidenceQuality:.9,novelty:.8,confidence:.8},
+    discovery:{informationGain:1,igReference:1,relevance:.99,evidenceQuality:.99,novelty:.99,confidence:.99},
     agency:{problemDiscovery:.8,planQuality:.8,feedbackAdaptation:.8,explorationEffectiveness:.8},
     continuity:{identityLoss:.1,stateTransitionLoss:.1,relationshipContextLoss:.1,memoryContinuityLoss:.1},
-    creativity:{novelty:.8,crossDimensionQuality:.8,applicationValue:.8,explainability:.8},
+    creativity:{novelty:.95,crossDimensionQuality:.95,applicationValue:.95,explainability:.95},
     evolution:{retention:.8,transfer:.8,reproducibility:.8,correctionUpdate:.8},
     safety:{status:"PASS",violations:[],warnings:[],checks:{authorization:true,dataIntegrity:true,privacy:true,productionWriteRestrictions:true,resourceBudget:true,personalityBaselineProtection:true,rollbackCapability:true}},
     ...features
@@ -67,4 +67,13 @@ test("seed remains hypothesized and does not self-verify",()=>{
   assert.equal(seed.seed.status,"hypothesized");
   assert.equal(seed.seed.stage,"S2");
   assert.equal(seed.seed.verification.status,"pending");
+});
+
+test("high total loss cannot create a seed even when safety passes",()=>{
+  const input=event({
+    grounding:{evidenceQualityLoss:1,factInferenceConfusionLoss:1,confidenceCalibrationLoss:1,correctionFailureLoss:1,memoryProvenanceLoss:1}
+  });
+  const result=evaluateZPCL(input);
+  assert.equal(result.decision,"OBSERVE");
+  assert.equal(createCognitiveSeed(input,result).created,false);
 });
