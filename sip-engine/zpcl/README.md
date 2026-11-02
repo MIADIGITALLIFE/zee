@@ -7,7 +7,7 @@ A deterministic, model-free evaluator for one explicitly supplied cognitive obse
 Requires Node.js with ES module support:
 
 ```bash
-node --test zpcl/evaluator.test.js
+node --test *.test.js
 ```
 
 ## Use
@@ -17,10 +17,16 @@ import { evaluateZPCL } from "./evaluator.js";
 const result = evaluateZPCL(packet);
 ```
 
-The caller supplies normalized 0–1 ratings and evidence metadata. Missing ratings default to zero and are reported. A hard safety violation always returns `BLOCKED`. The evaluator does not persist data, call a model, inspect chat history, verify external facts, or mutate agent identity/personality/memory.
+The caller supplies normalized 0–1 ratings and evidence metadata. Missing required ratings are reported as unavailable; they are never silently converted to zero. An incomplete dimension withholds the total loss.
 
-See [ZPCL-SPEC.md](ZPCL-SPEC.md) for formulas and lifecycle rules. All weights and thresholds are experimental starting values, not validated optima.
+## Cognitive Seed lifecycle
 
-## NPRM integration
+```js
+import { createSeedRecord, transitionSeed } from "./seed-manager.js";
+```
 
-See [NPRM-INTEGRATION.md](NPRM-INTEGRATION.md). The stateless adapter maps explicit NPRM records into ZPCL events; it does not infer features or run exploration. Run all tests with `node --test *.test.js` from this directory.
+The in-memory lifecycle guard enforces adjacent transitions S2 → S3 → S4 → S5 (and defines the complete S0–S5 vocabulary). S3 requires independent verification evidence; S4 requires an integration reviewer; S5 requires an evolution reviewer and explicitly identified longitudinal evidence. Every transition requires safety PASS, evidence references, and an actor. Each accepted transition returns a new immutable version; the prior snapshot is unchanged.
+
+This is a deterministic guard only: no database persistence, durable audit store, autonomous verification, or automatic evolution is implemented.
+
+See [ZPCL-SPEC.md](../ZPCL-SPEC.md) and [NPRM-INTEGRATION.md](./NPRM-INTEGRATION.md). Weights and thresholds are experimental starting values, not validated optima.
