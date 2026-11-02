@@ -5,12 +5,14 @@ on:
     paths:
       - "supabase/functions/cognitive-memory-manager/**"
       - "supabase/functions/cognitive-evidence-validator/**"
+      - "supabase/migrations/**"
       - ".github/workflows/cmm-validation.yml"
   push:
     branches: [main]
     paths:
       - "supabase/functions/cognitive-memory-manager/**"
       - "supabase/functions/cognitive-evidence-validator/**"
+      - "supabase/migrations/**"
       - ".github/workflows/cmm-validation.yml"
 
 permissions:
@@ -28,3 +30,23 @@ jobs:
         run: deno check supabase/functions/cognitive-memory-manager/index.ts
       - name: Type-check evidence validator
         run: deno check supabase/functions/cognitive-evidence-validator/index.ts
+
+  migration-sql-parse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install SQLFluff
+        run: python -m pip install --disable-pip-version-check sqlfluff
+      - name: Parse CMM migrations as PostgreSQL
+        shell: bash
+        run: |
+          for migration in \
+            supabase/migrations/20261102000000_cognitive_memory_foundation.sql \
+            supabase/migrations/20261102010000_cmm_independent_verification.sql \
+            supabase/migrations/20261102020000_cmm_evidence_validator.sql \
+            supabase/migrations/20261102030000_cmm_persistent_seed_lifecycle.sql; do
+            sqlfluff parse --dialect postgres "$migration"
+          done
