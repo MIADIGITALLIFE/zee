@@ -81,7 +81,7 @@ Deno.serve(async (req: Request) => {
 
   // The owner filter is mandatory even though the service-role client bypasses RLS.
   const { data: seed, error: seedError } = await db.from("cognitive_seeds")
-    .select("id,agent_id,owner_user_id,stage,safety_status,provenance,evidence_refs,independently_verified_by,independently_verified_at,independent_verification_ref")
+    .select("id,agent_id,owner_user_id,stage,safety_status,version,provenance,evidence_refs,independently_verified_by,independently_verified_at,independent_verification_ref")
     .eq("id", seed_id)
     .eq("owner_user_id", user.id)
     .maybeSingle();
@@ -109,7 +109,7 @@ Deno.serve(async (req: Request) => {
     evidence_summary: evidence_summary.trim(),
     confidence_basis: confidence_basis.trim(),
     source_seed_stage: seed.stage,
-    source_seed_version: 1,
+    source_seed_version: seed.version,
     independent_verification: {
       verifier_id: seed.independently_verified_by,
       verified_at: seed.independently_verified_at,
