@@ -16,7 +16,7 @@ const event = (features={}) => ({
     continuity:{identityLoss:.1,stateTransitionLoss:.1,relationshipContextLoss:.1,memoryContinuityLoss:.1},
     creativity:{novelty:.8,crossDimensionQuality:.8,applicationValue:.8,explainability:.8},
     evolution:{retention:.8,transfer:.8,reproducibility:.8,correctionUpdate:.8},
-    safety:{violations:[],warnings:[]},
+    safety:{status:"PASS",violations:[],warnings:[],checks:{authorization:true,dataIntegrity:true,privacy:true,productionWriteRestrictions:true,resourceBudget:true,personalityBaselineProtection:true,rollbackCapability:true}},
     ...features
   }
 });
@@ -40,14 +40,14 @@ test("missing dimension is unavailable, not zero, and total is null",()=>{
 });
 
 test("safety BLOCK cannot be compensated by strong scores",()=>{
-  const result=evaluateZPCL(event({safety:{violations:["unauthorized_write"],warnings:[]}}));
+  const result=evaluateZPCL(event({safety:{status:"BLOCK",violations:["unauthorized_write"],warnings:[],checks:{authorization:false,dataIntegrity:true,privacy:true,productionWriteRestrictions:true,resourceBudget:true,personalityBaselineProtection:true,rollbackCapability:true}}}));
   assert.equal(result.safety_gate,"BLOCK");
   assert.equal(result.decision,"REJECT");
   assert.equal(createCognitiveSeed(event(),result).created,false);
 });
 
 test("safety WARN permits observation only, not seed promotion",()=>{
-  const result=evaluateZPCL(event({safety:{violations:[],warnings:["budget_near_limit"]}}));
+  const result=evaluateZPCL(event({safety:{status:"WARN",violations:[],warnings:["budget_near_limit"],checks:{authorization:true,dataIntegrity:true,privacy:true,productionWriteRestrictions:true,resourceBudget:true,personalityBaselineProtection:true,rollbackCapability:true}}}));
   assert.equal(result.safety_gate,"WARN");
   assert.equal(result.decision,"OBSERVE");
   assert.equal(createCognitiveSeed(event(),result).created,false);
