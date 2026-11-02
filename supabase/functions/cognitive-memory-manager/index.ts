@@ -107,13 +107,13 @@ Deno.serve(async (req: Request) => {
   // Verification metadata is not sufficient by itself: require a matching,
   // append-only audit record whose decision is explicitly verified.
   const { data: verification, error: verificationError } = await db.from("cmm_verification_audit")
-    .select("id,decision,verifier_user_id,seed_version")
+    .select("id,decision,verifier_user_id,seed_version,resulting_seed_version")
     .eq("verification_ref", seed.independent_verification_ref)
     .eq("seed_id", seed.id)
     .eq("owner_user_id", user.id)
     .eq("agent_id", seed.agent_id)
     .eq("verifier_user_id", seed.independently_verified_by)
-    .eq("seed_version", seed.version)
+    .eq("resulting_seed_version", seed.version)
     .eq("decision", "verified")
     .maybeSingle();
 
