@@ -115,6 +115,22 @@ begin
      p_evidence_checks, trim(p_rationale), v_ref, v_now);
 
   if v_decision = 'verified' then
+    -- Preserve the reviewed S2 state as the baseline when older seed creation
+    -- paths did not yet write an initial version snapshot.
+    insert into public.cognitive_seed_versions
+      (seed_id, agent_id, owner_user_id, version, stage, snapshot, transition_reason,
+       evidence_refs, safety_status, actor_id, reviewer_role, created_at)
+    values
+      (v_seed.id, v_seed.agent_id, v_seed.owner_user_id, v_seed.version, 'S2',
+       jsonb_build_object('seed_id',v_seed.id,'agent_id',v_seed.agent_id,
+         'owner_user_id',v_seed.owner_user_id,'observation_id',v_seed.observation_id,
+         'hypothesis',v_seed.hypothesis,'stage','S2','safety_status',v_seed.safety_status,
+         'provenance',v_seed.provenance,'evidence_refs',v_seed.evidence_refs,
+         'version',v_seed.version),
+       'S2 baseline captured before independent verification promotion',
+       v_seed.evidence_refs,v_seed.safety_status,v_seed.owner_user_id,'seed_owner_baseline',v_now)
+    on conflict (seed_id, version) do nothing;
+
     update public.cognitive_seeds set stage = 'S3', version = v_resulting_version,
       independently_verified_by = p_verifier_user_id,
       independently_verified_at = v_now, independent_verification_ref = v_ref,
