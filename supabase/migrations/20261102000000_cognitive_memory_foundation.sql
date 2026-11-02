@@ -171,7 +171,12 @@ alter table public.memory_proposals enable row level security;
 alter table public.personality_change_requests enable row level security;
 
 create policy "owner reads cognitive seeds" on public.cognitive_seeds for select to authenticated using (owner_user_id = auth.uid());
-create policy "owner inserts cognitive seeds" on public.cognitive_seeds for insert to authenticated with check (owner_user_id = auth.uid());
+create policy "owner inserts cognitive seeds" on public.cognitive_seeds for insert to authenticated with check (
+  owner_user_id = auth.uid()
+  and stage = 'S2'
+  and safety_status = 'PASS'
+  and jsonb_array_length(provenance) > 0
+);
 create policy "owner reads seed versions" on public.cognitive_seed_versions for select to authenticated using (owner_user_id = auth.uid());
 create policy "owner reads memories" on public.cognitive_memories for select to authenticated using (owner_user_id = auth.uid());
 create policy "owner reads memory evidence" on public.memory_evidence for select to authenticated using (owner_user_id = auth.uid());
