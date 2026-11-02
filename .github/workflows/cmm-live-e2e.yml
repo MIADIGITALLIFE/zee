@@ -1,0 +1,32 @@
+name: CMM Live End-to-End Acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_URL: https://xeykndpirxfuozeunkku.supabase.co
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Validate required secrets without printing values
+        shell: bash
+        run: |
+          test -n "$SUPABASE_ANON_KEY" || { echo "::error::Missing SUPABASE_ANON_KEY secret"; exit 1; }
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo "::error::Missing SUPABASE_SERVICE_ROLE_KEY secret"; exit 1; }
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Supabase client
+        run: npm install --no-save @supabase/supabase-js
+      - name: Run isolated live acceptance
+        run: node scripts/cmm-live-e2e.mjs
