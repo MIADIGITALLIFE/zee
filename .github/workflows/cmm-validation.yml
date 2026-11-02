@@ -41,4 +41,12 @@ jobs:
       - name: Install SQLFluff
         run: python -m pip install --disable-pip-version-check sqlfluff
       - name: Parse CMM migrations as PostgreSQL
-        run: sqlfluff parse --dialect postgres supabase/migrations/20261102000000_cognitive_memory_foundation.sql supabase/migrations/20261102010000_cmm_independent_verification.sql supabase/migrations/20261102020000_cmm_evidence_validator.sql supabase/migrations/20261102030000_cmm_persistent_seed_lifecycle.sql
+        shell: bash
+        run: |
+          for migration in \
+            supabase/migrations/20261102000000_cognitive_memory_foundation.sql \
+            supabase/migrations/20261102010000_cmm_independent_verification.sql \
+            supabase/migrations/20261102020000_cmm_evidence_validator.sql \
+            supabase/migrations/20261102030000_cmm_persistent_seed_lifecycle.sql; do
+            sqlfluff parse --dialect postgres "$migration"
+          done
