@@ -1,9 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.SUPABASE_URL;
-const anonKey = process.env.SUPABASE_ANON_KEY;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-for (const [name, value] of Object.entries({ SUPABASE_URL: url, SUPABASE_ANON_KEY: anonKey, SUPABASE_SERVICE_ROLE_KEY: serviceKey })) {
+// Prefer current Supabase key names; retain legacy aliases during migration.
+const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const serviceKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+for (const [name, value] of Object.entries({ SUPABASE_URL: url, SUPABASE_PUBLISHABLE_KEY: anonKey, SUPABASE_SECRET_KEY: serviceKey })) {
   if (!value) throw new Error(`Missing required environment variable: ${name}`);
 }
 
@@ -64,6 +65,18 @@ function checks(refs, outcome = "supports") {
 
 let result = "FAILED";
 try {
+  // Fail before creating any fixture users if either project key is invalid.
+  const publicKeyCheck = await fetch(`${url}/auth/v1/settings`, {
+    headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+  });
+  if (!publicKeyCheck.ok) {
+    throw new Error(`Supabase publishable key rejected (HTTP ${publicKeyCheck.status}); check SUPABASE_PUBLISHABLE_KEY for project xeykndpirxfuozeunkku.`);
+  }
+  const { error: adminKeyError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1 });
+  if (adminKeyError) {
+    throw new Error(`Supabase secret key rejected by Auth Admin API: ${adminKeyError.message}. Set SUPABASE_SECRET_KEY to this project's server-side secret key (sb_secret_...) or its valid legacy service_role JWT. Do not use the project URL, anon/publishable key, JWT signing secret, or the displayed key label.`);
+  }
+
   const owner = await createTestUser("owner");
   const verifier = await createTestUser("verifier");
   const outsider = await createTestUser("outsider");
