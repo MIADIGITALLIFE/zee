@@ -21,6 +21,7 @@ This phase closes the persisted lifecycle gap between S2 seed capture and S3 eli
 - Successful S2 → S3: resulting version = reviewed version + 1.
 - Rejected review: resulting version = reviewed version.
 - The S3 version snapshot contains the reviewed evidence checks and audit reference.
+- Legacy Phase 3 audit rows are not rewritten; the memory manager accepts a legacy row with a null resulting version only when its reviewed version equals the current seed version.
 - Verification audit and seed-version rows are append-only. Client roles cannot write lifecycle or version records.
 
 ## Security boundary
