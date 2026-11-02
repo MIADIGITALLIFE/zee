@@ -37,8 +37,8 @@ declare
   v_now timestamptz := now();
 begin
   if p_verifier_user_id is null or p_seed_id is null
-     or jsonb_typeof(p_evidence_checks) <> 'array'
-     or jsonb_array_length(p_evidence_checks) = 0
+     or jsonb_typeof(p_evidence_checks) is distinct from 'array'
+     or coalesce(jsonb_array_length(p_evidence_checks), 0) = 0
      or p_rationale is null or length(trim(p_rationale)) = 0
      or length(p_rationale) > 4000 then
     raise exception 'invalid verification payload' using errcode = '22023';
