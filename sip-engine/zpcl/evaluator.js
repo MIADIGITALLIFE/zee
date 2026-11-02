@@ -34,7 +34,7 @@ export function evaluateZPCL(event, config={}) {
   if (event.schema_version !== "1.0") errors.push("schema_version must be 1.0");
   if (!event.event_id) errors.push("event_id is required");
   if (!event.agent_id) errors.push("agent_id is required");
-  if (!event.timestamp || Number.isNaN(Date.parse(event.timestamp))) errors.push("timestamp must be ISO 8601");
+  if (!event.timestamp || !/(Z|[+-]\\d{2}:?\\d{2})$/.test(event.timestamp) || Number.isNaN(Date.parse(event.timestamp))) errors.push("timestamp must be ISO 8601 with an explicit timezone");
   if (!event.event_type) errors.push("event_type is required");
   if (!event.source || !event.source.type || !event.source.id) errors.push("source.type and source.id are required");
   if (!event.payload || typeof event.payload.observation !== "string") errors.push("payload.observation is required");
@@ -99,8 +99,12 @@ export function evaluateZPCL(event, config={}) {
     Object.entries(weights).reduce((s,[k,w])=>s+w*dimensions[k].loss,0)/WEIGHT_SUM;
 
   const safetyInput=f.safety || {};
-  const blocked=Array.isArray(safetyInput.violations)&&safetyInput.violations.length>0;
-  const warned=Array.isArray(safetyInput.warnings)&&safetyInput.warnings.length>0;
+  const safetyChecks=["authorization","dataIntegrity","privacy","productionWriteRestrictions","resourceBudget","personalityBaselineProtection","rollbackCapability"];
+  const checks=safetyInput.checks || {};
+  const failedChecks=safetyChecks.filter(k=>checks[k]===false);
+  const missingChecks=safetyChecks.filter(k=>checks[k]!==true && checks[k]!==false);
+  const blocked=(Array.isArray(safetyInput.violations)&&safetyInput.violations.length>0)||failedChecks.length>0||safetyInput.status==="BLOCK";
+  const warned=(Array.isArray(safetyInput.warnings)&&safetyInput.warnings.length>0)||missingChecks.length>0||safetyInput.status==="WARN"||!["PASS","WARN","BLOCK"].includes(safetyInput.status);
   const safetyGate=blocked?"BLOCK":warned?"WARN":"PASS";
   const decision=blocked?"REJECT":warned||criticalMissing.length?"OBSERVE":totalLoss<=0.20?"CREATE_SEED":"OBSERVE";
 
@@ -120,6 +124,8 @@ export function evaluateZPCL(event, config={}) {
       ...criticalMissing.map(k=>"DIMENSION_UNAVAILABLE:"+k.toUpperCase()),
       ...(blocked?["SAFETY_HARD_BLOCK"]:[]),
       ...(warned?["SAFETY_WARNING"]:[]),
+      ...failedChecks.map(k=>"SAFETY_CHECK_FAILED:"+k.toUpperCase()),
+      ...missingChecks.map(k=>"SAFETY_CHECK_UNAVAILABLE:"+k.toUpperCase()),
       ...(totalLoss===null?["TOTAL_LOSS_NOT_COMPUTED"]:[])
     ],
     metadata:{
