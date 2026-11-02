@@ -77,15 +77,15 @@ $("send-btn").addEventListener("click",async()=>{
 const agent_id=$("agent-id").value.trim(),message=$("message").value.trim();
 if(!agent_id){chatStatus("请先填写智能人 UUID。",true);return}
 if(!message){chatStatus("请先输入消息。",true);return}
-let contextPayload={};
+let ontologyPayload={};
 const ontologyText=$("ontology-json").value.trim();
 if(ontologyText){
 let parsed;
 try{parsed=JSON.parse(ontologyText)}catch{chatStatus("JSON 格式无效，请检查后重试。",true);return}
 if(parsed&&typeof parsed==="object"&&!Array.isArray(parsed)&&parsed.product==="ZEE"&&parsed.model==="digital-persona-profile"){
-contextPayload.persona_config=parsed;
-}else if(Array.isArray(parsed)){contextPayload.ontology_records=parsed}
-else if(parsed&&typeof parsed==="object"){contextPayload.ontology_record=parsed}
+ontologyPayload.persona_config=parsed;
+}else if(Array.isArray(parsed)){ontologyPayload.ontology_records=parsed}
+else if(parsed&&typeof parsed==="object"){ontologyPayload.ontology_record=parsed}
 else{chatStatus("JSON 顶层必须是人格配置对象、本体记录对象或本体记录数组。",true);return}
 }
 const btn=$("send-btn");btn.disabled=true;chatStatus("正在请求 ZHI AI 大脑…");
@@ -93,7 +93,7 @@ try{
 const {data:{session},error:sessionError}=await supabase.auth.getSession();
 if(sessionError||!session)throw new Error("登录会话已失效，请重新登录。");
 addBubble("admin",message);$("message").value="";
-const {data,error}=await supabase.functions.invoke(FUNCTION_NAME,{body:{agent_id,message,...contextPayload}});
+const {data,error}=await supabase.functions.invoke(FUNCTION_NAME,{body:{agent_id,message,...ontologyPayload}});
 if(error){
 let detail=error.message||"Edge Function 请求失败";
 try{const ctx=error.context;if(ctx?.json){const payload=await ctx.json();detail=payload.details||payload.error||detail}}catch{}
