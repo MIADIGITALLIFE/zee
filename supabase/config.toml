@@ -4,3 +4,9 @@ project_id = "zee"
 # The handler also calls auth.getUser(token) to resolve the authenticated user.
 [functions.zhi-ontology-validate]
 verify_jwt = true
+
+[functions.cognitive-memory-manager]
+verify_jwt = true
+
+[functions.cognitive-evidence-validator]
+verify_jwt = true
