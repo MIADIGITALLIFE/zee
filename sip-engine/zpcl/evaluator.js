@@ -103,8 +103,12 @@ export function evaluateZPCL(packet = {}) {
     ? safety.hardViolations.filter(Boolean)
     : [];
   const blocked = hardViolations.length > 0;
-  const evidenceReady = evidence.length > 0 &&
-    evidence.some((item) => Boolean(item.source) && Boolean(item.summary));
+  // A single event is never enough to promote a candidate; require at least
+  // two traceable, repeatable evidence records.
+  const repeatableEvidence = evidence.filter(
+    (item) => item && item.repeatable === true && item.source && item.summary
+  );
+  const evidenceReady = repeatableEvidence.length >= 2;
 
   let status = "NEEDS_EVIDENCE";
   if (blocked) status = "BLOCKED";
