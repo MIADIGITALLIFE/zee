@@ -10,7 +10,7 @@ This phase closes the persisted lifecycle gap between S2 seed capture and S3 eli
 2. The owner assigns a distinct Supabase Auth user as verifier through the authenticated evidence-validator Edge Function.
 3. The assigned verifier submits one review item for every evidence reference. The verifier identity is derived from the verified Supabase session by the Edge Function; it is not accepted from request JSON.
 4. The database locks the S2 seed and validates assignment, evidence coverage, unique references, outcomes, and rationale.
-5. If every outcome is `supports`, one transaction appends the verification audit, promotes the seed to S3, increments the seed version, and writes an immutable `cognitive_seed_versions` snapshot.
+5. If every outcome is `supports`, one transaction appends the verification audit, captures the reviewed S2 baseline if that version snapshot is missing, promotes the seed to S3, increments the seed version, and writes an immutable S3 `cognitive_seed_versions` snapshot.
 6. If any outcome is `contradicts` or `inconclusive`, the audit is appended with decision `rejected`; the seed remains S2 and its version does not change.
 7. The memory manager accepts only S3 and matches the audit's `resulting_seed_version` to the current seed version before creating a pending memory proposal.
 
