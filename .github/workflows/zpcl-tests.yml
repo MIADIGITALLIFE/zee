@@ -1,0 +1,25 @@
+name: ZPCL evaluator tests
+
+on:
+  pull_request:
+    paths:
+      - "sip-engine/zpcl/**"
+      - ".github/workflows/zpcl-tests.yml"
+  push:
+    branches:
+      - "feat/zpcl-v0-1"
+    paths:
+      - "sip-engine/zpcl/**"
+      - ".github/workflows/zpcl-tests.yml"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run evaluator unit tests
+        working-directory: sip-engine/zpcl
+        run: node --test evaluator.test.js
