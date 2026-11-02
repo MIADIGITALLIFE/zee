@@ -24,7 +24,7 @@ revoke insert, update, delete, truncate on public.cognitive_seed_versions from a
 create or replace function public.cmm_record_seed_verification(
   p_verifier_user_id uuid, p_seed_id uuid, p_evidence_checks jsonb, p_rationale text
 ) returns jsonb
-language plpgsql security definer set search_path = public, auth, pg_temp as $$
+language plpgsql security definer set search_path = pg_catalog as $
 declare
   v_seed public.cognitive_seeds%rowtype;
   v_assignment public.cmm_verifier_assignments%rowtype;
