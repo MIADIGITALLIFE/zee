@@ -5,6 +5,8 @@ on:
     paths:
       - "supabase/functions/cognitive-memory-manager/**"
       - "supabase/functions/cognitive-evidence-validator/**"
+      - "supabase/functions/zhi-agnes-chat/**"
+      - "supabase/functions/_shared/continuity-context*"
       - "supabase/migrations/**"
       - ".github/workflows/cmm-validation.yml"
       - ".github/workflows/cmm-live-e2e.yml"
@@ -14,6 +16,9 @@ on:
     paths:
       - "supabase/functions/cognitive-memory-manager/**"
       - "supabase/functions/cognitive-evidence-validator/**"
+      - "supabase/functions/cognitive-memory-manager/**"
+      - "supabase/functions/zhi-agnes-chat/**"
+      - "supabase/functions/_shared/continuity-context*"
       - "supabase/migrations/**"
       - ".github/workflows/cmm-validation.yml"
 
@@ -34,6 +39,10 @@ jobs:
         run: deno check supabase/functions/cognitive-memory-manager/index.ts
       - name: Type-check evidence validator
         run: deno check supabase/functions/cognitive-evidence-validator/index.ts
+      - name: Type-check ZHI chat with continuity retrieval
+        run: deno check supabase/functions/zhi-agnes-chat/index.ts
+      - name: Test continuity memory allow-list
+        run: deno test supabase/functions/_shared/continuity-context.test.ts
 
   migration-sql-parse:
     runs-on: ubuntu-latest
@@ -51,6 +60,7 @@ jobs:
             supabase/migrations/20261102000000_cognitive_memory_foundation.sql \
             supabase/migrations/20261102010000_cmm_independent_verification.sql \
             supabase/migrations/20261102020000_cmm_evidence_validator.sql \
-            supabase/migrations/20261102030000_cmm_persistent_seed_lifecycle.sql; do
+            supabase/migrations/20261102030000_cmm_persistent_seed_lifecycle.sql \
+            supabase/migrations/20261102040000_cmm_reviewed_memory_admission.sql; do
             sqlfluff parse --dialect postgres "$migration"
           done

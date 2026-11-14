@@ -33,6 +33,12 @@ jobs:
       - name: Test persona configuration validator
         run: deno test supabase/functions/_shared/persona-config-context.test.ts
 
+      - name: Test trusted-memory continuity allow-list
+        run: deno test supabase/functions/_shared/continuity-context.test.ts
+
+      - name: Type-check ZHI chat Edge Function
+        run: deno check supabase/functions/zhi-agnes-chat/index.ts
+
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:

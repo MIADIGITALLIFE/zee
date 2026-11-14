@@ -66,6 +66,30 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Invalid JSON" }, 400);
   }
 
+  const db = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  if (body.action === "review_proposal") {
+    const { proposal_id, decision, rationale } = body;
+    if (!isUuid(proposal_id) || !["approve", "reject"].includes(String(decision)) ||
+        !nonEmpty(rationale, 4000)) {
+      return json({ error: "proposal_id, approve/reject decision and rationale are required" }, 400);
+    }
+    const { data, error } = await db.rpc("cmm_review_memory_proposal", {
+      p_actor_id: user.id,
+      p_proposal_id: proposal_id,
+      p_decision: decision,
+      p_rationale: rationale.trim(),
+    });
+    if (error) {
+      console.error("CMM proposal review failed", error.message);
+      const status = error.code === "P0002" ? 404 : error.code === "42501" ? 403 : 409;
+      return json({ error: "Memory proposal review could not be completed", code: error.code }, status);
+    }
+    return json({ ok: true, review: data });
+  }
+
   const { seed_id, request_key, claim, evidence_summary, confidence_basis } = body;
   if (!isUuid(seed_id) || !isUuid(request_key)) {
     return json({ error: "seed_id and request_key must be UUIDs" }, 400);
@@ -74,10 +98,6 @@ Deno.serve(async (req: Request) => {
       !nonEmpty(confidence_basis, 2000)) {
     return json({ error: "claim, evidence_summary and confidence_basis are required" }, 400);
   }
-
-  const db = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   // The owner filter is mandatory even though the service-role client bypasses RLS.
   const { data: seed, error: seedError } = await db.from("cognitive_seeds")
