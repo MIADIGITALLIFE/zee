@@ -9,7 +9,7 @@ test('new evolution lab dashboard exposes five system entry points', async ({ pa
   await expect(page.locator('a.module')).toHaveCount(5);
   await expect(page.locator('a[href="./legacy/model-v4.1.html"]').first()).toBeVisible();
   await expect(page.locator('a[href="./admin.html"]')).toHaveCount(4);
-  await expect(page.locator('a[href="./sip-engine/index.html"]')).toBeVisible();
+  await expect(page.locator('a[href="./sip-engine/index.html"]').first()).toBeVisible();
 });
 
 test.beforeEach(async ({ page }) => {
