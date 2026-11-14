@@ -175,7 +175,7 @@ begin
 
     for v_ref in select value from jsonb_array_elements(v_seed.evidence_refs) loop
       v_evidence_ref := case when jsonb_typeof(v_ref) = 'string'
-        then trim(both '"' from v_ref::text) else v_ref->>'evidence_ref' end;
+        then v_ref #>> '{}' else v_ref->>'evidence_ref' end;
       insert into public.memory_evidence
         (memory_id,agent_id,owner_user_id,evidence_ref,evidence_kind,
          source_uri,source_hash,verification_status,independently_verified,
