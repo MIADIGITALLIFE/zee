@@ -124,7 +124,7 @@ begin
 
     for v_ref in select value from jsonb_array_elements(v_seed.evidence_refs) loop
       v_evidence_ref := case when jsonb_typeof(v_ref) = 'string'
-        then trim(both '"' from v_ref::text) else v_ref->>'evidence_ref' end;
+        then v_ref #>> '{}' else v_ref->>'evidence_ref' end;
       if v_evidence_ref is null or not exists (
         select 1 from jsonb_array_elements(v_audit.evidence_snapshot) e(value)
         where e.value->>'evidence_ref' = v_evidence_ref
@@ -182,8 +182,9 @@ begin
          verifier_id,metadata)
       values
         (v_memory.id,v_memory.agent_id,p_actor_id,v_evidence_ref,
-         coalesce(nullif(v_ref->>'evidence_kind',''),'seed_evidence'),
-         nullif(v_ref->>'source_uri',''),nullif(v_ref->>'source_hash',''),
+         coalesce(nullif(case when jsonb_typeof(v_ref) = 'object' then v_ref->>'evidence_kind' end,''),'seed_evidence'),
+         nullif(case when jsonb_typeof(v_ref) = 'object' then v_ref->>'source_uri' end,''),
+         nullif(case when jsonb_typeof(v_ref) = 'object' then v_ref->>'source_hash' end,''),
          'verified',true,v_seed.independently_verified_by,
          jsonb_build_object('seed_id',v_seed.id,'verification_ref',v_audit.verification_ref,
            'audit_id',v_audit.id))
