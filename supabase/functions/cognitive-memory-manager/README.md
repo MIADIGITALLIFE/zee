@@ -42,3 +42,21 @@ Requires a valid Supabase user access token. The function authenticates the call
 This function does not authenticate the verifier's role or write the independent-verification fields. Those fields must be populated by a separately authorized server workflow. The current Seed Manager is an in-memory lifecycle guard and does not persist or authenticate reviewer actions. Do not treat a client-supplied stage or verification label as authoritative.
 
 This endpoint does not approve proposals, create trusted memories, create graph relations, revise historical memories, or modify personality configuration. Those require separate audited workflows.
+
+
+## Owner-reviewed admission
+
+After a pending proposal has been created, the authenticated owner may explicitly review it:
+
+```json
+{
+  "action": "review_proposal",
+  "proposal_id": "UUID",
+  "decision": "approve",
+  "rationale": "Why the verified evidence supports durable admission"
+}
+```
+
+Use `decision: "reject"` to reject the proposal. The caller identity is derived from the verified Supabase Auth session, not from the request body. Approval rechecks every S3 source and its matching all-supports verification audit in a database transaction. It then creates the trusted memory, version snapshot, verified evidence rows, admission review, and append-only proposal-review audit. Repeated approval of the same proposal is idempotent.
+
+A pending proposal is never trusted memory. Approval does not modify personality configuration. S2 hypotheses, rejected evidence, missing provenance, and unverified source records cannot be admitted.
