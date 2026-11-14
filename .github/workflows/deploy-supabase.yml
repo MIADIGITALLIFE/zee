@@ -52,4 +52,4 @@ jobs:
         run: supabase functions list --project-ref "$PROJECT_REF" --debug
 
       - name: Deploy ZEE AI function
-        run: supabase functions deploy zhi-agnes-chat --project-ref "$PROJECT_REF" --debug
+        run: supabase functions deploy zhi-agnes-chat --remote="$PROJECT_REF" --yes --debug

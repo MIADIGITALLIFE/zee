@@ -42,17 +42,14 @@ jobs:
         with:
           version: latest
 
-      - name: Link target Supabase project
-        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
-
       - name: Apply database migrations
-        run: supabase db push --linked --yes
+        run: supabase db push --remote="$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" --yes
 
       - name: Deploy Cognitive Memory Manager
-        run: supabase functions deploy cognitive-memory-manager --project-ref "$PROJECT_REF"
+        run: supabase functions deploy cognitive-memory-manager --remote="$PROJECT_REF" --yes
 
       - name: Deploy Cognitive Evidence Validator
-        run: supabase functions deploy cognitive-evidence-validator --project-ref "$PROJECT_REF"
+        run: supabase functions deploy cognitive-evidence-validator --remote="$PROJECT_REF" --yes
 
       - name: Verify deployed functions
         run: supabase functions list --project-ref "$PROJECT_REF"
