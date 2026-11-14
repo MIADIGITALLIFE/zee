@@ -1,25 +1,26 @@
-name: Validate ZEE model studio
+name: Validate ZEE Evolution Lab and Legacy Studio
 
 on:
   pull_request:
     paths:
       - "admin.html"
       - "scripts/validate_admin_html.py"
-      - "admin.html"
-      - "scripts/validate_admin_html.py"
       - "model.html"
+      - "legacy/**"
+      - "tests/model-studio.spec.cjs"
       - "schemas/**"
       - "scripts/validate_model_html.py"
       - "docs/**"
       - ".github/workflows/validate-model-html.yml"
   push:
     branches:
-      - "feat/ontology-dictionary-studio"
+      - "feat/digital-life-evolution-lab-v1"
     paths:
       - "model.html"
+      - "legacy/**"
+      - "tests/model-studio.spec.cjs"
       - "schemas/**"
       - "scripts/validate_model_html.py"
-      - "docs/**"
       - ".github/workflows/validate-model-html.yml"
 
 permissions:
@@ -41,5 +42,5 @@ jobs:
           node-version: "24"
       - name: Validate admin console HTML and embedded JavaScript
         run: python scripts/validate_admin_html.py
-      - name: Validate model studio HTML and embedded JavaScript
+      - name: Validate evolution dashboard and archived studio
         run: python scripts/validate_model_html.py

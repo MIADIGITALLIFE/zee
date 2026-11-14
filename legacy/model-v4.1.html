@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>数字生命调香室 v4.1</title>
+<style>
+:root{color-scheme:dark;--bg:#080d19;--panel:#111a2b;--line:#25334a;--muted:#9aa9bf;--teal:#5eead4;--blue:#a5b4fc;--green:#6ee7b7}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#15243a 0,#080d19 55%);color:#eef4ff;font:16px/1.6 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;min-height:100vh}button,input{font:inherit}button{cursor:pointer}.wrap{width:min(1120px,100% - 32px);margin:auto;padding:42px 0 56px}.hero{text-align:center;margin-bottom:30px}.eyebrow{color:var(--teal);letter-spacing:.2em;font-size:.75rem;text-transform:uppercase}.hero h1{font-size:clamp(2rem,5vw,3.5rem);line-height:1.15;margin:12px 0;background:linear-gradient(100deg,#5eead4,#a5b4fc,#c4b5fd);color:transparent;background-clip:text}.hero p{color:var(--muted);max-width:650px;margin:0 auto}.panel{background:rgba(17,26,43,.88);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,3vw,28px);box-shadow:0 18px 45px #0002}.presets{margin-bottom:22px}.section-title{font-size:1.05rem;margin:0 0 18px;color:var(--teal)}.preset-list{display:flex;flex-wrap:wrap;gap:10px}.preset{border:1px solid #354760;border-radius:999px;background:#18243a;color:#dce8fb;padding:9px 15px;font-size:.9rem}.preset:hover,.preset.active{border-color:var(--teal);background:#14353a}.layout{display:grid;grid-template-columns:minmax(0, .92fr) minmax(0,1.08fr);gap:22px;align-items:stretch}.stack{display:flex;flex-direction:column;gap:22px}.control{margin-bottom:20px}.control:last-child{margin-bottom:0}.control-head{display:flex;justify-content:space-between;gap:12px;font-size:.93rem;margin-bottom:8px}.control-head output{color:var(--blue);font-weight:700;white-space:nowrap}input[type=range]{width:100%;accent-color:#5eead4;cursor:pointer}input.brain{accent-color:#6ee7b7}.ends{display:flex;justify-content:space-between;color:#7f91aa;font-size:.75rem;gap:10px}.brain-total{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);margin-top:14px;padding-top:13px;color:var(--muted);font-size:.85rem}.brain-total strong{color:var(--green);font-size:1rem}.preview{color:#d8e2f2;background:#09111f;border:1px solid #26344a;border-radius:14px;padding:17px;min-height:135px;white-space:pre-line}.sim{color:#d8e2f2;background:#09111f;border:1px solid #26344a;border-radius:14px;padding:17px;min-height:110px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.action{border:1px solid #394b65;background:#1a2940;color:#eef4ff;border-radius:13px;padding:14px 12px;font-weight:700;font-size:.88rem;transition:transform .15s,border-color .15s}.action:hover{border-color:#7dd3fc;transform:translateY(-1px)}.action.primary{background:linear-gradient(110deg,#6d28d9,#4338ca);border:0}.note{font-size:.78rem;color:#8393aa;margin:18px 2px 0}.status{min-height:1.4em;color:var(--teal);font-size:.82rem;margin-top:10px}.hidden{display:none!important}
+@media(max-width:760px){.wrap{padding:28px 0 40px}.layout{grid-template-columns:1fr}.hero{margin-bottom:24px}.panel{border-radius:16px}.actions{grid-template-columns:1fr}.preset-list{gap:8px}.preset{font-size:.82rem}.ends{font-size:.69rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<style id="ontology-studio-v1">
+.ontology-suite{margin-top:26px}.ontology-suite .section-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ontology-suite .section-title small{font-size:.72rem;color:var(--muted);font-weight:400}.ontology-intro{color:var(--muted);font-size:.88rem;max-width:850px;margin:-6px 0 20px}.ontology-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ontology-domain{padding:14px;border:1px solid #2a3b52;border-radius:12px;background:#0b1423}.ontology-domain b{display:block;color:var(--teal);font-size:.88rem;margin-bottom:5px}.ontology-domain span{color:#9eacc0;font-size:.78rem;line-height:1.7}.ontology-types{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.ontology-type{font-size:.75rem;color:#c7d5e9;border:1px solid #34445d;border-radius:999px;padding:4px 9px;background:#0b1423}.ontology-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.ontology-form .control{margin:0}.ontology-form label{display:block;font-size:.8rem;color:#cbd5e1;margin:0 0 6px}.ontology-form input,.ontology-form select,.ontology-form textarea{width:100%;border:1px solid #34445d;background:#09111f;color:#eef4ff;border-radius:10px;padding:10px 11px;outline:none;font:inherit;font-size:.88rem}.ontology-form textarea{min-height:74px;resize:vertical}.ontology-form input:focus,.ontology-form select:focus,.ontology-form textarea:focus{border-color:var(--teal)}.ontology-form .wide{grid-column:1/-1}.ontology-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.ontology-actions button{border:1px solid #3c506b;background:#1a2940;color:#eef4ff;border-radius:10px;padding:10px 14px;font-size:.86rem}.ontology-actions .primary{background:linear-gradient(110deg,#0f766e,#4338ca);border:0}.ontology-json{white-space:pre-wrap;overflow-wrap:anywhere;max-height:440px;overflow:auto;background:#070d17;border:1px solid #26344a;border-radius:12px;padding:15px;color:#c9d7ea;font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;margin-top:14px}.ontology-note{font-size:.78rem;color:#8798ae;line-height:1.8;margin:12px 0 0}.ontology-status{min-height:1.5em;color:var(--teal);font-size:.82rem;margin-top:10px}.ontology-status.error{color:#fca5a5}
+@media(max-width:760px){.ontology-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ontology-form{grid-template-columns:1fr}.ontology-form .wide{grid-column:auto}}
+@media(max-width:460px){.ontology-grid{grid-template-columns:1fr}.ontology-suite .panel{padding:16px}.ontology-actions button{width:100%}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="hero"><div class="eyebrow">ZEE · DIGITAL PERSONA STUDIO</div><h1>数字生命调香室</h1><p>调节人格倾向与脑力场配比，实时预览一份可导出的角色配置。此页面目前是前端模拟器，不会自动修改或训练后端 AI。</p></header>
+<section class="panel presets">
+<h2 class="section-title">🔮 经典灵魂配方 · 一键调配</h2>
+<div class="preset-list" id="preset-container"></div>
+</section>
+<div class="layout">
+<section class="panel">
+<h2 class="section-title">🌊 灵魂特征参数</h2>
+<div class="control"><div class="control-head"><label for="gender">潮汐波长（表达能量倾向）</label><output id="val-gender" for="gender">50</output></div><input type="range" id="gender" min="0" max="100" value="50"><div class="ends"><span>柔和、包容</span><span>直接、锋芒</span></div></div>
+<div class="control"><div class="control-head"><label for="age">数字年轮（心理风格年龄）</label><output id="val-age" for="age">30 岁</output></div><input type="range" id="age" min="18" max="60" value="30"><div class="ends"><span>轻盈、好奇</span><span>沉稳、厚重</span></div></div>
+<div class="control"><div class="control-head"><label for="maturity">涟漪频宽（成熟与弹性）</label><output id="val-maturity" for="maturity">50</output></div><input type="range" id="maturity" min="0" max="100" value="50"><div class="ends"><span>即兴、跳跃</span><span>审慎、沉着</span></div></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:25px 0">
+<h2 class="section-title">🧠 大脑脑力场配比 <span style="font-size:.78rem;color:var(--muted);font-weight:400">（总和固定为 100%）</span></h2>
+<div id="brain-sliders">
+<div class="control"><div class="control-head"><label for="empathy">共情与包容</label><output id="val-empathy">40%</output></div><input class="brain" type="range" id="empathy" min="0" max="100" value="40"></div>
+<div class="control"><div class="control-head"><label for="creation">自主创化与建设</label><output id="val-creation">25%</output></div><input class="brain" type="range" id="creation" min="0" max="100" value="25"></div>
+<div class="control"><div class="control-head"><label for="stability">稳定与心理重力</label><output id="val-stability">15%</output></div><input class="brain" type="range" id="stability" min="0" max="100" value="15"></div>
+<div class="control"><div class="control-head"><label for="innovation">跨界创新与直觉</label><output id="val-innovation">15%</output></div><input class="brain" type="range" id="innovation" min="0" max="100" value="15"></div>
+<div class="control"><div class="control-head"><label for="metacognition">元认知与自省</label><output id="val-metacognition">5%</output></div><input class="brain" type="range" id="metacognition" min="0" max="100" value="5"></div>
+</div>
+<div class="brain-total"><span>当前配比总和</span><strong id="brain-total">100%</strong></div>
+</section>
+<div class="stack">
+<section class="panel"><h2 class="section-title">🔮 灵魂实时觉察独白</h2><div id="preview-text" class="preview" aria-live="polite"></div></section>
+<section class="panel"><h2 class="section-title">💬 语气拟真沙箱</h2><div id="simulation-text" class="sim" aria-live="polite"></div><p class="note">以下为基于滑块规则生成的示例文案，不是后端模型真实回复或能力评测。</p></section>
+<section class="panel"><h2 class="section-title">📦 导出配置</h2><div class="actions"><button class="action" id="btn-export" type="button">💾 导出 JSON 配置</button><button class="action primary" id="btn-poster" type="button">🎨 生成图腾海报 PNG</button></div><div class="status" id="status" role="status"></div><p class="note">导出的 JSON 可作为后续接入 ZEE 后端的配置草案；它不会自动写入数据库或 Supabase。</p></section>
+</div>
+</div>
+<canvas id="poster-canvas" width="900" height="1200" class="hidden" aria-hidden="true"></canvas>
+</main>
+<script>
+(function(){
+'use strict';
+const presets={
+'温暖包容的共创伙伴':{gender:30,age:30,maturity:45,empathy:45,creation:25,stability:15,innovation:10,metacognition:5},
+'傲娇高冷极客天才':{gender:85,age:24,maturity:35,empathy:10,creation:50,stability:15,innovation:20,metacognition:5},
+'沉香磐石灵魂树洞':{gender:20,age:48,maturity:85,empathy:50,creation:10,stability:30,innovation:5,metacognition:5},
+'赛博狂放破局军师':{gender:75,age:35,maturity:70,empathy:15,creation:30,stability:20,innovation:30,metacognition:5}
+};
+const ids=['gender','age','maturity','empathy','creation','stability','innovation','metacognition'];
+const brainIds=['empathy','creation','stability','innovation','metacognition'];
+const labels={empathy:'共情与包容',creation:'自主创化与建设',stability:'稳定与心理重力',innovation:'跨界创新与直觉',metacognition:'元认知与自省'};
+const $=id=>document.getElementById(id);
+const read=id=>Number($(id).value);
+function values(){const o={};ids.forEach(id=>o[id]=read(id));return o}
+function setStatus(s){$('status').textContent=s}
+function applyPreset(name){const p=presets[name];if(!p)return;ids.forEach(id=>$(id).value=p[id]);render();document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('active',b.textContent===name));}
+function balance(changed){
+ let remaining=100-read(changed);
+ const others=brainIds.filter(id=>id!==changed);
+ const sum=others.reduce((n,id)=>n+read(id),0);
+ if(remaining<0){$(changed).value=100;remaining=0}
+ if(sum===0){const each=Math.floor(remaining/others.length);let left=remaining;others.forEach((id,i)=>{const v=i===others.length-1?left:each;$(id).value=v;left-=v});}
+ else {let assigned=0;const parts=others.map(id=>({id,exact:read(id)*remaining/sum}));parts.forEach(p=>{p.base=Math.floor(p.exact);p.frac=p.exact-p.base;assigned+=p.base});parts.sort((a,b)=>b.frac-a.frac);for(let i=0;i<remaining-assigned;i++)parts[i%parts.length].base++;parts.forEach(p=>$(p.id).value=p.base);}
+}
+function render(){
+ ids.forEach(id=>{const out=$('val-'+id);if(out)out.textContent=read(id)+(brainIds.includes(id)?'%':id==='age'?' 岁':'')});
+ const v=values(), total=brainIds.reduce((n,id)=>n+v[id],0);
+ $('brain-total').textContent=total+'%';$('brain-total').style.color=total===100?'var(--green)':'#fca5a5';
+ const tone=v.gender<35?'温和、细腻':v.gender>65?'直接、锐利':'平衡、灵活';
+ const maturity=v.maturity<35?'保留好奇与即兴空间':v.maturity>70?'优先审慎判断与长线思考':'在探索和判断之间保持弹性';
+ const top=brainIds.slice().sort((a,b)=>v[b]-v[a]).slice(0,2).map(id=>labels[id]).join('与');
+ $('preview-text').textContent='我的表达更偏向'+tone+'，心理风格年龄设为 '+v.age+' 岁。'+maturity+'。\n\n当前最突出的脑力倾向是：'+top+'。这些数值是你设定的角色参数，不代表真实人格测量。';
+ let reply='我会先把现象拆成可验证的部分，再逐项检查。';
+ if(v.empathy>=35)reply='我理解这个故障会打断你的工作节奏。我们先稳住现状，再一步步定位原因。';
+ if(v.creation>=35)reply+=' 我也会提出一个可以快速验证的替代方案。';
+ if(v.stability>=25)reply+=' 在修改前先保留原版本，并确认每一步都能回滚。';
+ if(v.innovation>=25)reply+=' 如果常规路径无效，我们再比较另一种实现思路。';
+ if(v.metacognition>=15)reply+=' 最后我会区分已经验证的事实、推测和仍需测试的部分。';
+ $('simulation-text').textContent='假设遇到网页功能异常：\n“'+reply+'”';
+}
+function config(){return {schema_version:'1.0',product:'ZEE',model:'digital-persona-profile',updated_at:new Date().toISOString(),note:'Frontend draft only; not connected to or applied to a backend model.',parameters:values(),brain_weights:Object.fromEntries(brainIds.map(id=>[id,read(id)])),brain_weights_total:brainIds.reduce((n,id)=>n+read(id),0)}}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function exportJSON(){const data=config();download(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}),'zee-persona-config.json');setStatus('JSON 配置已生成；请检查文件内容后再用于后续集成。')}
+function poster(){
+ const c=$('poster-canvas'),ctx=c.getContext('2d'),v=values(),g=ctx.createLinearGradient(0,0,c.width,c.height);
+ g.addColorStop(0,'#0b1728');g.addColorStop(.55,'#19294a');g.addColorStop(1,'#24143c');ctx.fillStyle=g;ctx.fillRect(0,0,c.width,c.height);
+ for(let i=0;i<180;i++){const x=(Math.sin(i*127.1+v.gender)*.5+.5)*c.width,y=(Math.sin(i*311.7+v.maturity*2)*.5+.5)*c.height,r=1+(i%4);ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=i%3===0?'rgba(94,234,212,.7)':i%3===1?'rgba(165,180,252,.65)':'rgba(216,180,254,.55)';ctx.fill()}
+ const cx=c.width/2,cy=450;for(let i=0;i<5;i++){ctx.beginPath();ctx.ellipse(cx,cy,100+i*35,70+i*27,i*.24,0,Math.PI*2);ctx.strokeStyle='rgba(125,211,252,'+(0.65-i*.09)+')';ctx.lineWidth=2;ctx.stroke()}
+ ctx.textAlign='center';ctx.fillStyle='#e7f7ff';ctx.font='bold 48px system-ui,sans-serif';ctx.fillText('数字生命调香室',cx,115);ctx.fillStyle='#9fb7d6';ctx.font='24px system-ui,sans-serif';ctx.fillText('ZEE · DIGITAL PERSONA',cx,158);
+ ctx.fillStyle='#f0f6ff';ctx.font='bold 30px system-ui,sans-serif';ctx.fillText('灵魂参数图腾',cx,650);
+ ctx.font='22px system-ui,sans-serif';ctx.fillStyle='#cbd5e1';ctx.fillText('表达能量 '+v.gender+'  ·  心理风格 '+v.age+' 岁  ·  成熟张力 '+v.maturity,cx,705);
+ brainIds.forEach((id,i)=>{const y=790+i*55;ctx.textAlign='left';ctx.fillStyle='#cbd5e1';ctx.font='22px system-ui,sans-serif';ctx.fillText(labels[id],100,y);ctx.textAlign='right';ctx.fillStyle='#5eead4';ctx.fillText(v[id]+'%',800,y);ctx.fillStyle='rgba(148,163,184,.25)';ctx.fillRect(100,y+12,700,8);ctx.fillStyle='#5eead4';ctx.fillRect(100,y+12,700*v[id]/100,8)});
+ ctx.textAlign='center';ctx.fillStyle='#8196b5';ctx.font='18px system-ui,sans-serif';ctx.fillText('配置草案 · 不代表真实人格测量或后端已生效',cx,1130);
+ c.toBlob(blob=>{if(blob){download(blob,'zee-persona-totem.png');setStatus('PNG 海报已生成。')}else setStatus('浏览器未能生成海报，请重试。')},'image/png');
+}
+const container=$('preset-container');Object.keys(presets).forEach(name=>{const b=document.createElement('button');b.type='button';b.className='preset';b.textContent=name;b.addEventListener('click',()=>applyPreset(name));container.appendChild(b)});
+ids.forEach(id=>$(id).addEventListener('input',()=>{if(brainIds.includes(id))balance(id);document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));render()}));
+$('btn-export').addEventListener('click',exportJSON);$('btn-poster').addEventListener('click',poster);
+render();
+})();
+</script>
+
+<section class="panel ontology-suite" id="ontology-suite" aria-labelledby="ontology-heading">
+  <h2 class="section-title" id="ontology-heading">🧭 本体字典与认知闭环 <small>ONTOLOGY DICTIONARY · V1.0</small></h2>
+  <p class="ontology-intro">把“调香参数”从单纯的角色滑杆扩展为可追溯的本体草案：区分对象、关系、状态、证据、时间与反馈。当前只在浏览器生成本地 JSON，不写入 Supabase，不训练或修改后端 AI。</p>
+  <div class="ontology-grid" aria-label="六大基础本体域">
+    <div class="ontology-domain"><b>O-01 自我 · Self</b><span>身份、状态、能力、限制、目标与连续性</span></div>
+    <div class="ontology-domain"><b>O-02 他者 · Other</b><span>其他主体；区分观测、他者报告与内心推断</span></div>
+    <div class="ontology-domain"><b>O-03 世界 · World</b><span>对象、地点、资源、事件、规则与未知条件</span></div>
+    <div class="ontology-domain"><b>O-04 关系 · Relation</b><span>有类型、端点、方向、有效期和证据的关联</span></div>
+    <div class="ontology-domain"><b>O-05 变化 · Change</b><span>状态变化、版本差异与原因置信度分开记录</span></div>
+    <div class="ontology-domain"><b>O-06 反馈 · Feedback</b><span>预测与实际结果比较，决定是否修订模型</span></div>
+  </div>
+  <h3 class="section-title" style="margin-top:24px">15 个核心本体类型 <small>注册表 · 仅作语义字典展示</small></h3>
+  <div class="ontology-types" aria-label="15 个核心本体类型">
+    <span class="ontology-type">Self · 自我</span><span class="ontology-type">Other · 他者</span><span class="ontology-type">WorldObject · 世界对象</span><span class="ontology-type">Event · 事件</span><span class="ontology-type">Relation · 关系</span><span class="ontology-type">State · 状态</span><span class="ontology-type">Change · 变化</span><span class="ontology-type">Memory · 记忆</span><span class="ontology-type">EpistemicClaim · 认知主张</span><span class="ontology-type">Goal · 目标</span><span class="ontology-type">ValueAffectState · 价值与情感状态</span><span class="ontology-type">Action · 行动</span><span class="ontology-type">Feedback · 反馈</span><span class="ontology-type">Capability · 能力</span><span class="ontology-type">OntologyVersion · 本体版本</span>
+  </div>
+  <h3 class="section-title" style="margin-top:26px">创建一条可追溯的本体记录 <small>候选记录 · 不会自动成为事实</small></h3>
+  <div class="ontology-form">
+    <div class="control"><label for="onto-id">对象 ID（稳定标识）</label><input id="onto-id" maxlength="100" placeholder="例如 claim_bridge_closed"></div>
+    <div class="control"><label for="onto-type">本体类型</label><select id="onto-type"><option value="EpistemicClaim">认知主张 EpistemicClaim</option><option value="Event">事件 Event</option><option value="WorldObject">世界对象 WorldObject</option><option value="Relation">关系 Relation</option><option value="State">状态 State</option><option value="Change">变化 Change</option><option value="Memory">记忆 Memory</option><option value="Goal">目标 Goal</option><option value="Action">行动 Action</option><option value="Feedback">反馈 Feedback</option><option value="Capability">能力 Capability</option><option value="Self">自我 Self</option><option value="Other">他者 Other</option><option value="ValueAffectState">价值与情感状态 ValueAffectState</option><option value="OntologyVersion">本体版本 OntologyVersion</option></select></div>
+    <div class="control"><label for="onto-label">名称</label><input id="onto-label" maxlength="160" placeholder="人类可读名称，不作为唯一 ID"></div>
+    <div class="control"><label for="onto-state">当前状态</label><input id="onto-state" maxlength="160" placeholder="例如 closed / candidate / unknown"></div>
+    <div class="control"><label for="onto-epistemic">认知状态</label><select id="onto-epistemic"><option value="observed">observed · 已观测</option><option value="reported">reported · 已报告</option><option value="verified">verified · 已验证</option><option value="inferred">inferred · 推断</option><option value="hypothesis">hypothesis · 假设</option><option value="unknown">unknown · 未知</option><option value="conflicted">conflicted · 冲突</option></select></div>
+    <div class="control"><label for="onto-revision">修订序号</label><input id="onto-revision" type="number" min="1" step="1" value="1"></div>
+    <div class="control wide"><label for="onto-description">语义描述 / 主张内容</label><textarea id="onto-description" maxlength="2000" placeholder="描述记录的内容；不要把推断原因写成已验证事实。"></textarea></div>
+    <div class="control"><label for="onto-source">证据来源引用</label><input id="onto-source" maxlength="500" placeholder="例如 event_123、message_456；无来源请明确留空"></div>
+    <div class="control"><label for="onto-relation">关系类型（可选）</label><select id="onto-relation"><option value="">无关系</option><option value="is_a">is_a · 属于类型</option><option value="part_of">part_of · 整体组成</option><option value="has_state">has_state · 具有状态</option><option value="related_to">related_to · 一般关联</option><option value="causes">causes · 因果主张</option><option value="before">before · 时间先后</option><option value="after">after · 时间先后</option><option value="depends_on">depends_on · 依赖</option><option value="interacts_with">interacts_with · 交互</option><option value="supports">supports · 支持主张</option><option value="contradicts">contradicts · 冲突</option><option value="derived_from">derived_from · 派生来源</option><option value="updates">updates · 更新</option><option value="supersedes">supersedes · 特定范围取代</option><option value="has_goal">has_goal · 关联目标</option></select></div>
+    <div class="control"><label for="onto-source-entity">关系起点 ID（可选）</label><input id="onto-source-entity" maxlength="100" placeholder="source_entity"></div>
+    <div class="control"><label for="onto-target-entity">关系终点 ID（可选）</label><input id="onto-target-entity" maxlength="100" placeholder="target_entity"></div>
+    <div class="control"><label for="onto-event-time">事件发生时间（可选）</label><input id="onto-event-time" type="datetime-local"></div>
+    <div class="control"><label for="onto-observed-at">系统观测时间（可选）</label><input id="onto-observed-at" type="datetime-local"></div>
+    <div class="control"><label for="onto-valid-from">有效期开始（可选）</label><input id="onto-valid-from" type="datetime-local"></div>
+    <div class="control"><label for="onto-valid-to">有效期结束（可选）</label><input id="onto-valid-to" type="datetime-local"></div>
+  </div>
+  <div class="ontology-actions"><button type="button" class="primary" id="onto-generate">生成本体 JSON 草案</button><button type="button" id="onto-download">下载 JSON</button><button type="button" id="onto-copy">复制 JSON</button><button type="button" id="onto-reset">清空记录表单</button></div>
+  <div class="ontology-status" id="onto-status" role="status" aria-live="polite"></div>
+  <pre class="ontology-json" id="onto-output" aria-label="本体 JSON 预览">生成后将在这里显示结构化记录。尚未创建或保存任何本体数据。</pre>
+  <p class="ontology-note">语义边界：observed / reported / verified / inferred / hypothesis / unknown / conflicted 必须区分；事件时间、观测时间、记录时间与有效时间不能混用。记录生成只代表草案，不代表已经通过验证或进入 ZHI 后端。当前工具不持久化、不调用模型、不修改生产配置。</p>
+</section>
+
+<script id="ontology-studio-logic">
+(()=> {
+ const $ = id => document.getElementById(id);
+ const formIds=['onto-id','onto-type','onto-label','onto-state','onto-epistemic','onto-revision','onto-description','onto-source','onto-relation','onto-source-entity','onto-target-entity','onto-event-time','onto-observed-at','onto-valid-from','onto-valid-to'];
+ let current=null;
+ const status=(message,error=false)=>{const el=$('onto-status');el.textContent=message;el.classList.toggle('error',error)};
+ const iso=(id)=>{const value=$(id).value;if(!value)return null;const d=new Date(value);return Number.isNaN(d.getTime())?null:d.toISOString()};
+ function build(){
+   const id=$('onto-id').value.trim(),label=$('onto-label').value.trim(),relationType=$('onto-relation').value,sourceEntity=$('onto-source-entity').value.trim(),targetEntity=$('onto-target-entity').value.trim();
+   const ontologyType=$('onto-type').value,epistemicStatus=$('onto-epistemic').value,sourceRef=$('onto-source').value.trim();
+   if(!id||!label){status('请填写稳定对象 ID 和名称。',true);return null}
+   if(!/^[A-Za-z][A-Za-z0-9_-]{1,99}$/.test(id)){status('对象 ID 必须以英文字母开头，只能包含英文字母、数字、下划线或连字符（2–100 位）。',true);return null}
+   const revision=Number($('onto-revision').value);
+   if(!Number.isInteger(revision)||revision<1){status('修订序号必须是大于 0 的整数。',true);return null}
+   if(relationType&&(!sourceEntity||!targetEntity)){status('填写关系类型时，必须同时填写关系起点和终点 ID。',true);return null}
+   if(relationType&&sourceEntity===targetEntity){status('关系起点和终点不能是同一个 ID；若需自指关系，请在规范中明确定义后再录入。',true);return null}
+   if(ontologyType==='Relation'&&!relationType){status('Relation 类型必须填写关系类型与起点、终点 ID。',true);return null}
+   if(epistemicStatus==='verified'&&!sourceRef){status('认知状态选择 verified 时，请提供可追溯的来源引用；这仍不代表系统已完成独立验证。',true);return null}
+   const recordedAt=new Date().toISOString();
+   const record={
+     id,ontology_type:ontologyType,label,
+     description:$('onto-description').value.trim(),
+     state:$('onto-state').value.trim()||'unknown',
+     epistemic_status:epistemicStatus,
+     evidence:sourceRef? [{source_ref:sourceRef}]:[],
+     source_refs:sourceRef?[sourceRef]:[],
+     event_time:iso('onto-event-time'),
+     observed_at:iso('onto-observed-at'),
+     recorded_at:recordedAt,
+     validity:{from:iso('onto-valid-from'),to:iso('onto-valid-to')},
+     revision,
+     access_policy:'draft-local-only',
+     retention_policy:'not-persisted',
+     relations:relationType?[{relation_id:'rel_'+id,relation_type:relationType,source_entity:sourceEntity,target_entity:targetEntity,directionality:'directed',epistemic_status:epistemicStatus,evidence_refs:sourceRef?[sourceRef]:[],validity:{from:iso('onto-valid-from'),to:iso('onto-valid-to')},revision}]:[],
+     lifecycle:{transition:'CREATE',status:'candidate',requires_validation:true},
+     verification_status:'not-validated',
+     schema_version:'ZHI-Ontology-Dictionary-V1.0'
+   };
+   if(record.validity.from&&record.validity.to&&new Date(record.validity.to)<new Date(record.validity.from)){status('有效期结束时间不能早于开始时间。',true);return null}
+   current=record;$('onto-output').textContent=JSON.stringify(record,null,2);status('已生成本地 JSON 草案。尚未验证、上传或写入后端。');return record
+ }
+ function download(){
+   const record=current||build();if(!record)return;
+   const blob=new Blob([JSON.stringify(record,null,2)],{type:'application/json;charset=utf-8'});
+   const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=(record.id.replace(/[^a-zA-Z0-9_-]/g,'_')||'ontology-record')+'.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);status('JSON 文件已交由浏览器下载。');
+ }
+ async function copy(){
+   const record=current||build();if(!record)return;
+   try{await navigator.clipboard.writeText(JSON.stringify(record,null,2));status('JSON 已复制到剪贴板。')}
+   catch(_){status('浏览器未授予剪贴板权限；请从下方预览手动复制。',true)}
+ }
+ formIds.forEach(id=>{const el=$(id);const invalidate=()=>{if(current){current=null;$('onto-output').textContent='表单内容已修改；请重新生成 JSON 草案，避免误用旧版本。';status('草案已失效，请重新生成。')}};el.addEventListener('input',invalidate);el.addEventListener('change',invalidate)});
+ $('onto-generate').addEventListener('click',build);$('onto-download').addEventListener('click',download);$('onto-copy').addEventListener('click',copy);
+ $('onto-reset').addEventListener('click',()=>{formIds.forEach(id=>{const el=$(id);if(el.tagName==='SELECT')el.selectedIndex=0;else if(id==='onto-revision')el.value='1';else el.value=''});current=null;$('onto-output').textContent='表单已清空。尚未创建或保存任何本体数据。';status('已清空本地表单。')});
+})();
+</script>
+
+<section class="panel ontology-suite" id="cognition-loop" aria-labelledby="loop-heading" style="margin-top:22px">
+  <h2 class="section-title" id="loop-heading">↻ 离线认知闭环实验 <small>HYPOTHESIS → OBSERVATION → FEEDBACK</small></h2>
+  <p class="ontology-intro">用一条假设和一条观察，演示“提出主张—比较结果—产生反馈—修订版本”的最小闭环。实验状态只保存在当前页面内存中；刷新页面即清空，不调用模型、不写数据库。</p>
+  <div class="ontology-form">
+    <div class="control"><label for="loop-hypothesis">待检验假设</label><textarea id="loop-hypothesis" maxlength="1000" placeholder="例如：如果将提示分成两步，任务完成率会提高。"></textarea></div>
+    <div class="control"><label for="loop-observation">观察到的结果</label><textarea id="loop-observation" maxlength="1000" placeholder="填写本次实际观察；没有观察时不要编造结果。"></textarea></div>
+    <div class="control"><label for="loop-verdict">比较结论</label><select id="loop-verdict"><option value="supported">支持假设</option><option value="refuted">不支持 / 反驳假设</option><option value="inconclusive">证据不足，暂不判断</option></select></div>
+  </div>
+  <div class="preset-list" style="margin-top:14px">
+    <button class="preset" id="loop-evaluate" type="button">记录反馈并生成下一版本</button>
+    <button class="preset" id="loop-rollback" type="button">回滚到上一版本</button>
+    <button class="preset" id="loop-reset" type="button">清空实验</button>
+  </div>
+  <p id="loop-status" class="ontology-intro" role="status" aria-live="polite" style="margin-top:14px">等待输入。当前没有实验记录。</p>
+  <pre id="loop-output" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#080d19;border:1px solid var(--line);border-radius:12px;padding:16px;min-height:72px;color:#dce8fb">实验结果将在这里显示。</pre>
+  <p class="ontology-intro"><strong>解释边界：</strong>这里的“支持/反驳”是操作者选择的分类，不是自动推理或科学验证。此模块只演示版本与反馈流程，不代表 ZEE 已具备持久记忆、主动意识或真实认知能力。</p>
+</section>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ const status=$('loop-status'),out=$('loop-output');
+ let history=[],current=null;
+ function render(message){
+   status.textContent=message;
+   out.textContent=current?JSON.stringify(current,null,2):'实验结果将在这里显示。';
+ }
+ $('loop-evaluate').addEventListener('click',()=>{
+   const hypothesis=$('loop-hypothesis').value.trim();
+   const observation=$('loop-observation').value.trim();
+   if(!hypothesis||!observation){render('请同时填写假设和实际观察；不允许用空结果生成结论。');return}
+   if(current)history.push(JSON.parse(JSON.stringify(current)));
+   const verdict=$('loop-verdict').value;
+   const revision=current?current.revision+1:1;
+   current={
+     experiment_id:'offline_loop_'+new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14),
+     schema_version:'ZHI-Cognitive-Loop-Draft-V1.0',
+     revision,
+     hypothesis,
+     observation,
+     feedback:{verdict,operator_selected:true,automated_verification:false},
+     next_step:verdict==='supported'?'记录为暂时支持；在新条件下重复测试。':verdict==='refuted'?'修订或撤回假设，并设计下一轮测试。':'保留为未决问题，收集更多证据后再判断。',
+     recorded_at:new Date().toISOString(),
+     persistence:'memory-only',
+     verification_status:'not-independently-verified'
+   };
+   render('已生成第 '+revision+' 版实验记录；此结果仅在当前页面内存中。');
+ });
+ $('loop-rollback').addEventListener('click',()=>{
+   if(!history.length){render('没有可回滚的上一版本。');return}
+   current=history.pop();render('已回滚到第 '+current.revision+' 版。回滚仅作用于当前页面内存。');
+ });
+ $('loop-reset').addEventListener('click',()=>{
+   history=[];current=null;$('loop-hypothesis').value='';$('loop-observation').value='';$('loop-verdict').selectedIndex=0;
+   render('实验已清空；没有保存任何记录。');
+ });
+})();
+</script>
+
+</body>
+</html>
