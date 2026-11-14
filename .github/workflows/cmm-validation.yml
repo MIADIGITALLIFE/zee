@@ -5,6 +5,8 @@ on:
     paths:
       - "supabase/functions/cognitive-memory-manager/**"
       - "supabase/functions/cognitive-evidence-validator/**"
+      - "supabase/functions/zhi-agnes-chat/**"
+      - "supabase/functions/_shared/continuity-context*"
       - "supabase/migrations/**"
       - ".github/workflows/cmm-validation.yml"
       - ".github/workflows/cmm-live-e2e.yml"
@@ -34,6 +36,10 @@ jobs:
         run: deno check supabase/functions/cognitive-memory-manager/index.ts
       - name: Type-check evidence validator
         run: deno check supabase/functions/cognitive-evidence-validator/index.ts
+      - name: Type-check ZHI chat with continuity retrieval
+        run: deno check supabase/functions/zhi-agnes-chat/index.ts
+      - name: Test continuity memory allow-list
+        run: deno test supabase/functions/_shared/continuity-context.test.ts
 
   migration-sql-parse:
     runs-on: ubuntu-latest
