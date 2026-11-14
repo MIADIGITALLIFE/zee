@@ -46,3 +46,10 @@ The Edge Function validates the caller's Supabase Auth access token and passes t
 ## Deployment and test status
 
 This PR adds a new migration and updates the memory manager's audit/version matching. It is not deployed by this PR. After merge, the existing ordered CMM deployment workflow applies migrations and deploys both Edge Functions. Before production use, run the validation matrix with two real Supabase Auth accounts (owner and verifier), then verify the database rows and proposal behavior. CI type-checking alone does not prove the live database transaction path.
+
+
+## Phase 5 — reviewed memory admission
+
+A verified S3 seed may create only a pending consolidation proposal. The owner must explicitly approve or reject that proposal through the authenticated `cognitive-memory-manager` action. Approval revalidates every source seed and its successful evidence audit inside one database transaction, then creates a trusted memory, version snapshot, evidence rows, admission review, and immutable proposal-review audit. Repeated approval is idempotent. Rejection creates an audit record without creating a memory.
+
+The ZHI chat continuity bridge reads only memories whose lifecycle is `trusted` and verification status is `verified`. S2 hypotheses, pending proposals, disputed records, and unverified memories remain excluded. No chat turn automatically changes memory trust or personality.
