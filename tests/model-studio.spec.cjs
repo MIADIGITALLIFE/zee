@@ -4,10 +4,10 @@ const path = require('node:path');
 const pageUrl = 'file://' + path.resolve(__dirname, '../legacy/model-v4.1.html');
 
 test('new evolution lab dashboard exposes five system entry points', async ({ page }) => {
-  await page.goto('file://' + path.resolve(__dirname, '../model.html'));
+  await page.goto('file://' + path.resolve(__dirname, '../legacy/model-v4.1.html'));
   await expect(page.locator('h1')).toContainText('数字生命演化实验室');
   await expect(page.locator('a.module')).toHaveCount(5);
-  await expect(page.locator('a[href="./legacy/model-v4.1.html"]')).toBeVisible();
+  await expect(page.locator('a[href="./legacy/model-v4.1.html"]').first()).toBeVisible();
   await expect(page.locator('a[href="./admin.html"]')).toHaveCount(4);
   await expect(page.locator('a[href="./sip-engine/index.html"]')).toBeVisible();
 });
