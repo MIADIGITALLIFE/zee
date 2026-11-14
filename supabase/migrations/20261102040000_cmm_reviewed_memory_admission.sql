@@ -59,7 +59,7 @@ declare
   v_confidence_basis text;
   v_memory_type text;
 begin
-  if p_actor_id is null or p_proposal_id is null
+  if p_actor_id is null or p_proposal_id is null or p_decision is null
      or p_decision not in ('approve','reject')
      or p_rationale is null or length(trim(p_rationale)) = 0
      or length(p_rationale) > 4000 then
@@ -102,7 +102,7 @@ begin
         and agent_id = v_proposal.agent_id
       for share;
     if not found or v_seed.stage <> 'S3' or v_seed.safety_status <> 'PASS'
-       or cardinality(v_seed.evidence_refs) = 0
+       or jsonb_array_length(v_seed.evidence_refs) = 0
        or jsonb_array_length(v_seed.provenance) = 0
        or v_seed.independently_verified_by is null
        or v_seed.independently_verified_by = p_actor_id
