@@ -29,3 +29,18 @@ Configure `AGNES_API_KEY` in Supabase Edge Function secrets. Never commit it to 
 - [ ] Deploy `zhi-agnes-chat`.
 - [ ] Test with a valid administrator session and an existing `agent_id`.
 - [ ] Confirm the reply returns and the memory/history records are saved.
+
+
+## Continuous identity and memory bridge (v1)
+
+The ZHI chat runtime now reads three distinct continuity layers:
+
+1. **Identity and current mind** — the existing `zhi_agents` and `zhi_agent_minds` records.
+2. **Episodic continuity** — the existing `zhi_agent_memories` and `admin_agent_messages` history, retained across browser sessions and devices.
+3. **Trusted long-term memory** — only `cognitive_memories` rows matching the same `agent_id`, the configured admin/owner ID, `lifecycle_status = trusted`, and `verification_status = verified`.
+
+Pending proposals, S2 hypotheses, disputed memories, and unverified claims are excluded from the trusted-memory prompt context. The runtime reports counts for each loaded continuity layer. If the trusted-memory query fails, the chat can still reply using the existing context, but returns a continuity warning rather than silently claiming full memory availability.
+
+This is a read-side integration. It does not automatically promote chat text into trusted memory, approve proposals, or modify personality configuration. The existing CMM evidence and review gates remain authoritative. The configured owner ID must match the owner of the CMM memory rows.
+
+Before production acceptance, run the Edge Function deployment workflow and test a real chat turn against a known trusted memory and a pending/disputed control record. Verify that only the trusted record enters model context and that the response reports the expected continuity counts.
