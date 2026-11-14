@@ -232,8 +232,24 @@ try {
   console.log("CMM LIVE E2E: PASSED");
   console.log("Verified: independent assignment, self-review denial, unassigned denial, evidence mismatch denial, authenticated verifier identity, S2→S3 promotion, rejected branch, immutable snapshots, audit version binding, S3 pending proposal, S2 proposal denial, no automatic trusted memory.");
 } finally {
-  // Owner deletion cascades the temporary seeds and owner-scoped audit rows.
+  // Remove dependent CMM rows in FK-safe order before deleting temporary users.
   for (const userId of createdUsers) {
+    const cleanupSteps = [
+      ["memory_proposal_reviews", "owner_user_id"],
+      ["memory_proposals", "owner_user_id"],
+      ["memory_reviews", "owner_user_id"],
+      ["memory_evidence", "owner_user_id"],
+      ["memory_versions", "owner_user_id"],
+      ["cognitive_memories", "owner_user_id"],
+      ["cognitive_seed_versions", "owner_user_id"],
+      ["cmm_verification_audit", "owner_user_id"],
+      ["cmm_verifier_assignments", "owner_user_id"],
+      ["cognitive_seeds", "owner_user_id"],
+    ];
+    for (const [table, column] of cleanupSteps) {
+      const { error } = await admin.from(table).delete().eq(column, userId);
+      if (error) console.error(`Temporary cleanup warning (${table}):`, error.message);
+    }
     const { error } = await admin.auth.admin.deleteUser(userId);
     if (error) console.error("Temporary test-user cleanup warning:", error.message);
   }
