@@ -84,7 +84,7 @@ def validate_html(path, required_ids=None):
         missing = sorted(set(required_ids) - parser.ids)
         if missing:
             fail(f"{path.name}: required controls missing: " + ", ".join(missing))
-    scripts = re.findall(r"<script\\b[^>]*>(.*?)</script\\s*>", html, flags=re.I | re.S)
+    scripts = re.findall(r"<script[^>]*>(.*?)</script>", html, flags=re.I | re.S)
     if len(scripts) != parser.script_count:
         fail(f"{path.name}: extracted {len(scripts)} of {parser.script_count} script blocks")
     for index, source in enumerate(scripts, start=1):
