@@ -165,10 +165,63 @@ try {
   });
   assert(rejectedProposal.status === 409, "S2 seed cannot create a memory proposal");
 
+  // A proposal is not trusted memory until the authenticated owner explicitly approves it.
+  const { data: beforeApproval, error: beforeApprovalError } = await admin.from("cognitive_memories")
+    .select("id").eq("owner_user_id", owner.id);
+  if (beforeApprovalError) throw beforeApprovalError;
+  assert(beforeApproval.length === 0, "proposal creation alone does not create trusted memory");
+
+  const review = await callFunction("cognitive-memory-manager", owner.token, {
+    action: "review_proposal",
+    proposal_id: proposal.payload.proposal.id,
+    decision: "approve",
+    rationale: "Owner reviewed the verified fixture and approves durable admission.",
+  });
+  assert(review.status === 200 && review.payload.review?.status === "approved", "owner can explicitly approve a verified proposal");
+  const memoryId = review.payload.review.memory_id;
+  assert(typeof memoryId === "string", "approval returns the trusted memory ID");
+
+  const replay = await callFunction("cognitive-memory-manager", owner.token, {
+    action: "review_proposal",
+    proposal_id: proposal.payload.proposal.id,
+    decision: "approve",
+    rationale: "Idempotent replay of the same owner approval.",
+  });
+  assert(replay.status === 200 && replay.payload.review?.idempotent_replay === true,
+    "repeated approval is idempotent and does not create a duplicate memory");
+
+  const { data: trustedMemory, error: trustedMemoryError } = await admin.from("cognitive_memories")
+    .select("id,lifecycle_status,verification_status,current_version,source_seed_ids")
+    .eq("id", memoryId).single();
+  if (trustedMemoryError) throw trustedMemoryError;
+  assert(trustedMemory.lifecycle_status === "trusted" && trustedMemory.verification_status === "verified",
+    "approved memory is trusted and independently verified");
+  assert(trustedMemory.current_version === 1 && trustedMemory.source_seed_ids.includes(promotedSeed.id),
+    "trusted memory keeps its source seed lineage");
+
+  const { data: evidenceRows, error: evidenceRowsError } = await admin.from("memory_evidence")
+    .select("evidence_ref,verification_status,independently_verified,verifier_id")
+    .eq("memory_id", memoryId);
+  if (evidenceRowsError) throw evidenceRowsError;
+  assert(evidenceRows.length === evidenceA.length &&
+    evidenceRows.every(row => row.verification_status === "verified" &&
+      row.independently_verified === true && row.verifier_id === verifier.id),
+    "trusted memory inherits each independently reviewed evidence reference");
+
+  const { data: reviewAudit, error: reviewAuditError } = await admin.from("memory_proposal_reviews")
+    .select("decision,reviewer_id,resulting_memory_id")
+    .eq("proposal_id", proposal.payload.proposal.id);
+  if (reviewAuditError) throw reviewAuditError;
+  assert(reviewAudit.length === 1 && reviewAudit[0].decision === "approve" &&
+    reviewAudit[0].reviewer_id === owner.id && reviewAudit[0].resulting_memory_id === memoryId,
+    "owner decision is captured in append-only proposal review audit");
+
   const { data: proposals, error: proposalsError } = await admin.from("memory_proposals")
-    .select("status,source_seed_ids").eq("owner_user_id", owner.id);
+    .select("status,source_seed_ids,resulting_memory_id").eq("owner_user_id", owner.id);
   if (proposalsError) throw proposalsError;
-  assert(proposals.length === 1 && proposals[0].status === "pending_review", "exactly one pending proposal exists; no trusted memory is auto-created");
+  assert(proposals.length === 1 && proposals[0].status === "approved" &&
+    proposals[0].resulting_memory_id === memoryId,
+    "approved proposal links to exactly one durable trusted memory");
 
   const { error: immutableError } = await admin.from("cognitive_seed_versions")
     .update({ transition_reason: "tamper attempt" })
