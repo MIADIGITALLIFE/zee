@@ -1,18 +1,20 @@
-name: Test ZEE model studio interactions
+name: Test ZEE Evolution Lab and legacy studio interactions
 
 on:
   pull_request:
     paths:
       - "model.html"
+      - "legacy/**"
       - "tests/model-studio.spec.cjs"
       - "schemas/**"
       - "docs/**"
       - ".github/workflows/test-model-studio.yml"
   push:
     branches:
-      - "feat/ontology-dictionary-studio"
+      - "feat/digital-life-evolution-lab-v1"
     paths:
       - "model.html"
+      - "legacy/**"
       - "tests/model-studio.spec.cjs"
       - "schemas/**"
       - "docs/**"
@@ -36,5 +38,5 @@ jobs:
         run: npm install --no-save @playwright/test ajv ajv-formats
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run browser interaction tests
+      - name: Run dashboard and legacy browser tests
         run: npx playwright test tests/model-studio.spec.cjs --reporter=line
