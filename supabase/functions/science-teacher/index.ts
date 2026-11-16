@@ -244,6 +244,8 @@ Deno.serve(async (req: Request) => {
         .select("id,question_type,difficulty,prompt,options,marks")
         .eq("lesson_id", session.lesson_id).eq("status", "published")
         .eq("level", student.level).in("track", ["ALL", student.track])
+        .gte("difficulty", isTest ? 4 : 1)
+        .lte("difficulty", isTest ? 5 : 3)
         .order("difficulty").limit(isTest ? 20 : 10);
       if (error) throw error;
       if (!questions?.length) return reply({ error: "No published questions are available for this lesson" }, 404);
@@ -276,10 +278,16 @@ Deno.serve(async (req: Request) => {
       const attemptId = String(body.attempt_id ?? "");
       if (!attemptId) return reply({ error: "attempt_id from the practice/test question response is required" }, 400);
       const { data: attempt, error: aError } = await admin.from("science_assessment_attempts")
-        .select("id,assessment_type,status").eq("id", attemptId).eq("student_id", studentId)
+        .select("id,assessment_type,status,question_ids").eq("id", attemptId).eq("student_id", studentId)
         .eq("session_id", session.id).eq("assessment_type", attemptType).maybeSingle();
       if (aError || !attempt || attempt.status !== "in_progress") {
         return reply({ error: "Assessment attempt not found or already submitted" }, 404);
+      }
+      const issuedIds = [...new Set((attempt.question_ids ?? []).map((id: string) => String(id)))].sort();
+      const submittedIds = [...ids].sort();
+      if (issuedIds.length !== submittedIds.length ||
+          issuedIds.some((id: string, index: number) => id !== submittedIds[index])) {
+        return reply({ error: "Submitted answers must match the exact question set issued for this attempt" }, 400);
       }
       for (const answer of answers) {
         const q = questions.find((item: any) => item.id === answer.question_id);
