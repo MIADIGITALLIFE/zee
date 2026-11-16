@@ -34,7 +34,7 @@ The additive migration `20261116000000_science_learning_platform.sql` creates:
 - Per-session summaries and evidence-based analyses.
 - Mastery evidence and revision queue.
 
-All curriculum content must cite its syllabus version and source. Do not seed guessed topic lists or claim MOE alignment until the exact official syllabus, cohort transition rules, and Standard/Foundation scope have been checked and recorded.
+An official MOE 2023 P3–P6 syllabus source has now been identified and registered as a draft version. Its P5 topic overview is documented in `ZEE-SCIENCE-CURRICULUM-GOVERNANCE.md`. The full outcome-by-outcome import, original PDF formatting for Foundation exclusions, and cohort mapping still require review before publication. Do not mark the draft syllabus as published or claim every topic applies to Foundation.
 
 ## Mastery policy
 
