@@ -4,7 +4,7 @@ const URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const AGNES_API_KEY = Deno.env.get("AGNES_API_KEY") ?? "";
 const AGNES_MODEL = Deno.env.get("AGNES_MODEL") || "agnes-3.0-flash";
-const AGNES_BASE_URL = (Deno.env.get("AGNES_BASE_URL") || "https://apihub.agnes-ai.com/v1").replace(/\\/+$/, "");
+const AGNES_BASE_URL = (Deno.env.get("AGNES_BASE_URL") || "https://apihub.agnes-ai.com/v1").replace(/\/+$/, "");
 const ALLOWED_ORIGIN = Deno.env.get("SCIENCE_ALLOWED_ORIGIN") ?? "https://miadigitallife.github.io";
 const cors = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
@@ -28,7 +28,7 @@ function parseTutorOutput(raw: string): Record<string, unknown> | null {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
     return parsed as Record<string, unknown>;
   } catch {
-    const match = raw.match(/\\{[\\s\\S]*\\}/);
+    const match = raw.match(/\{[\s\S]*\}/);
     if (!match) return null;
     try {
       const parsed = JSON.parse(match[0]);
