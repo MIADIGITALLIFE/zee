@@ -10,3 +10,6 @@ verify_jwt = true
 
 [functions.cognitive-evidence-validator]
 verify_jwt = true
+
+[functions.science-teacher]
+verify_jwt = true
