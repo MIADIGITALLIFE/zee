@@ -263,7 +263,7 @@ declare
 begin
   foreach t in array array[
     'science_lesson_sessions','science_learning_events','science_assessment_attempts',
-    'science_assessment_answers','science_lesson_summaries','science_learning_analyses',
+    'science_lesson_summaries','science_learning_analyses',
     'science_mastery_evidence','science_revision_queue'
   ] loop
     execute format('drop policy if exists %I on public.%I', 'guardians read own ' || t, t);
@@ -318,3 +318,16 @@ values
     'draft'
   )
 on conflict (syllabus_code) do nothing;
+
+-- Assessment answers are intentionally not selectable by browser roles.
+-- They are linked to the guardian through their parent assessment attempt.
+drop policy if exists "guardians read own science assessment answers" on public.science_assessment_answers;
+create policy "guardians read own science assessment answers"
+  on public.science_assessment_answers for select to authenticated
+  using (exists (
+    select 1
+    from public.science_assessment_attempts a
+    join public.science_students s on s.id = a.student_id
+    where a.id = science_assessment_answers.attempt_id
+      and s.guardian_user_id = auth.uid()
+  ));
