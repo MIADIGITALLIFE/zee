@@ -19,9 +19,11 @@ const javascript = moduleScript[1].replace(/^import .*;\s*/m, "");
 new Function(javascript);
 
 const curriculumSql = readFileSync(new URL("../supabase/migrations/20261116020000_science_p5_curriculum_release.sql", import.meta.url), "utf8");
-const seedMatch = curriculumSql.match(/jsonb_array_elements\(\$seed\$([\\s\\S]*?)\$seed\$::jsonb\)/);
-assert.ok(seedMatch, "Expected embedded P5 curriculum seed");
-const curriculum = JSON.parse(seedMatch[1]);
+const seedStartToken = "jsonb_array_elements($seed$";
+const seedStart = curriculumSql.indexOf(seedStartToken);
+const seedEnd = curriculumSql.indexOf("$seed$::jsonb)", seedStart + seedStartToken.length);
+assert.ok(seedStart >= 0 && seedEnd > seedStart, "Expected embedded P5 curriculum seed");
+const curriculum = JSON.parse(curriculumSql.slice(seedStart + seedStartToken.length, seedEnd));
 assert.equal(curriculum.length, 10, "Expected five P5 topics for Standard and Foundation");
 assert.equal(curriculum.reduce((n, lesson) => n + lesson.questions.length, 0), 60, "Expected 60 P5 assessment items");
 assert.equal(new Set(curriculum.map(x => x.topic)).size, 5, "Expected all five official P5 topic areas");
