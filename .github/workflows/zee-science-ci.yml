@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "supabase/functions/science-teacher/**"
+      - "science/**"
+      - "tests/science-portal-smoke.mjs"
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - ".github/workflows/zee-science-ci.yml"
@@ -27,3 +29,11 @@ jobs:
 
       - name: Type-check ZEE Science teaching orchestrator
         run: deno check supabase/functions/science-teacher/index.ts
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate Science student portal
+        run: node tests/science-portal-smoke.mjs
