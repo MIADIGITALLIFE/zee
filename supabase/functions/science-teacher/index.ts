@@ -11,7 +11,7 @@ const cors = {
 const reply = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
-type Body = { action?: string; student_id?: string; lesson_id?: string; session_id?: string;
+type Body = { action?: string; student_id?: string; lesson_id?: string; session_id?: string; attempt_id?: string;
   passed?: boolean; answers?: Array<{ question_id: string; response: unknown }> };
 
 const transitions: Record<string, string[]> = {
@@ -175,11 +175,14 @@ Deno.serve(async (req: Request) => {
       if (!questions || questions.length !== ids.length) return reply({ error: "One or more questions are invalid" }, 400);
       let awarded = 0, total = 0, needsReview = false;
       const attemptType = isTest ? "FORMATIVE_TEST" : "PRACTICE";
-      const { data: attempt, error: aError } = await admin.from("science_assessment_attempts").insert({
-        student_id: studentId, session_id: session.id, assessment_type: attemptType,
-        status: "in_progress", total_marks: questions.reduce((s: number,q: any)=>s+Number(q.marks),0),
-      }).select("id").single();
-      if (aError) throw aError;
+      const attemptId = String(body.attempt_id ?? "");
+      if (!attemptId) return reply({ error: "attempt_id from the practice/test question response is required" }, 400);
+      const { data: attempt, error: aError } = await admin.from("science_assessment_attempts")
+        .select("id,assessment_type,status").eq("id", attemptId).eq("student_id", studentId)
+        .eq("session_id", session.id).eq("assessment_type", attemptType).maybeSingle();
+      if (aError || !attempt || attempt.status !== "in_progress") {
+        return reply({ error: "Assessment attempt not found or already submitted" }, 404);
+      }
       for (const answer of answers) {
         const q = questions.find((item: any) => item.id === answer.question_id);
         const max = Number(q.marks);
@@ -206,16 +209,24 @@ Deno.serve(async (req: Request) => {
       }
       const status = needsReview ? "review_required" : "scored";
       const pct = total ? Math.round(awarded / total * 10000) / 100 : 0;
+      const attemptId = String(body.attempt_id ?? "");
+      if (!attemptId) return reply({ error: "attempt_id is required" }, 400);
+      const { data: attempt, error: attemptLookupError } = await admin.from("science_assessment_attempts")
+        .select("id,status,assessment_type").eq("id", attemptId).eq("student_id", studentId)
+        .eq("session_id", session.id).eq("assessment_type", attemptType).maybeSingle();
+      if (attemptLookupError || !attempt || attempt.status !== "in_progress") {
+        return reply({ error: "Assessment attempt not found or already submitted" }, 404);
+      }
       const { error: updateError } = await admin.from("science_assessment_attempts").update({
         status, awarded_marks: needsReview ? null : awarded, score_percent: needsReview ? null : pct,
         scoring_version: "zee-science-marking-v1", submitted_at: new Date().toISOString(),
         scored_at: needsReview ? null : new Date().toISOString(),
-      }).eq("id", attempt.id);
+      }).eq("id", attemptId);
       if (updateError) throw updateError;
       await logEvent({ session_id: session.id, lesson_id: session.lesson_id,
         event_type: isTest ? "test_submitted" : "practice_attempt", stage,
         evidence: { attempt_id: attempt.id, status, score_percent: needsReview ? null : pct } });
-      return reply({ ok: true, attempt_id: attempt.id, status, score_percent: needsReview ? null : pct,
+      return reply({ ok: true, attempt_id: attemptId, status, score_percent: needsReview ? null : pct,
         awarded_marks: needsReview ? null : awarded, total_marks: total,
         message: needsReview ? "Some answers require rubric or teacher review; no unverified AI score was assigned." : "Answers marked." });
     }
