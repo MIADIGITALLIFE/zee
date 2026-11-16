@@ -61,7 +61,10 @@ Deno.serve(async (req: Request) => {
   const studentId = bounded(body.student_id, 80);
   const sessionId = bounded(body.session_id, 80);
   const message = bounded(body.message, 2500);
-  if (!studentId || !sessionId || !message) return json({ error: "student_id, session_id and message are required" }, 400);
+  const action = bounded(body.action, 40) || "tutor_turn";
+  if (!studentId || !sessionId) return json({ error: "student_id and session_id are required" }, 400);
+  if (action === "tutor_turn" && !message) return json({ error: "message is required" }, 400);
+  if (!["tutor_turn", "get_history"].includes(action)) return json({ error: "Unknown action" }, 400);
 
   const { data: student, error: studentError } = await admin.from("science_students")
     .select("id,guardian_user_id,display_name,level,track,learning_preferences")
@@ -72,6 +75,14 @@ Deno.serve(async (req: Request) => {
     .select("id,student_id,lesson_id,current_stage,session_status")
     .eq("id", sessionId).eq("student_id", studentId).maybeSingle();
   if (sessionError || !session) return json({ error: "Lesson session not found" }, 404);
+  if (action === "get_history") {
+    const { data, error } = await admin.from("science_tutor_messages")
+      .select("id,role,content,teaching_metadata,created_at")
+      .eq("student_id", studentId).eq("session_id", sessionId)
+      .order("created_at", { ascending: true }).limit(40);
+    if (error) return json({ error: "Could not load tutor conversation" }, 500);
+    return json({ ok: true, messages: data ?? [] });
+  }
   if (session.session_status !== "in_progress" ||
       !["TEACHING", "UNDERSTANDING_CHECK", "PRACTICE"].includes(session.current_stage)) {
     return json({ error: "AI tutoring is available during teaching, understanding checks and practice." }, 409);
@@ -134,7 +145,6 @@ No markdown fences. Do not include a diagnosis or sensitive inference. Keep repl
         ],
         temperature: 0.35,
         max_tokens: 500,
-        response_format: { type: "json_object" },
         stream: false,
       }),
     });
