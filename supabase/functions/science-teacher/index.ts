@@ -325,6 +325,18 @@ Deno.serve(async (req: Request) => {
           confidence, marking_rationale: mark === null ? "Requires rubric-based review." : "Deterministic MCQ key comparison.",
         });
         if (insertError) throw insertError;
+        if (method === "deterministic" && mark !== null && q.outcome_id) {
+          const { error: memoryError } = await admin.from("science_student_memory_evidence").insert({
+            student_id: studentId, session_id: session.id, lesson_id: session.lesson_id,
+            outcome_id: q.outcome_id, source_attempt_id: attempt.id,
+            evidence_kind: isTest ? "deterministic_test" : "deterministic_practice",
+            evidence_status: "candidate", performance: Math.round((mark / max) * 10000) / 100,
+            confidence: 1, observation: isTest ? "Independently answered a deterministic assessment item." : "Answered a deterministic practice item.",
+            evidence_detail: { question_id: q.id, question_type: q.question_type, difficulty: q.difficulty,
+              assessment_type: attemptType, marking_method: method },
+          });
+          if (memoryError) console.error("Science mastery evidence could not be persisted", memoryError.message);
+        }
       }
       const status = needsReview ? "review_required" : "scored";
       const pct = total ? Math.round(awarded / total * 10000) / 100 : 0;
@@ -337,6 +349,51 @@ Deno.serve(async (req: Request) => {
       await logEvent({ session_id: session.id, lesson_id: session.lesson_id,
         event_type: isTest ? "test_submitted" : "practice_attempt", stage,
         evidence: { attempt_id: attempt.id, status, score_percent: needsReview ? null : pct } });
+
+      // Rebuild outcome-level memory from the auditable evidence ledger.
+      const outcomeIds = [...new Set(questions.map((q: any) => q.outcome_id).filter(Boolean))] as string[];
+      for (const outcomeId of outcomeIds) {
+        const { data: ledger, error: ledgerError } = await admin.from("science_student_memory_evidence")
+          .select("source_attempt_id,evidence_kind,performance,observed_at")
+          .eq("student_id", studentId).eq("outcome_id", outcomeId)
+          .in("evidence_kind", ["deterministic_practice","deterministic_test"])
+          .order("observed_at", { ascending: false }).limit(30);
+        if (ledgerError) { console.error("Could not aggregate outcome evidence", ledgerError.message); continue; }
+        const rows = ledger ?? [];
+        const attemptSet = new Set(rows.map((row: any) => row.source_attempt_id).filter(Boolean));
+        const testRows = rows.filter((row: any) => row.evidence_kind === "deterministic_test");
+        const scoredRows = rows.filter((row: any) => row.performance !== null);
+        const average = scoredRows.length
+          ? scoredRows.reduce((sum: number, row: any) => sum + Number(row.performance), 0) / scoredRows.length : null;
+        const testAverage = testRows.length
+          ? testRows.reduce((sum: number, row: any) => sum + Number(row.performance), 0) / testRows.length : null;
+        const distinctDays = new Set(scoredRows.map((row: any) => String(row.observed_at).slice(0, 10))).size;
+        const supported = attemptSet.size >= 3 && distinctDays >= 2 && testRows.length >= 1 &&
+          average !== null && average >= 80 && testAverage !== null && testAverage >= 80;
+        if (supported) {
+          await admin.from("science_student_memory_evidence").update({ evidence_status: "supported" })
+            .eq("student_id", studentId).eq("outcome_id", outcomeId)
+            .in("evidence_kind", ["deterministic_practice","deterministic_test"]);
+        }
+        const { data: profileRow } = await admin.from("science_student_learning_profiles")
+          .select("profile,profile_version,evidence_count").eq("student_id", studentId).maybeSingle();
+        const profile = profileRow?.profile && typeof profileRow.profile === "object"
+          ? profileRow.profile as Record<string, any> : {};
+        const mastery = profile.topic_mastery && typeof profile.topic_mastery === "object"
+          ? { ...profile.topic_mastery } : {};
+        mastery[outcomeId] = { state: supported ? "supported" : "candidate",
+          evidence_count: rows.length, distinct_attempts: attemptSet.size,
+          independent_test_evidence: testRows.length, average_performance: average === null ? null : Math.round(average),
+          confidence: supported ? 0.85 : Math.min(0.7, 0.25 + attemptSet.size * 0.1),
+          updated_at: new Date().toISOString() };
+        const { count: totalMemoryCount } = await admin.from("science_student_memory_evidence")
+          .select("id", { count: "exact", head: true }).eq("student_id", studentId);
+        await admin.from("science_student_learning_profiles").upsert({
+          student_id: studentId, profile_version: 1, profile: { ...profile, topic_mastery: mastery },
+          evidence_count: totalMemoryCount ?? (profileRow?.evidence_count ?? 0),
+          last_evidence_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        }, { onConflict: "student_id" });
+      }
       return reply({ ok: true, attempt_id: attemptId, status, score_percent: needsReview ? null : pct,
         awarded_marks: needsReview ? null : awarded, total_marks: total,
         message: needsReview ? "Some answers require rubric or teacher review; no unverified AI score was assigned." : "Answers marked." });
