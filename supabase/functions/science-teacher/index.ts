@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
 
   if (!studentId) return reply({ error: "student_id is required" }, 400);
   const { data: student, error: studentError } = await admin.from("science_students")
-    .select("id,guardian_user_id,level,track,active_syllabus_version_id,status")
+    .select("id,guardian_user_id,level,track,cohort_year,active_syllabus_version_id,status")
     .eq("id", studentId).eq("guardian_user_id", userData.user.id).eq("status", "active").maybeSingle();
   if (studentError || !student) return reply({ error: "Student not found" }, 404);
 
@@ -95,6 +95,18 @@ Deno.serve(async (req: Request) => {
   };
 
   if (action === "list_lessons") {
+    if (["P3","P4","P5","P6"].includes(student.level) && student.cohort_year === null) {
+      return reply({ ok: true, lessons: [], curriculum_status: "cohort_year_required",
+        message: "Enter the year the learner started Primary 1 so ZEE can resolve the applicable MOE syllabus cohort." });
+    }
+    if (["P3","P4","P5","P6"].includes(student.level) && Number(student.cohort_year) + 2 < 2023) {
+      return reply({ ok: true, lessons: [], curriculum_status: "legacy_syllabus_not_loaded",
+        message: "This learner belongs to an earlier syllabus cohort. The matching legacy syllabus has not yet been imported." });
+    }
+    if (["P1","P2"].includes(student.level)) {
+      return reply({ ok: true, lessons: [], curriculum_status: "zee_explorers_pathway_pending",
+        message: "P1–P2 Science Explorers is a ZEE-designed pathway, not the MOE P3–P6 Primary Science syllabus." });
+    }
     const { data, error } = await admin.from("science_lessons")
       .select("id,level,track,title,topic,lesson_order,learning_objectives,syllabus_version_id")
       .eq("level", student.level).in("track", ["ALL", student.track])
