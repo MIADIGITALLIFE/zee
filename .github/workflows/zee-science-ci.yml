@@ -1,0 +1,29 @@
+name: ZEE Science CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/functions/science-teacher/**"
+      - "supabase/migrations/**"
+      - "supabase/config.toml"
+      - ".github/workflows/zee-science-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  science-edge-function:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type-check ZEE Science teaching orchestrator
+        run: deno check supabase/functions/science-teacher/index.ts
