@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "supabase/functions/zhi-agnes-chat/**"
+      - "supabase/functions/science-teacher/**"
       - "supabase/functions/_shared/**"
       - "schemas/**"
       - "supabase/config.toml"
@@ -39,6 +40,9 @@ jobs:
       - name: Type-check ZHI chat Edge Function
         run: deno check supabase/functions/zhi-agnes-chat/index.ts
 
+      - name: Type-check ZEE Science teaching orchestrator
+        run: deno check supabase/functions/science-teacher/index.ts
+
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:
@@ -53,3 +57,6 @@ jobs:
 
       - name: Deploy ZEE AI function
         run: supabase functions deploy zhi-agnes-chat --remote="$PROJECT_REF" --yes --debug
+
+      - name: Deploy ZEE Science teaching orchestrator
+        run: supabase functions deploy science-teacher --remote="$PROJECT_REF" --yes
