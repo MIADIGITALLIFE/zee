@@ -19,7 +19,9 @@ The official overview places P5 under **Systems / Interactions** and lists:
 - Human system (Respiratory and circulatory systems)
 - Electrical system
 
-This is a syllabus-level topic overview, not yet a complete lesson/outcome import. The precise learning outcomes, track exclusions, and page-level mappings must be transcribed and reviewed before curriculum publication.
+The first P5 release now maps these five topics into ten track-specific lesson records (Standard and Foundation), ten verified outcome records and 60 ZEE-authored MCQ items. The detailed P5 outcome mappings use printed pages 43–60. See [ZEE Science — P5 Curriculum Release V1](ZEE-SCIENCE-P5-RELEASE-V1.md).
+
+This is a P5-only release. It does not imply that P3, P4 or P6 have been imported. P1–P2 remain ZEE-designed exploratory pathways, not official MOE syllabus levels.
 
 ## Authority and scope
 
