@@ -19,6 +19,6 @@ assert.match(teacher, /evidence_kind: isTest \? "deterministic_test" : "determin
   "Deterministically marked assessment answers must become traceable evidence");
 assert.match(teacher, /attemptSet\.size >= 3 && distinctDays >= 2 && testRows\.length >= 1/,
   "Supported mastery must require repeated attempts across days and independent test evidence");
-assert.match(teacher, /average >= 80 && testAverage >= 80/,
+assert.match(teacher, /average !== null && average >= 80 && testAverage !== null && testAverage >= 80/,
   "Supported mastery must meet the performance threshold");
 console.log("ZEE Science longitudinal memory security and evidence tests passed.");
