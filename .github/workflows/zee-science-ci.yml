@@ -9,6 +9,7 @@ on:
       - "science/**"
       - "tests/science-portal-smoke.mjs"
       - "tests/science-ai-tutor-smoke.mjs"
+      - "tests/science-longitudinal-memory-smoke.mjs"
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - ".github/workflows/zee-science-ci.yml"
@@ -45,3 +46,6 @@ jobs:
 
       - name: Validate Science AI tutor security contract
         run: node tests/science-ai-tutor-smoke.mjs
+
+      - name: Validate longitudinal learner memory safeguards
+        run: node tests/science-longitudinal-memory-smoke.mjs

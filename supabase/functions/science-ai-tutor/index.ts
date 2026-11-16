@@ -89,18 +89,20 @@ Deno.serve(async (req: Request) => {
   }
 
   const [{ data: lesson, error: lessonError }, { data: history, error: historyError },
-    { data: attempts, error: attemptsError }] = await Promise.all([
+    { data: attempts, error: attemptsError }, { data: learnerProfile, error: profileError }] = await Promise.all([
     admin.from("science_lessons").select("title,topic,learning_objectives,teaching_content")
       .eq("id", session.lesson_id).maybeSingle(),
     admin.from("science_tutor_messages").select("role,content,created_at,session_id")
       .eq("student_id", studentId)
       .order("created_at", { ascending: false }).limit(12),
-    admin.from("science_assessment_attempts").select("id,assessment_type,status,score_percent,created_at,lesson_id")
+    admin.from("science_assessment_attempts").select("id,assessment_type,status,score_percent,created_at")
       .eq("student_id", studentId)
       .order("created_at", { ascending: false }).limit(5),
+    admin.from("science_student_learning_profiles").select("profile,profile_version,evidence_count,last_evidence_at")
+      .eq("student_id", studentId).maybeSingle(),
   ]);
   if (lessonError || !lesson) return json({ error: "Lesson content not found" }, 404);
-  if (historyError || attemptsError) return json({ error: "Could not load learning context" }, 500);
+  if (historyError || attemptsError || profileError) return json({ error: "Could not load learning context" }, 500);
 
   const attemptIds = (attempts ?? []).map((a: any) => a.id);
   let answerEvidence: Array<Record<string, unknown>> = [];
@@ -131,6 +133,8 @@ No markdown fences. Do not include a diagnosis or sensitive inference. Keep repl
       from_current_lesson_session: m.session_id === sessionId,
     })),
     recent_assessment_evidence: { attempts: attempts ?? [], answers: answerEvidence },
+    longitudinal_learning_profile: learnerProfile?.profile ?? { topic_mastery: {}, learning_patterns: [], revision_signals: [] },
+    profile_evidence_count: learnerProfile?.evidence_count ?? 0,
     current_learner_message: message,
   };
 
@@ -188,15 +192,42 @@ No markdown fences. Do not include a diagnosis or sensitive inference. Keep repl
   });
   if (tutorWriteError) return json({ error: "Tutor replied but the conversation could not be saved" }, 500);
 
-  const { error: eventError } = await admin.from("science_learning_events").insert({
+  const { data: event, error: eventError } = await admin.from("science_learning_events").insert({
     student_id: studentId, session_id: sessionId, lesson_id: session.lesson_id,
     event_type: "teacher_intervention", stage: session.current_stage,
-    evidence: { source: "science_ai_tutor_v2", strategy: metadata.strategy,
+    evidence: { source: "science_ai_tutor_v3", strategy: metadata.strategy,
       tentative_misconception: metadata.misconception || null,
       confidence: metadata.confidence, next_action: metadata.next_action,
       evidence_note: metadata.evidence_note },
-  });
+  }).select("id").single();
   if (eventError) console.error("Science tutor evidence event could not be saved", eventError.message);
+
+  // AI-generated observations enter the candidate ledger only; they never establish mastery.
+  if (metadata.misconception && event?.id) {
+    const { error: evidenceError } = await admin.from("science_student_memory_evidence").insert({
+      student_id: studentId, session_id: sessionId, lesson_id: session.lesson_id,
+      source_event_id: event.id, evidence_kind: "tutor_observation",
+      evidence_status: "candidate", confidence: metadata.confidence,
+      observation: metadata.misconception,
+      evidence_detail: { strategy: metadata.strategy, evidence_note: metadata.evidence_note,
+        next_action: metadata.next_action, model: AGNES_MODEL },
+    });
+    if (evidenceError) console.error("Tutor observation could not be added to memory ledger", evidenceError.message);
+  }
+  const { count: memoryCount } = await admin.from("science_student_memory_evidence")
+    .select("id", { count: "exact", head: true }).eq("student_id", studentId);
+  const priorProfile = learnerProfile?.profile && typeof learnerProfile.profile === "object"
+    ? learnerProfile.profile as Record<string, unknown> : {};
+  const updatedProfile = { ...priorProfile, last_learning_signal: {
+    lesson_title: lesson.title, strategy: metadata.strategy, next_action: metadata.next_action,
+    observed_at: new Date().toISOString(), status: "candidate_only",
+  } };
+  const { error: profileWriteError } = await admin.from("science_student_learning_profiles").upsert({
+    student_id: studentId, profile_version: 1, profile: updatedProfile,
+    evidence_count: memoryCount ?? (learnerProfile?.evidence_count ?? 0),
+    last_evidence_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+  }, { onConflict: "student_id" });
+  if (profileWriteError) console.error("Longitudinal learner profile update failed", profileWriteError.message);
 
   return json({ ok: true, reply: tutorReply, teaching: metadata,
     continuity: { messages_loaded: (history ?? []).length, saved: true },
