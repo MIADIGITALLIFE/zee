@@ -172,6 +172,29 @@ Deno.serve(async (req: Request) => {
     }
 
     const session = await getSession();
+    if (action === "resume_assessment") {
+      const { data: attempt } = await admin.from("science_assessment_attempts")
+        .select("id,assessment_type,status,total_marks,question_ids")
+        .eq("session_id", session.id).eq("student_id", studentId)
+        .eq("status", "in_progress").order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (!attempt) return reply({ ok: true, attempt: null, questions: [] });
+      const { data: questions, error } = await admin.from("science_question_bank")
+        .select("id,question_type,difficulty,prompt,options,marks")
+        .in("id", attempt.question_ids ?? []).eq("status", "published");
+      if (error) throw error;
+      return reply({ ok: true, attempt, questions: (questions ?? []).map(publicQuestion) });
+    }
+
+    if (action === "get_test_state") {
+      const { data: attempt } = await admin.from("science_assessment_attempts")
+        .select("id,status,score_percent,assessment_type")
+        .eq("session_id", session.id).eq("student_id", studentId)
+        .eq("assessment_type", "FORMATIVE_TEST")
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return reply({ ok: true, submitted: !!attempt && attempt.status !== "in_progress",
+        attempt: attempt ?? null });
+    }
+
     if (action === "complete_teaching") {
       if (session.current_stage !== "TEACHING") return reply({ error: "Teaching stage is not active" }, 409);
       await transition(session, "UNDERSTANDING_CHECK");
@@ -212,8 +235,9 @@ Deno.serve(async (req: Request) => {
         student_id: studentId, session_id: session.id,
         assessment_type: isTest ? "FORMATIVE_TEST" : "PRACTICE",
         status: "in_progress",
+        question_ids: questions.map((q: any) => q.id),
         total_marks: questions.reduce((sum: number, q: any) => sum + Number(q.marks), 0),
-      }).select("id,assessment_type,status,total_marks").single();
+      }).select("id,assessment_type,status,total_marks,question_ids").single();
       if (attemptError) throw attemptError;
       return reply({ ok: true, attempt, questions: questions.map(publicQuestion), stage: isTest ? "TESTING" : "PRACTICE" });
     }
