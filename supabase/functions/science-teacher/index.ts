@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
 
   if (!studentId) return reply({ error: "student_id is required" }, 400);
   const { data: student, error: studentError } = await admin.from("science_students")
-    .select("id,guardian_user_id,level,track,active_syllabus_version_id,status")
+    .select("id,guardian_user_id,level,track,cohort_year,active_syllabus_version_id,status")
     .eq("id", studentId).eq("guardian_user_id", userData.user.id).eq("status", "active").maybeSingle();
   if (studentError || !student) return reply({ error: "Student not found" }, 404);
 
@@ -95,6 +95,18 @@ Deno.serve(async (req: Request) => {
   };
 
   if (action === "list_lessons") {
+    if (["P3","P4","P5","P6"].includes(student.level) && student.cohort_year === null) {
+      return reply({ ok: true, lessons: [], curriculum_status: "cohort_year_required",
+        message: "Enter the year the learner started Primary 1 so ZEE can resolve the applicable MOE syllabus cohort." });
+    }
+    if (["P3","P4","P5","P6"].includes(student.level) && Number(student.cohort_year) + 2 < 2023) {
+      return reply({ ok: true, lessons: [], curriculum_status: "legacy_syllabus_not_loaded",
+        message: "This learner belongs to an earlier syllabus cohort. The matching legacy syllabus has not yet been imported." });
+    }
+    if (["P1","P2"].includes(student.level)) {
+      return reply({ ok: true, lessons: [], curriculum_status: "zee_explorers_pathway_pending",
+        message: "P1–P2 Science Explorers is a ZEE-designed pathway, not the MOE P3–P6 Primary Science syllabus." });
+    }
     const { data, error } = await admin.from("science_lessons")
       .select("id,level,track,title,topic,lesson_order,learning_objectives,syllabus_version_id")
       .eq("level", student.level).in("track", ["ALL", student.track])
@@ -244,6 +256,8 @@ Deno.serve(async (req: Request) => {
         .select("id,question_type,difficulty,prompt,options,marks")
         .eq("lesson_id", session.lesson_id).eq("status", "published")
         .eq("level", student.level).in("track", ["ALL", student.track])
+        .gte("difficulty", isTest ? 4 : 1)
+        .lte("difficulty", isTest ? 5 : 3)
         .order("difficulty").limit(isTest ? 20 : 10);
       if (error) throw error;
       if (!questions?.length) return reply({ error: "No published questions are available for this lesson" }, 404);
@@ -276,10 +290,17 @@ Deno.serve(async (req: Request) => {
       const attemptId = String(body.attempt_id ?? "");
       if (!attemptId) return reply({ error: "attempt_id from the practice/test question response is required" }, 400);
       const { data: attempt, error: aError } = await admin.from("science_assessment_attempts")
-        .select("id,assessment_type,status").eq("id", attemptId).eq("student_id", studentId)
+        .select("id,assessment_type,status,question_ids").eq("id", attemptId).eq("student_id", studentId)
         .eq("session_id", session.id).eq("assessment_type", attemptType).maybeSingle();
       if (aError || !attempt || attempt.status !== "in_progress") {
         return reply({ error: "Assessment attempt not found or already submitted" }, 404);
+      }
+      const rawIssuedIds: unknown[] = Array.isArray(attempt.question_ids) ? attempt.question_ids : [];
+      const issuedIds: string[] = [...new Set<string>(rawIssuedIds.map((id: unknown) => String(id)))].sort();
+      const submittedIds = [...ids].sort();
+      if (issuedIds.length !== submittedIds.length ||
+          issuedIds.some((id: string, index: number) => id !== submittedIds[index])) {
+        return reply({ error: "Submitted answers must match the exact question set issued for this attempt" }, 400);
       }
       for (const answer of answers) {
         const q = questions.find((item: any) => item.id === answer.question_id);
