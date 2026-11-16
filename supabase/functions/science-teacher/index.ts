@@ -51,6 +51,36 @@ Deno.serve(async (req: Request) => {
 
   const action = String(body.action ?? "");
   const studentId = String(body.student_id ?? "");
+
+  if (action === "list_students") {
+    const { data, error } = await admin.from("science_students")
+      .select("id,display_name,level,track,cohort_year,status,created_at")
+      .eq("guardian_user_id", userData.user.id).eq("status", "active")
+      .order("created_at", { ascending: true });
+    if (error) return reply({ error: "Could not load student profiles" }, 500);
+    return reply({ ok: true, students: data ?? [] });
+  }
+
+  if (action === "create_student") {
+    const name = String((body as any).display_name ?? "").trim().slice(0, 80);
+    const level = String((body as any).level ?? "");
+    const track = String((body as any).track ?? "STANDARD");
+    const cohort = Number((body as any).cohort_year);
+    if (!name || !["P1","P2","P3","P4","P5","P6"].includes(level) ||
+        !["STANDARD","FOUNDATION","UNCONFIRMED"].includes(track)) {
+      return reply({ error: "A display name, valid primary level, and track are required" }, 400);
+    }
+    if (Number.isFinite(cohort) && cohort > 0 && (cohort < 2010 || cohort > 2100)) {
+      return reply({ error: "Invalid cohort year" }, 400);
+    }
+    const { data, error } = await admin.from("science_students").insert({
+      guardian_user_id: userData.user.id, display_name: name, level, track,
+      cohort_year: Number.isFinite(cohort) && cohort > 0 ? cohort : null,
+    }).select("id,display_name,level,track,cohort_year,status").single();
+    if (error) return reply({ error: "Could not create student profile" }, 500);
+    return reply({ ok: true, student: data });
+  }
+
   if (!studentId) return reply({ error: "student_id is required" }, 400);
   const { data: student, error: studentError } = await admin.from("science_students")
     .select("id,guardian_user_id,level,track,active_syllabus_version_id,status")
@@ -63,6 +93,33 @@ Deno.serve(async (req: Request) => {
     });
     if (error) throw error;
   };
+
+  if (action === "list_lessons") {
+    const { data, error } = await admin.from("science_lessons")
+      .select("id,level,track,title,topic,lesson_order,learning_objectives,syllabus_version_id")
+      .eq("level", student.level).in("track", ["ALL", student.track])
+      .eq("status", "published").order("lesson_order");
+    if (error) return reply({ error: "Could not load published lessons" }, 500);
+    const visible = [];
+    for (const lesson of data ?? []) {
+      const { data: syllabus } = await admin.from("science_syllabus_versions")
+        .select("id").eq("id", lesson.syllabus_version_id).eq("status", "published").maybeSingle();
+      if (syllabus) visible.push(lesson);
+    }
+    return reply({ ok: true, lessons: visible, curriculum_status: visible.length ? "available" : "awaiting_verified_curriculum" });
+  }
+
+  if (action === "get_dashboard") {
+    const [{ data: sessions }, { data: analyses }, { data: revisions }] = await Promise.all([
+      admin.from("science_lesson_sessions").select("id,lesson_id,current_stage,session_status,started_at,last_activity_at,completed_at")
+        .eq("student_id", studentId).order("last_activity_at", { ascending: false }).limit(10),
+      admin.from("science_learning_analyses").select("id,analysis_type,strengths,learning_gaps,recommended_actions,confidence,created_at")
+        .eq("student_id", studentId).order("created_at", { ascending: false }).limit(5),
+      admin.from("science_revision_queue").select("id,outcome_id,due_at,reason,priority,status")
+        .eq("student_id", studentId).eq("status", "pending").order("due_at").limit(10),
+    ]);
+    return reply({ ok: true, sessions: sessions ?? [], analyses: analyses ?? [], revisions: revisions ?? [] });
+  }
   const getSession = async () => {
     const sessionId = String(body.session_id ?? "");
     if (!sessionId) throw new Error("session_id is required");
