@@ -172,6 +172,23 @@ Deno.serve(async (req: Request) => {
     }
 
     const session = await getSession();
+    if (action === "get_saved_summary") {
+      const { data, error } = await admin.from("science_lesson_summaries")
+        .select("summary_content,created_at").eq("session_id", session.id)
+        .eq("student_id", studentId).maybeSingle();
+      if (error || !data) return reply({ error: "Saved lesson summary not found" }, 404);
+      return reply({ ok: true, summary: data.summary_content, created_at: data.created_at });
+    }
+
+    if (action === "get_saved_analysis") {
+      const { data, error } = await admin.from("science_learning_analyses")
+        .select("dimensions,strengths,learning_gaps,recommended_actions,confidence,created_at")
+        .eq("session_id", session.id).eq("student_id", studentId)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (error || !data) return reply({ error: "Saved learning analysis not found" }, 404);
+      return reply({ ok: true, analysis: data });
+    }
+
     if (action === "resume_assessment") {
       const { data: attempt } = await admin.from("science_assessment_attempts")
         .select("id,assessment_type,status,total_marks,question_ids")
