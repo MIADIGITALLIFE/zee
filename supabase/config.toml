@@ -13,3 +13,6 @@ verify_jwt = true
 
 [functions.science-teacher]
 verify_jwt = true
+
+[functions.science-ai-tutor]
+verify_jwt = true

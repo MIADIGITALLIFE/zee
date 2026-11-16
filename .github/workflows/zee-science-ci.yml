@@ -5,8 +5,10 @@ on:
     branches: [main]
     paths:
       - "supabase/functions/science-teacher/**"
+      - "supabase/functions/science-ai-tutor/**"
       - "science/**"
       - "tests/science-portal-smoke.mjs"
+      - "tests/science-ai-tutor-smoke.mjs"
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - ".github/workflows/zee-science-ci.yml"
@@ -30,6 +32,9 @@ jobs:
       - name: Type-check ZEE Science teaching orchestrator
         run: deno check supabase/functions/science-teacher/index.ts
 
+      - name: Type-check ZEE Science AI tutor
+        run: deno check supabase/functions/science-ai-tutor/index.ts
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -37,3 +42,6 @@ jobs:
 
       - name: Validate Science student portal
         run: node tests/science-portal-smoke.mjs
+
+      - name: Validate Science AI tutor security contract
+        run: node tests/science-ai-tutor-smoke.mjs
