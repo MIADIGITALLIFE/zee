@@ -92,11 +92,11 @@ Deno.serve(async (req: Request) => {
     { data: attempts, error: attemptsError }] = await Promise.all([
     admin.from("science_lessons").select("title,topic,learning_objectives,teaching_content")
       .eq("id", session.lesson_id).maybeSingle(),
-    admin.from("science_tutor_messages").select("role,content,created_at")
-      .eq("student_id", studentId).eq("session_id", sessionId)
-      .order("created_at", { ascending: false }).limit(10),
-    admin.from("science_assessment_attempts").select("id,assessment_type,status,score_percent,created_at")
-      .eq("student_id", studentId).eq("session_id", sessionId)
+    admin.from("science_tutor_messages").select("role,content,created_at,session_id")
+      .eq("student_id", studentId)
+      .order("created_at", { ascending: false }).limit(12),
+    admin.from("science_assessment_attempts").select("id,assessment_type,status,score_percent,created_at,lesson_id")
+      .eq("student_id", studentId)
       .order("created_at", { ascending: false }).limit(5),
   ]);
   if (lessonError || !lesson) return json({ error: "Lesson content not found" }, 404);
@@ -126,7 +126,10 @@ No markdown fences. Do not include a diagnosis or sensitive inference. Keep repl
     lesson: { title: lesson.title, topic: lesson.topic, objectives: lesson.learning_objectives,
       teaching_material: lesson.teaching_content },
     current_stage: session.current_stage,
-    recent_dialogue: (history ?? []).slice().reverse().map((m: any) => ({ role: m.role, content: m.content })),
+    recent_student_dialogue: (history ?? []).slice().reverse().map((m: any) => ({
+      role: m.role, content: m.content, session_id: m.session_id,
+      from_current_lesson_session: m.session_id === sessionId,
+    })),
     recent_assessment_evidence: { attempts: attempts ?? [], answers: answerEvidence },
     current_learner_message: message,
   };
@@ -159,7 +162,7 @@ No markdown fences. Do not include a diagnosis or sensitive inference. Keep repl
   }
   let envelope: any;
   try { envelope = JSON.parse(raw); } catch { return json({ error: "AI provider returned an unreadable response" }, 502); }
-  const rawContent = envelope?.choices?.[0]?.message?.content;
+  const rawContent = envelope?.choices?.[0]?.message?.content || envelope?.choices?.[0]?.message?.reasoning_content;
   const output = parseTutorOutput(typeof rawContent === "string" ? rawContent : "");
   if (!output) return json({ error: "AI teacher returned an invalid teaching response" }, 502);
 
