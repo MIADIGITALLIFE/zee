@@ -298,3 +298,23 @@ comment on table public.science_mastery_evidence is
   'Evidence ledger. Mastery is inferred from multiple evidence types and delayed checks, never a single score.';
 comment on table public.science_learning_events is
   'Append-oriented learning event stream used by the ZEE teaching loop and longitudinal analysis.';
+
+-- Register the official source as a draft curriculum version.
+-- It remains unpublished until learning outcomes and track scope are fully reviewed.
+insert into public.science_syllabus_versions
+  (syllabus_code, title, authority, effective_from, cohort_rule, source_url, status)
+values
+  (
+    'MOE-PRIMARY-SCIENCE-2023',
+    'Primary Science Teaching & Learning Syllabus — Primary Three to Six, Standard / Foundation (Updated May 2024)',
+    'Singapore Ministry of Education',
+    date '2023-01-01',
+    jsonb_build_object(
+      'implementation', 'Starting with 2023 Primary Three cohort',
+      'levels', jsonb_build_array('P3','P4','P5','P6'),
+      'resolution', 'Resolve by cohort and official transition guidance; do not infer solely from current level.'
+    ),
+    'https://www.moe.gov.sg/-/media/files/primary/syllabus/primary-science-syllabus-2023_may24.pdf',
+    'draft'
+  )
+on conflict (syllabus_code) do nothing;
