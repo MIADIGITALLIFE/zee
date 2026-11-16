@@ -283,7 +283,8 @@ Deno.serve(async (req: Request) => {
       if (aError || !attempt || attempt.status !== "in_progress") {
         return reply({ error: "Assessment attempt not found or already submitted" }, 404);
       }
-      const issuedIds = [...new Set((attempt.question_ids ?? []).map((id: string) => String(id)))].sort();
+      const rawIssuedIds: unknown[] = Array.isArray(attempt.question_ids) ? attempt.question_ids : [];
+      const issuedIds: string[] = [...new Set<string>(rawIssuedIds.map((id: unknown) => String(id)))].sort();
       const submittedIds = [...ids].sort();
       if (issuedIds.length !== submittedIds.length ||
           issuedIds.some((id: string, index: number) => id !== submittedIds[index])) {
