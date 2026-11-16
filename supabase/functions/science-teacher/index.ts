@@ -142,7 +142,6 @@ Deno.serve(async (req: Request) => {
         const { count } = await admin.from("science_assessment_attempts").select("id", { count: "exact", head: true })
           .eq("session_id", session.id).eq("assessment_type", "PRACTICE").in("status", ["scored", "review_required"]);
         if (!count || count < 1) return reply({ error: "Complete at least one practice attempt before testing" }, 409);
-        await transition(session, "TESTING");
       }
       const { data: questions, error } = await admin.from("science_question_bank")
         .select("id,question_type,difficulty,prompt,options,marks")
@@ -151,6 +150,7 @@ Deno.serve(async (req: Request) => {
         .order("difficulty").limit(isTest ? 20 : 10);
       if (error) throw error;
       if (!questions?.length) return reply({ error: "No published questions are available for this lesson" }, 404);
+      if (isTest) await transition(session, "TESTING");
       const { data: attempt, error: attemptError } = await admin.from("science_assessment_attempts").insert({
         student_id: studentId, session_id: session.id,
         assessment_type: isTest ? "FORMATIVE_TEST" : "PRACTICE",
@@ -209,14 +209,6 @@ Deno.serve(async (req: Request) => {
       }
       const status = needsReview ? "review_required" : "scored";
       const pct = total ? Math.round(awarded / total * 10000) / 100 : 0;
-      const attemptId = String(body.attempt_id ?? "");
-      if (!attemptId) return reply({ error: "attempt_id is required" }, 400);
-      const { data: attempt, error: attemptLookupError } = await admin.from("science_assessment_attempts")
-        .select("id,status,assessment_type").eq("id", attemptId).eq("student_id", studentId)
-        .eq("session_id", session.id).eq("assessment_type", attemptType).maybeSingle();
-      if (attemptLookupError || !attempt || attempt.status !== "in_progress") {
-        return reply({ error: "Assessment attempt not found or already submitted" }, 404);
-      }
       const { error: updateError } = await admin.from("science_assessment_attempts").update({
         status, awarded_marks: needsReview ? null : awarded, score_percent: needsReview ? null : pct,
         scoring_version: "zee-science-marking-v1", submitted_at: new Date().toISOString(),
@@ -233,6 +225,10 @@ Deno.serve(async (req: Request) => {
 
     if (action === "get_summary") {
       if (session.current_stage !== "TESTING") return reply({ error: "Complete the test before requesting a summary" }, 409);
+      const { count: submittedTests } = await admin.from("science_assessment_attempts")
+        .select("id", { count: "exact", head: true }).eq("session_id", session.id)
+        .eq("assessment_type", "FORMATIVE_TEST").in("status", ["scored", "review_required"]);
+      if (!submittedTests || submittedTests < 1) return reply({ error: "Submit the independent test before generating the summary" }, 409);
       const { data: attempts } = await admin.from("science_assessment_attempts")
         .select("assessment_type,status,score_percent,awarded_marks,total_marks")
         .eq("session_id", session.id);
