@@ -8,6 +8,7 @@ on:
       - "supabase/functions/science-ai-tutor/**"
       - "science/**"
       - "tests/science-portal-smoke.mjs"
+      - "tests/science-ai-tutor-smoke.mjs"
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - ".github/workflows/zee-science-ci.yml"
