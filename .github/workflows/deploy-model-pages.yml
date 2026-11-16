@@ -7,6 +7,8 @@ on:
       - "model.html"
       - "legacy/**"
       - "admin.html"
+      - "science/**"
+      - "tests/science-portal-smoke.mjs"
       - "sip-engine/**"
       - "tests/sip-smoke-test.mjs"
       - ".github/workflows/deploy-model-pages.yml"
@@ -36,10 +38,12 @@ jobs:
 
       - name: Prepare static pages for publishing
         run: |
-          mkdir -p dist/sip-engine dist/legacy
+          mkdir -p dist/sip-engine dist/legacy dist/science
           cp model.html dist/model.html
           cp model.html dist/index.html
           cp admin.html dist/admin.html
+          cp science/index.html dist/science/index.html
+          node tests/science-portal-smoke.mjs
           cp legacy/model-v4.1.html dist/legacy/model-v4.1.html
           cp sip-engine/index.html dist/sip-engine/index.html
           touch dist/.nojekyll
