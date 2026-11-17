@@ -110,7 +110,7 @@ Deno.serve(async (req: Request) => {
     }
     const { data, error } = await admin.from("science_lessons")
       .select("id,level,track,title,topic,lesson_order,learning_objectives,syllabus_version_id")
-      .eq("level", student.level).in("track", ["ALL", student.track])
+      .eq("level", student.level).in("track", student.track === "UNCONFIRMED" ? ["ALL","STANDARD","FOUNDATION"] : ["ALL", student.track])
       .eq("status", "published").order("lesson_order");
     if (error) return reply({ error: "Could not load published lessons" }, 500);
     const visible = [];

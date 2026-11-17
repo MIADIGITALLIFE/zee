@@ -1,0 +1,649 @@
+{
+  "title": "ZEE Science · Primary 5 Curriculum",
+  "syllabus": "Singapore MOE Primary Science Syllabus 2023 (updated May 2024)",
+  "note": "Teaching explanations and learning resources are authored by ZEE and mapped to MOE learning outcomes. This public preview is available before guardian sign-in; saving progress requires an account.",
+  "lessons": [
+    {
+      "code": "P5-REPRO-STANDARD",
+      "track": "STANDARD",
+      "topic": "Cycles in Plants and Animals (Reproduction)",
+      "strand": "Cycles",
+      "source": "MOE 2023 syllabus, pp. 43–47",
+      "outcome_text": "Recognise that a cell is a basic unit of life.\nExplain that living things reproduce to ensure continuity of their kind and that many characteristics are passed from parents to offspring.\nDescribe sexual reproduction in flowering plants: pollination, fertilisation (seed production), seed dispersal and germination.\nRecognise fertilisation in human sexual reproduction: a sperm fuses with an egg; the fertilised egg develops in the womb; ovaries produce eggs and testes produce sperms.\nRecognise the similarity in fertilisation in flowering plants and humans.\nInvestigate plant reproduction by spores and seeds.",
+      "objectives": [
+        "Explain why living things reproduce.",
+        "Describe the sequence of sexual reproduction in flowering plants.",
+        "Explain fertilisation in flowering plants and humans at the required level.",
+        "Compare reproduction by spores and seeds."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Why reproduction matters",
+            "content": "Living things reproduce to ensure that their kind continues. Offspring inherit many characteristics from their parents. A cell is the basic unit of life."
+          },
+          {
+            "heading": "Flowering plant reproduction",
+            "content": "Pollination is the transfer of pollen grains from the anther to the stigma. After pollination, fertilisation occurs when the male reproductive cell fuses with the female reproductive cell. Seeds form; seeds may be dispersed away from the parent plant."
+          },
+          {
+            "heading": "Germination and plant reproduction",
+            "content": "Germination is the growth of a seed into a young plant under suitable conditions. Some plants reproduce using spores; others reproduce using seeds."
+          },
+          {
+            "heading": "Human fertilisation",
+            "content": "The ovaries produce eggs and the testes produce sperms. Fertilisation occurs when a sperm fuses with an egg. The fertilised egg develops in the womb. The syllabus does not require detailed foetal development."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Explain why living things reproduce.",
+          "Describe the sequence of sexual reproduction in flowering plants.",
+          "Explain fertilisation in flowering plants and humans at the required level.",
+          "Compare reproduction by spores and seeds."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-REPRO-FOUNDATION",
+      "track": "FOUNDATION",
+      "topic": "Cycles in Plants and Animals (Reproduction)",
+      "strand": "Cycles",
+      "source": "MOE 2023 syllabus, pp. 43–47",
+      "outcome_text": "State the processes in sexual reproduction of flowering plants: pollination, fertilisation (seed production), seed dispersal and germination.\nState the process of fertilisation in human sexual reproduction.\nObserve and compare how plants reproduce by spores and seeds.",
+      "objectives": [
+        "State the four processes in flowering plant reproduction.",
+        "Describe fertilisation in humans using the terms sperm and egg.",
+        "Observe and compare reproduction by spores and seeds."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "The four processes",
+            "content": "Flowering plants reproduce through pollination, fertilisation, seed dispersal and germination. Learn the processes in the correct order."
+          },
+          {
+            "heading": "Fertilisation",
+            "content": "In flowering plants, fertilisation leads to the development of fruits and seeds. In humans, fertilisation occurs when a sperm fuses with an egg."
+          },
+          {
+            "heading": "Spores and seeds",
+            "content": "Some plants reproduce by spores, while others reproduce by seeds. Observe their structures and compare how they differ."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "State the four processes in flowering plant reproduction.",
+          "Describe fertilisation in humans using the terms sperm and egg.",
+          "Observe and compare reproduction by spores and seeds."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-WATER-STANDARD",
+      "track": "STANDARD",
+      "topic": "Cycles in Matter and Water (Water)",
+      "strand": "Cycles",
+      "source": "MOE 2023 syllabus, pp. 49–51",
+      "outcome_text": "Recognise that water exists in three interchangeable states and explain melting, freezing, boiling/evaporation and condensation.\nUnderstand melting point of ice/freezing point of water and boiling point of water.\nExplain the roles of evaporation and condensation in the water cycle and recognise its importance.\nInvestigate the effect of heat gain or loss on water temperature and state, and factors affecting evaporation rate: wind, temperature and exposed surface area.\nRecognise the importance of water to life processes and describe impacts of water pollution on Earth's water resources.",
+      "objectives": [
+        "Describe the three states of water and changes between them.",
+        "Explain the water cycle using evaporation and condensation.",
+        "Interpret simple investigations about evaporation.",
+        "Explain why clean water is important and how pollution affects water resources."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Three states of water",
+            "content": "Water can exist as solid ice, liquid water and water vapour (a gas). These states can change into one another when heat is gained or lost."
+          },
+          {
+            "heading": "Changes of state",
+            "content": "Melting changes ice to liquid water at 0°C. Freezing changes water to ice at 0°C. Water boils at 100°C under normal atmospheric pressure. Evaporation can occur at temperatures below boiling. Condensation changes water vapour into liquid water."
+          },
+          {
+            "heading": "The water cycle",
+            "content": "Water evaporates from surfaces. Water vapour cools and condenses into tiny droplets that form clouds. Water returns to Earth as precipitation and collects in water bodies. Evaporation and condensation are key processes."
+          },
+          {
+            "heading": "Investigating evaporation",
+            "content": "Wind, higher temperature and a larger exposed surface area increase the rate of evaporation. In a fair test, change one factor and keep the others the same."
+          },
+          {
+            "heading": "Water and life",
+            "content": "Water is needed for life processes. Pollution can make water unsafe and reduce the amount of usable water. Conserving water helps protect this limited natural resource."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Describe the three states of water and changes between them.",
+          "Explain the water cycle using evaporation and condensation.",
+          "Interpret simple investigations about evaporation.",
+          "Explain why clean water is important and how pollution affects water resources."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-WATER-FOUNDATION",
+      "track": "FOUNDATION",
+      "topic": "Cycles in Matter and Water (Water)",
+      "strand": "Cycles",
+      "source": "MOE 2023 syllabus, pp. 49–51",
+      "outcome_text": "Recognise that water exists in three interchangeable states and state how water changes state.\nState the melting point of ice/freezing point of water and boiling point of water.\nRecognise changes of state in the water cycle and its importance.\nCompare water in three states and show concern for conserving water as a limited natural resource.",
+      "objectives": [
+        "Identify solid, liquid and gas forms of water.",
+        "State the four changes of state and key temperatures.",
+        "Recognise evaporation and condensation in the water cycle.",
+        "Explain why water should be conserved."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Three states",
+            "content": "Water exists as solid ice, liquid water and water vapour (gas)."
+          },
+          {
+            "heading": "Changes of state",
+            "content": "Melting: ice to water. Freezing: water to ice. Boiling: water to steam at 100°C. Condensation: water vapour to liquid water. Ice melts and water freezes at 0°C."
+          },
+          {
+            "heading": "Water cycle",
+            "content": "Water evaporates, water vapour condenses to form clouds, and water returns to Earth. The cycle is important because it moves water through the environment."
+          },
+          {
+            "heading": "Conserving water",
+            "content": "Water is a limited natural resource. We can reduce waste by turning off taps and using water carefully."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Identify solid, liquid and gas forms of water.",
+          "State the four changes of state and key temperatures.",
+          "Recognise evaporation and condensation in the water cycle.",
+          "Explain why water should be conserved."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-HUMAN-STANDARD",
+      "track": "STANDARD",
+      "topic": "Human System (Respiratory and Circulatory Systems)",
+      "strand": "Systems",
+      "source": "MOE 2023 syllabus, pp. 54–55",
+      "outcome_text": "Recognise that air contains gases including nitrogen, carbon dioxide, oxygen and water vapour.\nIdentify the nose, windpipe and lungs and the heart, blood and blood vessels, and describe their functions.\nRecognise how digestive, respiratory and circulatory systems work together in life processes.\nCompare how plants, fish and humans take in oxygen and give out carbon dioxide.\nCompare transport in plants and humans: plant tubes transport food and water; human blood vessels transport digested food, oxygen and carbon dioxide.",
+      "objectives": [
+        "Identify major parts and functions of respiratory and circulatory systems.",
+        "Explain how oxygen enters the body and is transported.",
+        "Explain how body systems work together.",
+        "Compare gas exchange and transport in plants, fish and humans at syllabus level."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Air and breathing",
+            "content": "Air is a mixture of gases. It contains mainly nitrogen and oxygen, with smaller amounts of carbon dioxide and water vapour. The nose, windpipe and lungs are parts of the respiratory system."
+          },
+          {
+            "heading": "Respiratory system",
+            "content": "Air enters through the nose, travels down the windpipe and reaches the lungs. Oxygen from inhaled air enters the body; carbon dioxide is removed when we breathe out."
+          },
+          {
+            "heading": "Circulatory system",
+            "content": "The heart pumps blood around the body. Blood vessels carry blood. Blood transports oxygen and digested food to body parts and carries carbon dioxide away."
+          },
+          {
+            "heading": "Systems work together",
+            "content": "The digestive system provides digested food, the respiratory system supplies oxygen, and the circulatory system transports these substances to cells. These systems work together to support life."
+          },
+          {
+            "heading": "Comparing living things",
+            "content": "Plants, fish and humans take in oxygen and give out carbon dioxide in different ways. In plants, tubes transport water and food. In humans, blood vessels transport digested food, oxygen and carbon dioxide."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Identify major parts and functions of respiratory and circulatory systems.",
+          "Explain how oxygen enters the body and is transported.",
+          "Explain how body systems work together.",
+          "Compare gas exchange and transport in plants, fish and humans at syllabus level."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-HUMAN-FOUNDATION",
+      "track": "FOUNDATION",
+      "topic": "Human System (Respiratory and Circulatory Systems)",
+      "strand": "Systems",
+      "source": "MOE 2023 syllabus, pp. 54–55",
+      "outcome_text": "Recognise that air contains nitrogen, carbon dioxide, oxygen and water vapour.\nIdentify the nose, windpipe, lungs, heart, blood and blood vessels and state their functions.\nCompare how plants and humans take in oxygen and give out carbon dioxide.\nShow objectivity by seeking information to validate explanations about the human body.",
+      "objectives": [
+        "Name the main parts of the respiratory and circulatory systems.",
+        "State the functions of these parts.",
+        "Describe how plants and humans exchange gases.",
+        "Use accurate information when explaining the human body."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Air",
+            "content": "Air is a mixture of gases. It contains nitrogen, oxygen, carbon dioxide and water vapour."
+          },
+          {
+            "heading": "Breathing system",
+            "content": "The nose, windpipe and lungs are parts of the respiratory system. They help air enter and leave the body."
+          },
+          {
+            "heading": "Blood circulation",
+            "content": "The heart pumps blood. Blood travels through blood vessels around the body. Blood carries substances to and from body parts."
+          },
+          {
+            "heading": "Plants and humans",
+            "content": "Both plants and humans take in oxygen and give out carbon dioxide. They do this using different structures."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Name the main parts of the respiratory and circulatory systems.",
+          "State the functions of these parts.",
+          "Describe how plants and humans exchange gases.",
+          "Use accurate information when explaining the human body."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-PLANT-STANDARD",
+      "track": "STANDARD",
+      "topic": "Plant System (Respiratory and Circulatory Systems)",
+      "strand": "Systems",
+      "source": "MOE 2023 syllabus, pp. 57–58",
+      "outcome_text": "Identify parts of the plant transport system and describe their functions.\nInvestigate how food and water are transported in plants.\nRecognise that specific terms xylem and phloem, relative positions of tubes and transpiration pull are not required.",
+      "objectives": [
+        "Explain that plants transport water from roots to other parts.",
+        "Explain that plants transport food from leaves to other parts.",
+        "Interpret a simple investigation showing transport in plants."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Plants are systems",
+            "content": "A plant has parts that work together. Roots absorb water. Leaves make food. The plant transport system moves water and food to where they are needed."
+          },
+          {
+            "heading": "Transporting water",
+            "content": "Water absorbed by the roots is transported through water-carrying tubes to other parts of the plant, including the leaves."
+          },
+          {
+            "heading": "Transporting food",
+            "content": "Food made in the leaves is transported through food-carrying tubes to other parts of the plant for growth and other life processes."
+          },
+          {
+            "heading": "Investigating transport",
+            "content": "A coloured-water investigation can show water movement through a plant stem. Keep the plant, water amount and time consistent when comparing results."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Explain that plants transport water from roots to other parts.",
+          "Explain that plants transport food from leaves to other parts.",
+          "Interpret a simple investigation showing transport in plants."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-PLANT-FOUNDATION",
+      "track": "FOUNDATION",
+      "topic": "Plant System (Respiratory and Circulatory Systems)",
+      "strand": "Systems",
+      "source": "MOE 2023 syllabus, pp. 57–58",
+      "outcome_text": "Recognise how water is transported from roots to other parts of a plant and how food is transported from leaves to other parts.\nObserve how food and water are transported in plants.\nShow objectivity and care when investigating plant parts and functions.",
+      "objectives": [
+        "State where water enters a plant and where it is transported.",
+        "State where food is made and where it is transported.",
+        "Observe evidence of transport in plants."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Water transport",
+            "content": "Roots absorb water from the soil. Water is transported from the roots to other parts of the plant."
+          },
+          {
+            "heading": "Food transport",
+            "content": "Leaves make food. Food is transported from the leaves to other parts of the plant."
+          },
+          {
+            "heading": "Observe transport",
+            "content": "A plant stem placed in coloured water may show colour moving upwards. This is evidence that water is transported through the plant."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": []
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "State where water enters a plant and where it is transported.",
+          "State where food is made and where it is transported.",
+          "Observe evidence of transport in plants."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-ELECTRIC-STANDARD",
+      "track": "STANDARD",
+      "topic": "Electrical System",
+      "strand": "Systems",
+      "source": "MOE 2023 syllabus, pp. 59–60",
+      "outcome_text": "Recognise an electrical system as a circuit with an energy source (battery) and components such as wire, bulb and switch.\nExplain that a closed circuit allows current to flow.\nIdentify electrical conductors and insulators.\nConstruct simple circuits from circuit diagrams.\nInvestigate effects on current of the number of batteries in series and the number of bulbs in series and parallel.\nShow concern for conserving electricity and handling it properly.",
+      "objectives": [
+        "Identify components of a simple electrical circuit.",
+        "Explain the difference between open and closed circuits.",
+        "Classify conductors and insulators.",
+        "Predict effects of changing batteries and bulbs in series and parallel."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "An electrical system",
+            "content": "A simple electrical system can include a battery, connecting wires, a bulb and a switch. The battery is the energy source."
+          },
+          {
+            "heading": "Open and closed circuits",
+            "content": "A closed circuit is a complete path that allows current to flow and the bulb to light. An open circuit has a break, so current cannot flow."
+          },
+          {
+            "heading": "Conductors and insulators",
+            "content": "Conductors allow electricity to pass through them; insulators do not allow electricity to pass through easily. Metals are commonly used as conductors; plastic is commonly used as an insulator."
+          },
+          {
+            "heading": "Changing a circuit",
+            "content": "Adding batteries in series increases the energy supplied. Adding bulbs in series generally makes each bulb dimmer. In a parallel arrangement, bulbs have separate branches."
+          },
+          {
+            "heading": "Electrical safety",
+            "content": "Use only low-voltage batteries in classroom investigations. Never experiment with mains electricity. Switch off devices when not in use."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": [
+          "Use low-voltage batteries only. Never use mains electricity."
+        ]
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Identify components of a simple electrical circuit.",
+          "Explain the difference between open and closed circuits.",
+          "Classify conductors and insulators.",
+          "Predict effects of changing batteries and bulbs in series and parallel."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    },
+    {
+      "code": "P5-ELECTRIC-FOUNDATION",
+      "track": "FOUNDATION",
+      "topic": "Electrical System",
+      "strand": "Systems",
+      "source": "MOE 2023 syllabus, pp. 59–60",
+      "outcome_text": "Recognise a simple electrical system consisting of a battery, wire, bulb and switch.\nState that a closed circuit allows current to flow.\nIdentify electrical conductors and insulators.\nConstruct simple circuits from diagrams.\nInvestigate effects of batteries in series and bulbs in series.\nShow concern for conserving and handling electricity properly.",
+      "objectives": [
+        "Name the parts of a simple circuit.",
+        "State what happens in a closed circuit.",
+        "Identify conductors and insulators.",
+        "Construct simple series circuits and describe safe use of electricity."
+      ],
+      "teaching_content": {
+        "sections": [
+          {
+            "heading": "Circuit parts",
+            "content": "A simple circuit has a battery, wires, a bulb and sometimes a switch. The battery provides energy."
+          },
+          {
+            "heading": "Closed circuits",
+            "content": "A closed circuit is a complete path. Current can flow and the bulb lights. If the path is broken, the bulb goes off."
+          },
+          {
+            "heading": "Conductors and insulators",
+            "content": "Conductors allow electricity to pass through. Insulators do not allow electricity to pass through easily."
+          },
+          {
+            "heading": "Series circuits",
+            "content": "Batteries and bulbs can be connected in series. Adding batteries can make a bulb brighter. Adding bulbs in series generally makes bulbs dimmer. Use safe low-voltage batteries only."
+          }
+        ],
+        "teaching_language": "English",
+        "pedagogy": [
+          "Explain",
+          "Model",
+          "Check understanding",
+          "Connect to daily life"
+        ],
+        "safety_notes": [
+          "Use low-voltage batteries only. Never use mains electricity."
+        ]
+      },
+      "practice_blueprint": {
+        "selection": "difficulty 1–3",
+        "question_count": 3,
+        "feedback": "Immediate feedback after submission"
+      },
+      "test_blueprint": {
+        "selection": "difficulty 4–5",
+        "question_count": 3,
+        "independent": true
+      },
+      "summary_blueprint": {
+        "key_takeaways": [
+          "Name the parts of a simple circuit.",
+          "State what happens in a closed circuit.",
+          "Identify conductors and insulators.",
+          "Construct simple series circuits and describe safe use of electricity."
+        ],
+        "reflection_prompts": [
+          "What idea can you explain confidently?",
+          "Which part would you like to practise again?"
+        ]
+      }
+    }
+  ]
+}
