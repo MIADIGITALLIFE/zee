@@ -17,6 +17,10 @@ assert.match(html, /create_student/);
 assert.match(html, /list_students/);
 assert.match(html, /get_dashboard/);
 assert.doesNotMatch(html, /SUPABASE_SERVICE_ROLE_KEY|AGNES_API_KEY/);
+const teacher = readFileSync(new URL("../supabase/functions/science-teacher/index.ts", import.meta.url), "utf8");
+assert.match(teacher, /student\.track === "UNCONFIRMED" \? \["ALL","STANDARD","FOUNDATION"\]/,
+  "An unconfirmed school track must still return visible curriculum pathways");
+
 
 const moduleScript = html.match(/<script type="module">([\s\S]*?)<\/script>/);
 const publicCatalog = JSON.parse(readFileSync(new URL("../science/curriculum-preview.json", import.meta.url), "utf8"));
