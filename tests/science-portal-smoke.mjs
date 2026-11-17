@@ -75,3 +75,6 @@ assert.match(teacher, /published_mcq_count/);
 assert.match(teacher, /syllabus_not_published/);
 assert.match(teacher, /lessons_not_seeded/);
 assert.match(teacher, /assessment_items_missing/);
+
+assert.match(html, /catalog_status/, "Student portal must request live curriculum readiness diagnostics");
+assert.match(html, /Curriculum check/, "Empty lesson catalogue must explain live database readiness");
