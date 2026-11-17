@@ -252,15 +252,37 @@ Deno.serve(async (req: Request) => {
           .eq("session_id", session.id).eq("assessment_type", "PRACTICE").in("status", ["scored", "review_required"]);
         if (!count || count < 1) return reply({ error: "Complete at least one practice attempt before testing" }, 409);
       }
+      let adaptivePlan = { mode: "baseline", target_band: "foundation", difficulty_min: 1, difficulty_max: 3,
+        reason: "No reliable outcome-level mastery evidence is available yet." };
+      if (!isTest) {
+        const { data: profileRow, error: profileError } = await admin.from("science_student_learning_profiles")
+          .select("profile").eq("student_id", studentId).maybeSingle();
+        if (profileError) throw profileError;
+        const mastery = profileRow?.profile?.topic_mastery && typeof profileRow.profile.topic_mastery === "object"
+          ? Object.values(profileRow.profile.topic_mastery) as Array<Record<string, unknown>> : [];
+        const supported = mastery.filter((m) => m.state === "supported" && Number.isFinite(Number(m.average_performance)));
+        const evidenceBackedAverage = supported.length
+          ? supported.reduce((sum, m) => sum + Number(m.average_performance), 0) / supported.length : null;
+        if (evidenceBackedAverage !== null && evidenceBackedAverage < 60) {
+          adaptivePlan = { mode: "adaptive", target_band: "foundation", difficulty_min: 1, difficulty_max: 2,
+            reason: "Recent evidence suggests the learner benefits from rebuilding core concepts first." };
+        } else if (evidenceBackedAverage !== null && evidenceBackedAverage < 80) {
+          adaptivePlan = { mode: "adaptive", target_band: "developing", difficulty_min: 2, difficulty_max: 3,
+            reason: "The learner is ready for guided application with a gradual increase in challenge." };
+        } else if (evidenceBackedAverage !== null) {
+          adaptivePlan = { mode: "adaptive", target_band: "stretch", difficulty_min: 3, difficulty_max: 4,
+            reason: "Repeated evidence supports moving to more demanding application questions." };
+        }
+      }
       const { data: questions, error } = await admin.from("science_question_bank")
         .select("id,question_type,difficulty,prompt,options,marks")
         .eq("lesson_id", session.lesson_id).eq("status", "published")
         .eq("level", student.level).in("track", ["ALL", student.track])
-        .gte("difficulty", isTest ? 4 : 1)
-        .lte("difficulty", isTest ? 5 : 3)
+        .gte("difficulty", isTest ? 4 : adaptivePlan.difficulty_min)
+        .lte("difficulty", isTest ? 5 : adaptivePlan.difficulty_max)
         .order("difficulty").limit(isTest ? 20 : 10);
       if (error) throw error;
-      if (!questions?.length) return reply({ error: "No published questions are available for this lesson" }, 404);
+      if (!questions?.length) return reply({ error: "No published questions are available in the selected difficulty band. Please ask your teacher to add suitable questions." }, 404);
       if (isTest) await transition(session, "TESTING");
       const { data: attempt, error: attemptError } = await admin.from("science_assessment_attempts").insert({
         student_id: studentId, session_id: session.id,
@@ -270,7 +292,9 @@ Deno.serve(async (req: Request) => {
         total_marks: questions.reduce((sum: number, q: any) => sum + Number(q.marks), 0),
       }).select("id,assessment_type,status,total_marks,question_ids").single();
       if (attemptError) throw attemptError;
-      return reply({ ok: true, attempt, questions: questions.map(publicQuestion), stage: isTest ? "TESTING" : "PRACTICE" });
+      return reply({ ok: true, attempt, questions: questions.map(publicQuestion), stage: isTest ? "TESTING" : "PRACTICE",
+        adaptive_plan: isTest ? { mode: "independent_test", target_band: "assessment", difficulty_min: 4, difficulty_max: 5,
+          reason: "Independent test difficulty remains standardised and is not adjusted." } : adaptivePlan });
     }
 
     if (action === "submit_practice" || action === "submit_test") {
