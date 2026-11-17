@@ -12,6 +12,7 @@ on:
       - "tests/science-ai-tutor-smoke.mjs"
       - "tests/science-longitudinal-memory-smoke.mjs"
       - "tests/science-spaced-repetition-smoke.mjs"
+      - "tests/science-curriculum-release-smoke.mjs"
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - ".github/workflows/zee-science-ci.yml"
@@ -42,6 +43,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Validate P5 curriculum release integrity
+        run: node tests/science-curriculum-release-smoke.mjs
 
       - name: Validate Science student portal
         run: node tests/science-portal-smoke.mjs
