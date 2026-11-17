@@ -107,7 +107,16 @@ Deno.serve(async (req: Request) => {
       admin.from("science_question_bank").select("id", { count: "exact", head: true }).eq("level", student.level).in("track", tracks).eq("status", "published").eq("question_type", "MCQ"),
     ]);
     const errors = [syllabusError, lessonError, outcomeError, questionError, mcqError].filter(Boolean);
-    if (errors.length) return reply({ error: "Curriculum diagnostics are temporarily unavailable" }, 503);
+    const missingScienceSchema = errors.some((e: any) => e.code === "42P01" || e.code === "PGRST205");
+    if (missingScienceSchema) return reply({ ok: true, catalog: {
+      level: student.level, track: student.track, syllabus: [], published_lesson_count: 0,
+      verified_outcome_count: 0, published_question_count: 0, published_mcq_count: 0,
+      status: "database_migrations_pending", checked_at: new Date().toISOString()
+    } });
+    if (errors.length) {
+      console.error("Science catalog diagnostics failed", errors.map((e: any) => e.code));
+      return reply({ error: "Curriculum diagnostics are temporarily unavailable" }, 503);
+    }
     const publishedSyllabus = (syllabi ?? []).filter((v: any) => v.status === "published");
     const status = student.level === "P1" || student.level === "P2" ? "zee_explorers_pathway_pending"
       : student.cohort_year === null ? "cohort_year_required"
@@ -139,7 +148,12 @@ Deno.serve(async (req: Request) => {
       .select("id,level,track,title,topic,lesson_order,learning_objectives,syllabus_version_id")
       .eq("level", student.level).in("track", student.track === "UNCONFIRMED" ? ["ALL","STANDARD","FOUNDATION"] : ["ALL", student.track])
       .eq("status", "published").order("lesson_order");
-    if (error) return reply({ error: "Could not load published lessons" }, 500);
+    if (error) {
+      if (error.code === "42P01" || error.code === "PGRST205") {
+        return reply({ ok: true, lessons: [], curriculum_status: "database_migrations_pending" });
+      }
+      return reply({ error: "Could not load published lessons" }, 500);
+    }
     const visible = [];
     for (const lesson of data ?? []) {
       const { data: syllabus } = await admin.from("science_syllabus_versions")
