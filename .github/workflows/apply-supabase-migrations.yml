@@ -1,0 +1,48 @@
+name: Apply ZEE Supabase Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_apply:
+        description: "Confirm applying all pending repository migrations to the linked Supabase project"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  apply-migrations:
+    if: ${{ inputs.confirm_apply == true }}
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: xeykndpirxfuozeunkku
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate required credentials
+        shell: bash
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN" || { echo "::error::Missing SUPABASE_ACCESS_TOKEN repository secret."; exit 1; }
+          test -n "$SUPABASE_DB_PASSWORD" || { echo "::error::Missing SUPABASE_DB_PASSWORD repository secret. Add it in GitHub Actions secrets before running this workflow."; exit 1; }
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link the intended Supabase project
+        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+
+      - name: Preview pending migrations
+        run: supabase db push --dry-run --linked
+
+      - name: Apply pending migrations
+        run: supabase db push --linked --yes
+
+      - name: Verify migration history
+        run: supabase migration list --linked
