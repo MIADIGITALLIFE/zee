@@ -3,7 +3,7 @@ import fs from "node:fs";
 
 const path = "supabase/migrations/20261116020000_science_p5_curriculum_release.sql";
 const sql = fs.readFileSync(path, "utf8");
-const match = sql.match(/\\$seed\\$([\\s\\S]*?)\\$seed\\$/);
+const match = sql.match(/\$seed\$([\s\S]*?)\$seed\$/);
 assert.ok(match, "P5 curriculum migration must contain a delimited JSON seed");
 
 const units = JSON.parse(match[1]);
