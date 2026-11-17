@@ -45,4 +45,4 @@ assert.match(curriculumSql, /status='published'/);
 
 console.log("ZEE Science portal and P5 curriculum smoke tests passed.");
 
-assert.match(portal, /Spaced revision plan/, "Dashboard must show the learner spaced revision schedule");
+assert.match(html, /Spaced revision plan/, "Dashboard must show the learner spaced revision schedule");
