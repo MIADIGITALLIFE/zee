@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "supabase/functions/science-teacher/**"
+      - "supabase/functions/_shared/science-spaced-repetition.ts"
       - "supabase/functions/science-ai-tutor/**"
       - "science/**"
       - "tests/science-portal-smoke.mjs"
       - "tests/science-ai-tutor-smoke.mjs"
       - "tests/science-longitudinal-memory-smoke.mjs"
+      - "tests/science-spaced-repetition-smoke.mjs"
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - ".github/workflows/zee-science-ci.yml"
@@ -52,3 +54,6 @@ jobs:
 
       - name: Validate adaptive teaching safeguards
         run: node tests/science-adaptive-teaching-smoke.mjs
+
+      - name: Validate spaced repetition safeguards
+        run: node tests/science-spaced-repetition-smoke.mjs

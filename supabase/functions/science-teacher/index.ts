@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { nextReview } from "../_shared/science-spaced-repetition.ts";
 
 const URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -121,7 +122,15 @@ Deno.serve(async (req: Request) => {
     return reply({ ok: true, lessons: visible, curriculum_status: visible.length ? "available" : "awaiting_verified_curriculum" });
   }
 
-  if (action === "get_dashboard") {
+  if (action === "get_dashboard" || action === "get_revision_queue") {
+    const { data: revisionSchedule, error: revisionError } = await admin.from("science_student_revision_schedule")
+      .select("id,outcome_id,lesson_id,interval_days,repetitions,lapses,last_score,last_reviewed_at,due_at,status")
+      .eq("student_id", studentId).eq("status", "pending").order("due_at").limit(30);
+    if (revisionError) return reply({ error: "Could not load the revision schedule" }, 500);
+    const now = Date.now();
+    const revisionsDue = (revisionSchedule ?? []).map((item: any) => ({ ...item,
+      is_due: new Date(item.due_at).getTime() <= now }));
+    if (action === "get_revision_queue") return reply({ ok: true, revisions: revisionsDue });
     const [{ data: sessions }, { data: analyses }, { data: revisions }] = await Promise.all([
       admin.from("science_lesson_sessions").select("id,lesson_id,current_stage,session_status,started_at,last_activity_at,completed_at")
         .eq("student_id", studentId).order("last_activity_at", { ascending: false }).limit(10),
@@ -130,7 +139,8 @@ Deno.serve(async (req: Request) => {
       admin.from("science_revision_queue").select("id,outcome_id,due_at,reason,priority,status")
         .eq("student_id", studentId).eq("status", "pending").order("due_at").limit(10),
     ]);
-    return reply({ ok: true, sessions: sessions ?? [], analyses: analyses ?? [], revisions: revisions ?? [] });
+    return reply({ ok: true, sessions: sessions ?? [], analyses: analyses ?? [],
+      revisions: revisions ?? [], revision_schedule: revisionsDue });
   }
   const getSession = async () => {
     const sessionId = String(body.session_id ?? "");
@@ -372,6 +382,33 @@ Deno.serve(async (req: Request) => {
           });
           if (memoryError) console.error("Science mastery evidence could not be persisted", memoryError.message);
         }
+      }
+      // V5: schedule outcome-level reviews from deterministic MCQ evidence only.
+      // Unmarked written answers never influence a review interval.
+      const outcomeScores = new Map<string, { awarded: number; maximum: number }>();
+      for (const answer of answers) {
+        const q = questions.find((item: any) => item.id === answer.question_id);
+        if (!q?.outcome_id || q.question_type !== "MCQ" || !q.answer_key ||
+            typeof q.answer_key !== "object" || !Object.hasOwn(q.answer_key, "correct_option")) continue;
+        const max = Number(q.marks);
+        const correct = String((answer.response as any)?.option_id ?? "") === String(q.answer_key.correct_option);
+        const current = outcomeScores.get(q.outcome_id) ?? { awarded: 0, maximum: 0 };
+        current.awarded += correct ? max : 0;
+        current.maximum += max;
+        outcomeScores.set(q.outcome_id, current);
+      }
+      for (const [outcomeId, score] of outcomeScores) {
+        const { data: previous, error: previousError } = await admin.from("science_student_revision_schedule")
+          .select("interval_days,repetitions,lapses,ease_factor")
+          .eq("student_id", studentId).eq("outcome_id", outcomeId).maybeSingle();
+        if (previousError) throw previousError;
+        const next = nextReview(previous, score.maximum ? score.awarded / score.maximum * 100 : 0);
+        const { error: scheduleError } = await admin.from("science_student_revision_schedule").upsert({
+          student_id: studentId, outcome_id: outcomeId, lesson_id: session.lesson_id,
+          source_attempt_id: attempt.id, ...next, last_reviewed_at: new Date().toISOString(),
+          status: "pending", updated_at: new Date().toISOString(),
+        }, { onConflict: "student_id,outcome_id" });
+        if (scheduleError) throw scheduleError;
       }
       const status = needsReview ? "review_required" : "scored";
       const pct = total ? Math.round(awarded / total * 10000) / 100 : 0;
