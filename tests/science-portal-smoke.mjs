@@ -78,3 +78,6 @@ assert.match(teacher, /assessment_items_missing/);
 
 assert.match(html, /catalog_status/, "Student portal must request live curriculum readiness diagnostics");
 assert.match(html, /Curriculum check/, "Empty lesson catalogue must explain live database readiness");
+
+assert.match(teacher, /database_migrations_pending/, "Missing database migrations must produce a safe actionable status");
+assert.match(html, /Science database migrations have not been applied yet/, "Portal must explain pending database migrations");
