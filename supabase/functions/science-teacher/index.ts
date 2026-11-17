@@ -196,7 +196,7 @@ Deno.serve(async (req: Request) => {
       }).select("id,assessment_type,status,total_marks,question_ids").single();
       if (attemptError) throw attemptError;
       await logEvent({ session_id: session.id, lesson_id: lesson.id, outcome_id: revision.outcome_id,
-        event_type: "revision_started", stage: "PRACTICE", evidence: { revision_id: revision.id, mode: "spaced_revision" } });
+        event_type: "practice_attempt", stage: "PRACTICE", evidence: { revision_id: revision.id, mode: "spaced_revision" } });
       return reply({ ok: true, session, lesson, attempt, questions: questions.map(publicQuestion),
         revision: { id: revision.id, outcome: revision.outcome } });
     }
