@@ -252,15 +252,48 @@ Deno.serve(async (req: Request) => {
           .eq("session_id", session.id).eq("assessment_type", "PRACTICE").in("status", ["scored", "review_required"]);
         if (!count || count < 1) return reply({ error: "Complete at least one practice attempt before testing" }, 409);
       }
-      const { data: questions, error } = await admin.from("science_question_bank")
-        .select("id,question_type,difficulty,prompt,options,marks")
+      const { data: questionPool, error: poolError } = await admin.from("science_question_bank")
+        .select("id,outcome_id,question_type,difficulty,prompt,options,marks")
         .eq("lesson_id", session.lesson_id).eq("status", "published")
         .eq("level", student.level).in("track", ["ALL", student.track])
-        .gte("difficulty", isTest ? 4 : 1)
-        .lte("difficulty", isTest ? 5 : 3)
-        .order("difficulty").limit(isTest ? 20 : 10);
-      if (error) throw error;
-      if (!questions?.length) return reply({ error: "No published questions are available for this lesson" }, 404);
+        .order("difficulty").limit(100);
+      if (poolError) throw poolError;
+      if (!questionPool?.length) return reply({ error: "No published questions are available for this lesson" }, 404);
+
+      const relevantOutcomeIds = [...new Set(questionPool.map((q: any) => q.outcome_id).filter(Boolean))];
+      let adaptivePlan = { mode: "baseline", target_band: "foundation", difficulty_min: 1, difficulty_max: 3,
+        reason: "No reliable evidence for this lesson's learning outcomes is available yet." };
+      if (!isTest && relevantOutcomeIds.length) {
+        const { data: profileRow, error: profileError } = await admin.from("science_student_learning_profiles")
+          .select("profile").eq("student_id", studentId).maybeSingle();
+        if (profileError) throw profileError;
+        const mastery = profileRow?.profile?.topic_mastery && typeof profileRow.profile.topic_mastery === "object"
+          ? profileRow.profile.topic_mastery as Record<string, Record<string, unknown>> : {};
+        const supported = relevantOutcomeIds.map((id) => mastery[id]).filter((m) =>
+          m && m.state === "supported" && Number.isFinite(Number(m.average_performance)));
+        const evidenceBackedAverage = supported.length
+          ? supported.reduce((sum, m) => sum + Number(m.average_performance), 0) / supported.length : null;
+        if (evidenceBackedAverage !== null && evidenceBackedAverage < 60) {
+          adaptivePlan = { mode: "adaptive", target_band: "foundation", difficulty_min: 1, difficulty_max: 2,
+            reason: "Evidence for this lesson suggests rebuilding core concepts before increasing challenge." };
+        } else if (evidenceBackedAverage !== null && evidenceBackedAverage < 80) {
+          adaptivePlan = { mode: "adaptive", target_band: "developing", difficulty_min: 2, difficulty_max: 3,
+            reason: "Evidence for this lesson supports guided application with a gradual increase in challenge." };
+        } else if (evidenceBackedAverage !== null) {
+          adaptivePlan = { mode: "adaptive", target_band: "stretch", difficulty_min: 3, difficulty_max: 4,
+            reason: "Repeated evidence for this lesson supports more demanding application questions." };
+        }
+      }
+      let selectedQuestions = questionPool.filter((q: any) => Number(q.difficulty) >= (isTest ? 4 : adaptivePlan.difficulty_min) &&
+        Number(q.difficulty) <= (isTest ? 5 : adaptivePlan.difficulty_max));
+      if (!selectedQuestions.length && !isTest) {
+        // Sparse banks should not block learning: widen to the safe baseline practice band.
+        selectedQuestions = questionPool.filter((q: any) => Number(q.difficulty) >= 1 && Number(q.difficulty) <= 3);
+        adaptivePlan = { mode: "baseline_fallback", target_band: "mixed", difficulty_min: 1, difficulty_max: 3,
+          reason: "The lesson question bank has too few items in the personalised band; a mixed foundational set is used instead." };
+      }
+      const questions = selectedQuestions.slice(0, isTest ? 20 : 10);
+      if (!questions.length) return reply({ error: "No published questions are available in the selected difficulty band. Please ask your teacher to add suitable questions." }, 404);
       if (isTest) await transition(session, "TESTING");
       const { data: attempt, error: attemptError } = await admin.from("science_assessment_attempts").insert({
         student_id: studentId, session_id: session.id,
@@ -270,7 +303,9 @@ Deno.serve(async (req: Request) => {
         total_marks: questions.reduce((sum: number, q: any) => sum + Number(q.marks), 0),
       }).select("id,assessment_type,status,total_marks,question_ids").single();
       if (attemptError) throw attemptError;
-      return reply({ ok: true, attempt, questions: questions.map(publicQuestion), stage: isTest ? "TESTING" : "PRACTICE" });
+      return reply({ ok: true, attempt, questions: questions.map(publicQuestion), stage: isTest ? "TESTING" : "PRACTICE",
+        adaptive_plan: isTest ? { mode: "independent_test", target_band: "assessment", difficulty_min: 4, difficulty_max: 5,
+          reason: "Independent test difficulty remains standardised and is not adjusted." } : adaptivePlan });
     }
 
     if (action === "submit_practice" || action === "submit_test") {
