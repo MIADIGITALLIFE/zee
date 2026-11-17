@@ -503,8 +503,14 @@ Deno.serve(async (req: Request) => {
           last_evidence_at: new Date().toISOString(), updated_at: new Date().toISOString(),
         }, { onConflict: "student_id" });
       }
+      const incorrectCount = answers.filter((answer) => {
+        const q = questions.find((item: any) => item.id === answer.question_id);
+        return q?.question_type === "MCQ" && q.answer_key && typeof q.answer_key === "object" &&
+          Object.hasOwn(q.answer_key, "correct_option") &&
+          String((answer.response as any)?.option_id ?? "") !== String(q.answer_key.correct_option);
+      }).length;
       return reply({ ok: true, attempt_id: attemptId, status, score_percent: needsReview ? null : pct,
-        awarded_marks: needsReview ? null : awarded, total_marks: total,
+        awarded_marks: needsReview ? null : awarded, total_marks: total, incorrect_count: incorrectCount,
         message: needsReview ? "Some answers require rubric or teacher review; no unverified AI score was assigned." : "Answers marked." });
     }
 

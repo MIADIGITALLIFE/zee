@@ -28,4 +28,7 @@ assert.match(teacher, /get_revision_queue/, "Learners need a due-review retrieva
 assert.match(teacher, /start_revision/, "Due reviews must launch a focused revision session");
 assert.match(teacher, /revision\.due_at/, "A revision cannot be started before its due date");
 assert.match(teacher, /eq\("outcome_id", revision\.outcome_id\)/, "Revision questions must target the scheduled outcome");
-console.log("ZEE Science spaced repetition V5 safeguards passed.");
+assert.match(teacher, /incorrect_count: incorrectCount/, "Practice marking must return deterministic incorrect-answer count");
+assert.match(readFileSync(new URL("../supabase/functions/science-ai-tutor/index.ts", import.meta.url), "utf8"), /question_context: byId\.get/,
+  "AI remediation must receive server-fetched question context, including the answer key");
+console.log("ZEE Science spaced repetition and targeted remediation safeguards passed.");
