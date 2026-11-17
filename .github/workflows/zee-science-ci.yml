@@ -49,3 +49,6 @@ jobs:
 
       - name: Validate longitudinal learner memory safeguards
         run: node tests/science-longitudinal-memory-smoke.mjs
+
+      - name: Validate adaptive teaching safeguards
+        run: node tests/science-adaptive-teaching-smoke.mjs
