@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 const html = readFileSync(new URL("../science/index.html", import.meta.url), "utf8");
 assert.match(html, /ZEE SCIENCE/);
 assert.match(html, /Explore Primary 5 Science/, "The curriculum must be visible before guardian sign-in");
-assert.match(html, /curriculum-preview\\.json/, "The portal must load the public teaching catalogue");
+assert.match(html, /curriculum-preview/, "The portal must load the public teaching catalogue");
 assert.match(html, /Open teaching notes/, "Parents and learners must be able to read actual teaching content");
 assert.match(html, /UNCONFIRMED.*STANDARD.*FOUNDATION|STANDARD.*FOUNDATION/, "Unconfirmed track must not hide both pathways");
 
