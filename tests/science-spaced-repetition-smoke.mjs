@@ -25,4 +25,7 @@ const teacher = readFileSync(new URL("../supabase/functions/science-teacher/inde
 assert.match(teacher, /science_student_revision_schedule/, "Schedule writes and reads must be server-side");
 assert.match(teacher, /deterministic_practice|deterministic_test/, "Only objectively marked evidence may schedule revision");
 assert.match(teacher, /get_revision_queue/, "Learners need a due-review retrieval action");
+assert.match(teacher, /start_revision/, "Due reviews must launch a focused revision session");
+assert.match(teacher, /revision\.due_at/, "A revision cannot be started before its due date");
+assert.match(teacher, /eq\("outcome_id", revision\.outcome_id\)/, "Revision questions must target the scheduled outcome");
 console.log("ZEE Science spaced repetition V5 safeguards passed.");
