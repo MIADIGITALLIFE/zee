@@ -95,6 +95,33 @@ Deno.serve(async (req: Request) => {
     if (error) throw error;
   };
 
+  if (action === "catalog_status") {
+    const tracks = student.track === "UNCONFIRMED" ? ["ALL","STANDARD","FOUNDATION"] : ["ALL", student.track];
+    const [{ data: syllabi, error: syllabusError }, { count: lessonCount, error: lessonError },
+      { count: outcomeCount, error: outcomeError }, { count: questionCount, error: questionError },
+      { count: mcqCount, error: mcqError }] = await Promise.all([
+      admin.from("science_syllabus_versions").select("id,syllabus_code,title,status", { count: "exact" }).eq("syllabus_code", "MOE-PRIMARY-SCIENCE-2023"),
+      admin.from("science_lessons").select("id", { count: "exact", head: true }).eq("level", student.level).in("track", tracks).eq("status", "published"),
+      admin.from("science_learning_outcomes").select("id", { count: "exact", head: true }).eq("level", student.level).in("track", tracks).eq("verification_status", "verified"),
+      admin.from("science_question_bank").select("id", { count: "exact", head: true }).eq("level", student.level).in("track", tracks).eq("status", "published"),
+      admin.from("science_question_bank").select("id", { count: "exact", head: true }).eq("level", student.level).in("track", tracks).eq("status", "published").eq("question_type", "MCQ"),
+    ]);
+    const errors = [syllabusError, lessonError, outcomeError, questionError, mcqError].filter(Boolean);
+    if (errors.length) return reply({ error: "Curriculum diagnostics are temporarily unavailable" }, 503);
+    const publishedSyllabus = (syllabi ?? []).filter((v: any) => v.status === "published");
+    const status = student.level === "P1" || student.level === "P2" ? "zee_explorers_pathway_pending"
+      : student.cohort_year === null ? "cohort_year_required"
+      : Number(student.cohort_year) + 2 < 2023 ? "legacy_syllabus_not_loaded"
+      : !publishedSyllabus.length ? "syllabus_not_published"
+      : !lessonCount ? "lessons_not_published"
+      : !outcomeCount ? "verified_outcomes_missing"
+      : !mcqCount ? "assessment_items_missing" : "ready";
+    return reply({ ok: true, catalog: { level: student.level, track: student.track,
+      syllabus: publishedSyllabus.map((v: any) => ({ code: v.syllabus_code, title: v.title, status: v.status })),
+      published_lesson_count: lessonCount ?? 0, verified_outcome_count: outcomeCount ?? 0,
+      published_question_count: questionCount ?? 0, published_mcq_count: mcqCount ?? 0,
+      status, checked_at: new Date().toISOString() } });
+  }
   if (action === "list_lessons") {
     if (["P3","P4","P5","P6"].includes(student.level) && student.cohort_year === null) {
       return reply({ ok: true, lessons: [], curriculum_status: "cohort_year_required",
@@ -119,7 +146,15 @@ Deno.serve(async (req: Request) => {
         .select("id").eq("id", lesson.syllabus_version_id).eq("status", "published").maybeSingle();
       if (syllabus) visible.push(lesson);
     }
-    return reply({ ok: true, lessons: visible, curriculum_status: visible.length ? "available" : "awaiting_verified_curriculum" });
+    if (visible.length) return reply({ ok: true, lessons: visible, curriculum_status: "available" });
+    const [{ count: syllabusCount }, { count: matchingLessons }, { count: outcomes }, { count: questions }] = await Promise.all([
+      admin.from("science_syllabus_versions").select("id", { count: "exact", head: true }).eq("syllabus_code", "MOE-PRIMARY-SCIENCE-2023").eq("status", "published"),
+      admin.from("science_lessons").select("id", { count: "exact", head: true }).eq("level", student.level).in("track", student.track === "UNCONFIRMED" ? ["ALL","STANDARD","FOUNDATION"] : ["ALL", student.track]),
+      admin.from("science_learning_outcomes").select("id", { count: "exact", head: true }).eq("level", student.level).eq("verification_status", "verified"),
+      admin.from("science_question_bank").select("id", { count: "exact", head: true }).eq("level", student.level).eq("status", "published"),
+    ]);
+    const curriculumStatus = !syllabusCount ? "syllabus_not_published" : !matchingLessons ? "lessons_not_seeded" : !outcomes ? "verified_outcomes_missing" : !questions ? "assessment_items_missing" : "lessons_not_published";
+    return reply({ ok: true, lessons: [], curriculum_status: curriculumStatus, diagnostics: { published_syllabus_count: syllabusCount ?? 0, matching_lesson_count: matchingLessons ?? 0, verified_outcome_count: outcomes ?? 0, published_question_count: questions ?? 0 } });
   }
 
   if (action === "get_dashboard" || action === "get_revision_queue") {
