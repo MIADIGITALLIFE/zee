@@ -13,7 +13,7 @@ const reply = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
 type Body = { action?: string; student_id?: string; lesson_id?: string; session_id?: string; attempt_id?: string;
-  passed?: boolean; answers?: Array<{ question_id: string; response: unknown }> };
+  passed?: boolean; revision_id?: string; answers?: Array<{ question_id: string; response: unknown }> };
 
 const transitions: Record<string, string[]> = {
   TEACHING: ["UNDERSTANDING_CHECK"],
@@ -163,6 +163,43 @@ Deno.serve(async (req: Request) => {
   };
 
   try {
+    if (action === "start_revision") {
+      const revisionId = String(body.revision_id ?? "");
+      if (!revisionId) return reply({ error: "revision_id is required" }, 400);
+      const { data: revision, error: revisionError } = await admin.from("science_student_revision_schedule")
+        .select("id,outcome_id,lesson_id,due_at,status,outcome:science_learning_outcomes(outcome_code,outcome_text,topic)")
+        .eq("id", revisionId).eq("student_id", studentId).eq("status", "pending").maybeSingle();
+      if (revisionError || !revision) return reply({ error: "Revision task not found" }, 404);
+      if (new Date(revision.due_at).getTime() > Date.now()) return reply({ error: "This review is scheduled for a later date." }, 409);
+      const { data: lesson, error: lessonError } = await admin.from("science_lessons")
+        .select("id,syllabus_version_id,level,track,title,topic,learning_objectives,teaching_content")
+        .eq("id", revision.lesson_id).eq("level", student.level).in("track", ["ALL", student.track])
+        .eq("status", "published").maybeSingle();
+      if (lessonError || !lesson) return reply({ error: "The original lesson is no longer available." }, 404);
+      const { data: questions, error: questionError } = await admin.from("science_question_bank")
+        .select("id,outcome_id,question_type,difficulty,prompt,options,marks")
+        .eq("lesson_id", lesson.id).eq("outcome_id", revision.outcome_id)
+        .eq("level", student.level).in("track", ["ALL", student.track])
+        .eq("status", "published").eq("question_type", "MCQ").gte("difficulty", 1).lte("difficulty", 3).limit(5);
+      if (questionError) throw questionError;
+      if (!questions?.length) return reply({ error: "There are no multiple-choice review questions for this learning outcome yet." }, 409);
+      const { data: session, error: sessionError } = await admin.from("science_lesson_sessions").insert({
+        student_id: studentId, lesson_id: lesson.id, syllabus_version_id: lesson.syllabus_version_id,
+        current_stage: "PRACTICE", session_status: "in_progress",
+        metadata: { mode: "spaced_revision", revision_id: revision.id, outcome_id: revision.outcome_id },
+      }).select("*").single();
+      if (sessionError) throw sessionError;
+      const { data: attempt, error: attemptError } = await admin.from("science_assessment_attempts").insert({
+        student_id: studentId, session_id: session.id, assessment_type: "PRACTICE", status: "in_progress",
+        question_ids: questions.map((q: any) => q.id),
+        total_marks: questions.reduce((sum: number, q: any) => sum + Number(q.marks), 0),
+      }).select("id,assessment_type,status,total_marks,question_ids").single();
+      if (attemptError) throw attemptError;
+      await logEvent({ session_id: session.id, lesson_id: lesson.id, outcome_id: revision.outcome_id,
+        event_type: "revision_started", stage: "PRACTICE", evidence: { revision_id: revision.id, mode: "spaced_revision" } });
+      return reply({ ok: true, session, lesson, attempt, questions: questions.map(publicQuestion),
+        revision: { id: revision.id, outcome: revision.outcome } });
+    }
     if (action === "start_lesson") {
       const lessonId = String(body.lesson_id ?? "");
       if (!lessonId) return reply({ error: "lesson_id is required" }, 400);
