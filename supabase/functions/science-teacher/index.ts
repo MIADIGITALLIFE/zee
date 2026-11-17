@@ -124,7 +124,7 @@ Deno.serve(async (req: Request) => {
 
   if (action === "get_dashboard" || action === "get_revision_queue") {
     const { data: revisionSchedule, error: revisionError } = await admin.from("science_student_revision_schedule")
-      .select("id,outcome_id,lesson_id,interval_days,repetitions,lapses,last_score,last_reviewed_at,due_at,status")
+      .select("id,outcome_id,lesson_id,interval_days,repetitions,lapses,last_score,last_reviewed_at,due_at,status,outcome:science_learning_outcomes(outcome_code,outcome_text,topic)")
       .eq("student_id", studentId).eq("status", "pending").order("due_at").limit(30);
     if (revisionError) return reply({ error: "Could not load the revision schedule" }, 500);
     const now = Date.now();
